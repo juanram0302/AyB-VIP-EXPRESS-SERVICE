@@ -391,10 +391,60 @@ select.input { cursor: pointer; appearance: none; background-image: url("data:im
 .grid-auto { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 .grid-auto-sm { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
 
+/* Mobile hamburger button */
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  transition: var(--transition);
+}
+.mobile-menu-btn:hover { background: var(--hover); }
+
+/* Sidebar overlay for mobile */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 99;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
 @media (max-width: 900px) {
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
-  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 100; }
-  .sidebar.collapsed { width: 0; border: none; }
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+    transform: translateX(-100%);
+    width: 260px;
+    transition: transform 0.3s ease;
+  }
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  .sidebar.collapsed {
+    width: 260px;
+    transform: translateX(-100%);
+  }
+  .sidebar.collapsed.mobile-open {
+    transform: translateX(0);
+  }
+  /* Reset collapsed inner styles on mobile so text always shows when open */
+  .sidebar.collapsed .sidebar-brand { width: auto; opacity: 1; }
+  .sidebar.collapsed .nav-item span { width: auto; opacity: 1; }
+  .mobile-menu-btn { display: flex; align-items: center; }
   .content { padding: 16px; }
 }
 
@@ -642,6 +692,8 @@ tr td:last-child { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
      MAIN APP
      ═══════════════════════════════════════════════════════════ -->
 <div id="app-page">
+  <!-- SIDEBAR OVERLAY (mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
   <!-- SIDEBAR -->
   <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -667,7 +719,12 @@ tr td:last-child { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
   <!-- MAIN AREA -->
   <div class="main-area">
     <div class="topbar">
-      <h2 class="topbar-title" id="topbar-title">Dashboard</h2>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="mobile-menu-btn" id="mobile-menu-btn" onclick="openMobileSidebar()">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <h2 class="topbar-title" id="topbar-title">Dashboard</h2>
+      </div>
       <div class="topbar-right">
         <!-- THEME SELECTOR -->
         <div style="position:relative">
@@ -1402,8 +1459,27 @@ function buildSidebar() {
 }
 
 function toggleSidebar() {
-  sidebarCollapsed = !sidebarCollapsed;
-  document.getElementById('sidebar').classList.toggle('collapsed', sidebarCollapsed);
+  const isMobile = window.innerWidth <= 900;
+  if (isMobile) {
+    closeMobileSidebar();
+  } else {
+    sidebarCollapsed = !sidebarCollapsed;
+    document.getElementById('sidebar').classList.toggle('collapsed', sidebarCollapsed);
+  }
+}
+
+function openMobileSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.add('mobile-open');
+  overlay.classList.add('active');
+}
+
+function closeMobileSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.remove('mobile-open');
+  overlay.classList.remove('active');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1464,6 +1540,8 @@ function navigate(page) {
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   const navBtn = document.getElementById('nav-'+page);
   if (navBtn) navBtn.classList.add('active');
+  // Close sidebar on mobile after navigation
+  if (window.innerWidth <= 900) closeMobileSidebar();
   renderPage();
 }
 
