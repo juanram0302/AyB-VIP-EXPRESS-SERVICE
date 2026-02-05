@@ -1949,10 +1949,10 @@ let budgetSelected = {
 let budgetDay = 'comida';
 
 function getIngredientPrice(name, totalGrams) {
-  // Match ingredient name to inventory item to get price per unit
   const lname = name.toLowerCase();
   for (const item of inventory) {
-    const iname = (inv(item,'nombre')||item.nombre||'').toLowerCase();
+    const ni = inv(item);
+    const iname = (ni.nombre||'').toLowerCase();
     if (lname.includes(iname.split(' ')[0]) || iname.includes(lname.split(' ')[0]) || 
         (lname.includes('pollo') && iname.includes('pollo')) ||
         (lname.includes('pechuga') && iname.includes('pechuga')) ||
@@ -1968,26 +1968,25 @@ function getIngredientPrice(name, totalGrams) {
         (lname.includes('leche') && iname.includes('leche')) ||
         (lname.includes('tomate') && (iname.includes('tomate') || iname.includes('salsa'))) ||
         (lname.includes('plátano') && iname.includes('plátano')) ||
+        (lname.includes('platano') && iname.includes('plat')) ||
         (lname.includes('harina') && iname.includes('harina')) ||
         (lname.includes('pasta') && iname.includes('pasta')) ||
         (lname.includes('dorado') && iname.includes('dorado')) ||
         (lname.includes('sal') && iname === 'sal')) {
       
-      const precio = inv(item,'precio') || item.precio || 0;
-      const u = inv(item,'u') || item.u || 'lb';
-      // Convert price per unit to price per gram
+      const precio = ni.precio || 0;
+      const u = ni.u || 'lb';
       let pricePerG = 0;
       if (u === 'lb') pricePerG = precio / G_PER_LB;
       else if (u === 'kg') pricePerG = precio / 1000;
       else if (u === 'gal') pricePerG = precio / 3785;
       else if (u === 'lt') pricePerG = precio / 1000;
-      else if (u === 'und') pricePerG = precio / 50; // ~50g average per unit
+      else if (u === 'und') pricePerG = precio / 50;
       else pricePerG = precio / G_PER_LB;
       
       return totalGrams * pricePerG;
     }
   }
-  // Default estimate: $2/lb average
   return totalGrams * (2 / G_PER_LB);
 }
 
