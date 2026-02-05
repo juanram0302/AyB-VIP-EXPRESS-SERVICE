@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>AyB VIP Express - Sistema de Katering</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+
+<!-- ═══════════════════ FIREBASE SDK ═══════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<style>
+/* ═══════════════════ CSS VARIABLES ═══════════════════ */
+:root {
+  --bg-deep: #0a0505;
+  --bg-primary: #0f0808;
+  --bg-card: #150c0c;
+  --bg-card2: #1a0e0e;
+  --bg-hover: #1e1212;
+  --border: #2a1515;
+  --border-light: #3a1a1a;
+  --accent: #c41e1e;
+  --accent-light: #e83030;
+  --accent-glow: rgba(196, 30, 30, 0.3);
+  --accent-soft: rgba(196, 30, 30, 0.12);
+  --text-primary: #ecdcdc;
+  --text-secondary: #c8a8a8;
+  --text-muted: #8a6060;
+  --text-dim: #5a3535;
+  --gold: #e6a817;
+  --green: #2ecc71;
+  --blue: #3498db;
+  --purple: #9b59b6;
+  --orange: #f39c12;
+  --red: #e74c3c;
+  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --shadow-lg: 0 12px 48px rgba(0,0,0,0.6);
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ═══════════════════ RESET & BASE ═══════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font);
+  background: var(--bg-deep);
+  color: var(--text-secondary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+input, select, button, textarea { font-family: var(--font); }
+a { color: var(--accent-light); text-decoration: none; }
+
+/* ═══════════════════ ANIMATIONS ═══════════════════ */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideRight { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 20px var(--accent-glow); } 50% { box-shadow: 0 0 40px var(--accent-glow), 0 0 60px rgba(196,30,30,0.15); } }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+@keyframes bellRing { 0%,100% { transform: rotate(0); } 25% { transform: rotate(12deg); } 75% { transform: rotate(-12deg); } }
+
+.fade-up { animation: fadeUp 0.5s ease both; }
+.fade-in { animation: fadeIn 0.4s ease both; }
+.slide-right { animation: slideRight 0.4s ease both; }
+.scale-in { animation: scaleIn 0.35s ease both; }
+
+/* ═══════════════════ LOGIN PAGE ═══════════════════ */
+#login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 30% 20%, #2a0a0a 0%, var(--bg-deep) 60%),
+              radial-gradient(ellipse at 70% 80%, #1a0808 0%, transparent 50%);
+  position: relative;
+}
+#login-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 25% 25%, rgba(196,30,30,0.06) 1px, transparent 1px),
+                    radial-gradient(circle at 75% 75%, rgba(196,30,30,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+.login-box {
+  background: rgba(15,8,8,0.97);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  width: 440px;
+  max-width: 92vw;
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(196,30,30,0.08);
+  backdrop-filter: blur(20px);
+  position: relative;
+  z-index: 1;
+  animation: fadeUp 0.6s ease;
+}
+.login-logo {
+  width: 240px; height: auto;
+  border-radius: 16px;
+  object-fit: contain;
+  border: 2px solid var(--border-light);
+  display: block;
+  margin: 0 auto 18px;
+  animation: pulse 3s ease infinite;
+}
+.login-title {
+  text-align: center;
+  font-family: var(--font-display);
+  color: var(--text-primary);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.login-subtitle {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 11px;
+  letter-spacing: 3px;
+  font-weight: 500;
+  margin-bottom: 28px;
+}
+.auth-tabs {
+  display: flex;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-bottom: 22px;
+}
+.auth-tab {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: var(--transition);
+  background: transparent;
+  color: var(--text-muted);
+}
+.auth-tab.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ═══════════════════ FORM ELEMENTS ═══════════════════ */
+.input {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card2);
+  color: var(--text-primary);
+  font-size: 14px;
+  margin-bottom: 12px;
+  outline: none;
+  transition: var(--transition);
+}
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.input::placeholder { color: var(--text-dim); }
+select.input { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a6060' stroke-width='2'%3E%3Cpolyline points='6,9 12,15 18,9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+.btn {
+  padding: 11px 22px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  color: #fff;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+.btn-primary:hover { box-shadow: 0 6px 24px var(--accent-glow); }
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border-light);
+  color: var(--text-secondary);
+}
+.btn-secondary:hover { border-color: var(--text-muted); background: var(--bg-hover); }
+.btn-full { width: 100%; justify-content: center; padding: 14px; font-size: 15px; letter-spacing: 1px; }
+.btn-sm { padding: 6px 14px; font-size: 12px; }
+.btn-ghost { background: none; border: none; color: var(--text-muted); padding: 6px 10px; }
+.btn-ghost:hover { color: var(--text-primary); background: var(--bg-hover); border-radius: var(--radius-sm); }
+
+/* ═══════════════════ LAYOUT ═══════════════════ */
+#app-page { display: none; min-height: 100vh; }
+#app-page.visible { display: flex; }
+
+.sidebar {
+  width: 260px;
+  background: linear-gradient(180deg, #100808 0%, #140a0a 100%);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  position: relative;
+  z-index: 20;
+}
+.sidebar.collapsed { width: 66px; }
+.sidebar-header {
+  padding: 18px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo {
+  width: 42px; height: 30px;
+  border-radius: 8px;
+  object-fit: contain;
+  border: 1px solid var(--border-light);
+  background: #1a0a0a;
+  flex-shrink: 0;
+}
+.sidebar-brand { overflow: hidden; transition: var(--transition); }
+.sidebar.collapsed .sidebar-brand { width: 0; opacity: 0; }
+.sidebar-brand-name { color: var(--text-primary); font-weight: 700; font-size: 12px; line-height: 1.2; }
+.sidebar-brand-sub { color: var(--text-dim); font-size: 9px; letter-spacing: 2px; }
+
+.sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 14px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 3px;
+  transition: var(--transition);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 400;
+  text-align: left;
+  border-left: 3px solid transparent;
+  white-space: nowrap;
+}
+.nav-item:hover { background: var(--bg-hover); color: var(--text-secondary); }
+.nav-item.active {
+  background: var(--accent-soft);
+  color: #ff8888;
+  font-weight: 600;
+  border-left-color: var(--accent);
+}
+.nav-item svg { flex-shrink: 0; }
+.nav-item span { overflow: hidden; transition: var(--transition); }
+.sidebar.collapsed .nav-item span { width: 0; opacity: 0; }
+
+.sidebar-footer {
+  padding: 12px 8px;
+  border-top: 1px solid var(--border);
+}
+
+.main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.topbar {
+  height: 60px;
+  background: rgba(15,8,8,0.96);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  backdrop-filter: blur(12px);
+  flex-shrink: 0;
+}
+.topbar-title { color: var(--text-primary); font-size: 17px; font-weight: 600; }
+.topbar-right { display: flex; align-items: center; gap: 14px; }
+
+.content { flex: 1; overflow: auto; padding: 24px; }
+
+/* ═══════════════════ NOTIFICATIONS ═══════════════════ */
+.notif-btn { position: relative; background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; }
+.notif-btn:hover { color: var(--text-primary); }
+.notif-badge {
+  position: absolute; top: -2px; right: -4px;
+  background: var(--accent); color: #fff;
+  border-radius: 50%; width: 18px; height: 18px;
+  font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  animation: scaleIn 0.3s ease;
+}
+.notif-panel {
+  display: none;
+  position: absolute; right: 0; top: 42px; width: 340px; max-height: 420px;
+  overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border-light);
+  border-radius: var(--radius); box-shadow: var(--shadow-lg); z-index: 100;
+}
+.notif-panel.open { display: block; animation: scaleIn 0.25s ease; }
+.notif-header { padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--text-muted); font-size: 11px; font-weight: 600; letter-spacing: 0.5px; }
+.notif-item { padding: 12px 16px; border-bottom: 1px solid rgba(26,14,14,0.5); display: flex; gap: 10px; transition: var(--transition); }
+.notif-item:hover { background: var(--bg-hover); }
+.notif-msg { color: var(--text-secondary); font-size: 12px; line-height: 1.4; }
+.notif-time { color: var(--text-dim); font-size: 10px; margin-top: 4px; }
+.notif-empty { padding: 30px; text-align: center; color: var(--text-dim); font-size: 13px; }
+
+.user-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #8a1515);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 14px; font-weight: 700;
+  flex-shrink: 0;
+}
+.user-name { color: var(--text-secondary); font-size: 13px; }
+
+/* ═══════════════════ CARDS & COMPONENTS ═══════════════════ */
+.card {
+  background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-card2) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  transition: var(--transition);
+}
+.card:hover { border-color: var(--border-light); }
+
+.stat-card {
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 80px; height: 80px;
+  border-radius: 0 0 0 80px;
+  opacity: 0.06;
+}
+.stat-value { font-size: 34px; font-weight: 800; line-height: 1; font-family: var(--font-display); }
+.stat-label { color: var(--text-muted); font-size: 11px; margin-top: 6px; letter-spacing: 0.8px; font-weight: 500; }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  gap: 4px;
+}
+
+.grid { display: grid; gap: 16px; }
+.grid-2 { grid-template-columns: 1fr 1fr; }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-auto { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.grid-auto-sm { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+
+@media (max-width: 900px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 100; }
+  .sidebar.collapsed { width: 0; border: none; }
+  .content { padding: 16px; }
+}
+
+/* ═══════════════════ TAB BUTTONS ═══════════════════ */
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.tab-btn {
+  padding: 10px 18px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+.tab-btn:hover { border-color: var(--border-light); color: var(--text-secondary); }
+.tab-btn.active { border-width: 2px; }
+
+/* ═══════════════════ TABLE ═══════════════════ */
+.table-wrap { overflow-x: auto; border-radius: var(--radius); }
+table { width: 100%; border-collapse: separate; border-spacing: 0 4px; }
+th { padding: 10px 14px; text-align: left; color: var(--text-dim); font-size: 11px; font-weight: 600; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+td { padding: 10px 14px; background: var(--bg-card); font-size: 13px; }
+tr td:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+tr td:last-child { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+
+/* ═══════════════════ SEARCH BAR ═══════════════════ */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.search-bar input { background: transparent; border: none; color: var(--text-primary); flex: 1; outline: none; font-size: 14px; }
+.search-bar input::placeholder { color: var(--text-dim); }
+.search-bar svg { color: var(--text-dim); flex-shrink: 0; }
+
+/* ═══════════════════ PROGRESS BAR ═══════════════════ */
+.progress-track { height: 6px; background: var(--bg-card2); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+
+/* ═══════════════════ ALERT BOX ═══════════════════ */
+.alert-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+.alert-danger { background: rgba(231,76,60,0.08); border: 1px solid rgba(231,76,60,0.2); border-left: 4px solid var(--red); }
+.alert-success { background: rgba(46,204,113,0.08); border: 1px solid rgba(46,204,113,0.2); border-left: 4px solid var(--green); }
+.alert-info { background: var(--accent-soft); border: 1px solid rgba(196,30,30,0.2); border-left: 4px solid var(--accent); }
+
+/* ═══════════════════ MENU ITEM CARD ═══════════════════ */
+.menu-card {
+  padding: 13px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-left-width: 3px;
+  border-left-style: solid;
+}
+.menu-card:hover { background: var(--bg-hover); }
+
+/* ═══════════════════ RECIPE STEP ═══════════════════ */
+.recipe-step {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 12px;
+  align-items: flex-start;
+}
+.step-num {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--accent-soft);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent); font-size: 13px; font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════ HIDDEN PAGES ═══════════════════ */
+.page { display: none; }
+.page.active { display: block; animation: fadeUp 0.4s ease; }
+
+/* ═══════════════════ FIREBASE BADGE ═══════════════════ */
+.firebase-badge {
+  margin-top: 20px;
+  padding: 14px;
+  background: var(--accent-soft);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(196,30,30,0.15);
+  text-align: center;
+}
+.firebase-badge p { color: var(--text-muted); font-size: 11px; }
+
+/* ═══════════════════ THEME PANEL ═══════════════════ */
+.theme-panel {
+  display: none;
+  position: absolute; right: 0; top: 42px; width: 260px;
+  background: var(--bg-card); border: 1px solid var(--border-light);
+  border-radius: var(--radius); box-shadow: var(--shadow-lg); z-index: 100;
+}
+.theme-panel.open { display: block; animation: scaleIn 0.25s ease; }
+.theme-opt {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  text-align: left;
+  margin-bottom: 5px;
+  transition: var(--transition);
+}
+.theme-opt:hover { background: var(--bg-hover); border-color: var(--border-light); }
+.theme-opt.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-light); font-weight: 600; }
+
+/* ═══════════════════ THEME: LIGHT ═══════════════════ */
+[data-theme="light"] {
+  --bg-deep: #f0eded; --bg-primary: #f5f2f2; --bg-card: #ffffff; --bg-card2: #f8f5f5;
+  --bg-hover: #efe8e8; --border: #e0d0d0; --border-light: #d0c0c0;
+  --accent: #c41e1e; --accent-light: #d42a2a; --accent-glow: rgba(196,30,30,0.15); --accent-soft: rgba(196,30,30,0.08);
+  --text-primary: #1a0808; --text-secondary: #3a1a1a; --text-muted: #8a6060; --text-dim: #b09090;
+}
+[data-theme="light"] .sidebar { background: linear-gradient(180deg, #f8f2f2 0%, #f0e8e8 100%); }
+[data-theme="light"] .topbar { background: rgba(255,255,255,0.96); }
+[data-theme="light"] #login-page { background: radial-gradient(ellipse at 30% 20%, #fce8e8 0%, #f0eded 60%); }
+[data-theme="light"] .login-box { background: rgba(255,255,255,0.97); }
+[data-theme="light"] td { background: #fff; }
+
+/* ═══════════════════ THEME: BLUE ═══════════════════ */
+[data-theme="blue"] {
+  --bg-deep: #080c14; --bg-primary: #0a1020; --bg-card: #0f1828; --bg-card2: #121e30;
+  --bg-hover: #162440; --border: #1a2a45; --border-light: #243650;
+  --accent: #2e86de; --accent-light: #54a0ff; --accent-glow: rgba(46,134,222,0.3); --accent-soft: rgba(46,134,222,0.12);
+  --text-primary: #dce6f0; --text-secondary: #a8bcd0; --text-muted: #607890; --text-dim: #354555;
+}
+[data-theme="blue"] .sidebar { background: linear-gradient(180deg, #0a0e18 0%, #0d1422 100%); }
+[data-theme="blue"] .topbar { background: rgba(10,16,32,0.96); }
+[data-theme="blue"] #login-page { background: radial-gradient(ellipse at 30% 20%, #0a1a35 0%, #080c14 60%); }
+[data-theme="blue"] .login-box { background: rgba(10,16,32,0.97); border-color: var(--border); }
+[data-theme="blue"] .nav-item.active { background: var(--accent-soft); color: #54a0ff; border-left-color: #2e86de; }
+[data-theme="blue"] .stat-value { color: #54a0ff; }
+[data-theme="blue"] td { background: #0f1828; }
+
+/* ═══════════════════ THEME: HIGH CONTRAST LIGHT ═══════════════════ */
+[data-theme="hc-light"] {
+  --bg-deep: #ffffff; --bg-primary: #ffffff; --bg-card: #ffffff; --bg-card2: #f0f0f0;
+  --bg-hover: #e0e0e0; --border: #000000; --border-light: #333333;
+  --accent: #cc0000; --accent-light: #cc0000; --accent-glow: rgba(204,0,0,0.2); --accent-soft: rgba(204,0,0,0.08);
+  --text-primary: #000000; --text-secondary: #111111; --text-muted: #333333; --text-dim: #666666;
+}
+[data-theme="hc-light"] .sidebar { background: #f5f5f5; border-right: 2px solid #000; }
+[data-theme="hc-light"] .topbar { background: #ffffff; border-bottom: 2px solid #000; }
+[data-theme="hc-light"] #login-page { background: #ffffff; }
+[data-theme="hc-light"] .login-box { background: #ffffff; border: 2px solid #000; }
+[data-theme="hc-light"] .card { border: 2px solid #333; }
+[data-theme="hc-light"] .input { border: 2px solid #333; background: #fff; color: #000; }
+[data-theme="hc-light"] .btn-primary { background: #cc0000; color: #fff; font-weight: 800; }
+[data-theme="hc-light"] .nav-item { color: #111; font-weight: 500; }
+[data-theme="hc-light"] .nav-item.active { background: #ffe0e0; color: #cc0000; border-left: 4px solid #cc0000; font-weight: 800; }
+[data-theme="hc-light"] .tag { border: 1px solid currentColor; font-weight: 700; }
+[data-theme="hc-light"] td { background: #fff; border: 1px solid #ccc; }
+[data-theme="hc-light"] th { border-bottom: 2px solid #000; color: #000; }
+[data-theme="hc-light"] #login-page::before { display: none; }
+[data-theme="hc-light"] .login-logo { border-color: #000; }
+
+/* ═══════════════════ THEME: HIGH CONTRAST DARK ═══════════════════ */
+[data-theme="hc-dark"] {
+  --bg-deep: #000000; --bg-primary: #000000; --bg-card: #0a0a0a; --bg-card2: #111111;
+  --bg-hover: #1a1a1a; --border: #ffffff; --border-light: #cccccc;
+  --accent: #ff4444; --accent-light: #ff6666; --accent-glow: rgba(255,68,68,0.3); --accent-soft: rgba(255,68,68,0.15);
+  --text-primary: #ffffff; --text-secondary: #eeeeee; --text-muted: #bbbbbb; --text-dim: #888888;
+}
+[data-theme="hc-dark"] .sidebar { background: #000; border-right: 2px solid #fff; }
+[data-theme="hc-dark"] .topbar { background: #000; border-bottom: 2px solid #fff; }
+[data-theme="hc-dark"] #login-page { background: #000; }
+[data-theme="hc-dark"] .login-box { background: #0a0a0a; border: 2px solid #fff; }
+[data-theme="hc-dark"] .card { border: 2px solid #888; }
+[data-theme="hc-dark"] .input { border: 2px solid #888; background: #111; color: #fff; }
+[data-theme="hc-dark"] .btn-primary { background: #ff4444; color: #fff; font-weight: 800; }
+[data-theme="hc-dark"] .nav-item { color: #ccc; font-weight: 500; }
+[data-theme="hc-dark"] .nav-item.active { background: rgba(255,68,68,0.15); color: #ff6666; border-left: 4px solid #ff4444; font-weight: 800; }
+[data-theme="hc-dark"] .tag { border: 1px solid currentColor; font-weight: 700; }
+[data-theme="hc-dark"] td { background: #0a0a0a; border: 1px solid #444; }
+[data-theme="hc-dark"] th { border-bottom: 2px solid #fff; color: #fff; }
+[data-theme="hc-dark"] #login-page::before { display: none; }
+[data-theme="hc-dark"] .login-logo { border-color: #fff; }
+
+/* ═══════════════════ FONT SIZE MODES ═══════════════════ */
+[data-fontsize="large"] { font-size: 16px; }
+[data-fontsize="large"] .topbar-title { font-size: 20px; }
+[data-fontsize="large"] .nav-item { font-size: 15px; padding: 13px 14px; }
+[data-fontsize="large"] .stat-value { font-size: 40px; }
+[data-fontsize="large"] td, [data-fontsize="large"] th { font-size: 15px; padding: 12px 16px; }
+
+[data-fontsize="xlarge"] { font-size: 19px; }
+[data-fontsize="xlarge"] .topbar-title { font-size: 24px; }
+[data-fontsize="xlarge"] .nav-item { font-size: 17px; padding: 15px 14px; }
+[data-fontsize="xlarge"] .stat-value { font-size: 48px; }
+[data-fontsize="xlarge"] .stat-label { font-size: 14px; }
+[data-fontsize="xlarge"] td, [data-fontsize="xlarge"] th { font-size: 17px; padding: 14px 18px; }
+[data-fontsize="xlarge"] .input { font-size: 18px; padding: 16px; }
+[data-fontsize="xlarge"] .btn { font-size: 16px; padding: 14px 24px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     LOGIN PAGE
+     ═══════════════════════════════════════════════════════════ -->
+<div id="login-page">
+  <div class="login-box">
+    <img class="login-logo" src="data:image/webp;base64,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" alt="AyB VIP Express" id="loginLogoImg">
+    <h1 class="login-title">AyB VIP EXPRESS SERVICE</h1>
+    <p class="login-subtitle">SISTEMA DE GESTIÓN DE KATERING</p>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuth('login')" id="tab-login">Ingresar</button>
+      <button class="auth-tab" onclick="switchAuth('register')" id="tab-register">Registrarse</button>
+    </div>
+
+    <div id="register-name" style="display:none">
+      <input class="input" type="text" id="reg-name" placeholder="Nombre completo">
+    </div>
+    <input class="input" type="email" id="auth-email" placeholder="Correo electrónico">
+    <input class="input" type="password" id="auth-password" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doAuth()">
+    <p id="auth-error" style="color:#ff6b6b;font-size:13px;margin:6px 0 10px;display:none"></p>
+    <button class="btn btn-primary btn-full" onclick="doAuth()" id="auth-btn">INGRESAR</button>
+
+    <div class="firebase-badge">
+      <p>🔥 Firebase Auth listo · Configura tus credenciales en el código</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN APP
+     ═══════════════════════════════════════════════════════════ -->
+<div id="app-page">
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <img class="sidebar-logo" src="data:image/webp;base64,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" alt="Logo">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-name">AyB VIP EXPRESS</div>
+        <div class="sidebar-brand-sub">TODO NATURAL</div>
+      </div>
+    </div>
+    <div class="sidebar-nav" id="sidebar-nav"></div>
+    <div class="sidebar-footer">
+      <button class="nav-item" onclick="toggleSidebar()" style="color:var(--text-dim)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        <span>Colapsar</span>
+      </button>
+      <button class="nav-item" onclick="doLogout()" style="color:#ff6b6b">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Cerrar Sesión</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN AREA -->
+  <div class="main-area">
+    <div class="topbar">
+      <h2 class="topbar-title" id="topbar-title">Dashboard</h2>
+      <div class="topbar-right">
+        <!-- THEME SELECTOR -->
+        <div style="position:relative">
+          <button class="notif-btn" onclick="toggleThemePanel()" title="Cambiar tema / Accesibilidad">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </button>
+          <div class="theme-panel" id="theme-panel">
+            <div class="notif-header">🎨 TEMAS Y ACCESIBILIDAD</div>
+            <div style="padding:12px">
+              <div style="color:var(--text-muted);font-size:10px;font-weight:600;letter-spacing:0.5px;margin-bottom:8px">TEMAS</div>
+              <button class="theme-opt" onclick="setTheme('dark')" id="theme-dark">🌙 Oscuro (Original)</button>
+              <button class="theme-opt" onclick="setTheme('light')" id="theme-light">☀️ Claro</button>
+              <button class="theme-opt" onclick="setTheme('blue')" id="theme-blue">🔵 Azul Oscuro</button>
+              <div style="color:var(--text-muted);font-size:10px;font-weight:600;letter-spacing:0.5px;margin:12px 0 8px">👁️ ALTO CONTRASTE</div>
+              <button class="theme-opt" onclick="setTheme('hc-light')" id="theme-hc-light">⬜ Alto Contraste Claro</button>
+              <button class="theme-opt" onclick="setTheme('hc-dark')" id="theme-hc-dark">⬛ Alto Contraste Oscuro</button>
+              <div style="color:var(--text-muted);font-size:10px;font-weight:600;letter-spacing:0.5px;margin:12px 0 8px">🔤 TAMAÑO DE TEXTO</div>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-sm btn-secondary" style="flex:1;justify-content:center" onclick="setFontSize('normal')">A</button>
+                <button class="btn btn-sm btn-secondary" style="flex:1;justify-content:center;font-size:15px" onclick="setFontSize('large')">A+</button>
+                <button class="btn btn-sm btn-secondary" style="flex:1;justify-content:center;font-size:18px" onclick="setFontSize('xlarge')">A++</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- NOTIFICATIONS -->
+        <div style="position:relative">
+          <button class="notif-btn" onclick="toggleNotifs()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <span class="notif-badge" id="notif-badge" style="display:none">0</span>
+          </button>
+          <div class="notif-panel" id="notif-panel">
+            <div class="notif-header">NOTIFICACIONES</div>
+            <div id="notif-list"><div class="notif-empty">Sin notificaciones</div></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="user-avatar" id="user-avatar">A</div>
+          <span class="user-name" id="user-name-display"></span>
+        </div>
+      </div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// 🔥 FIREBASE CONFIG - PON TUS DATOS AQUÍ
+// ═══════════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyCRZvZBU6K_cZ1uMF6Lkexo-5zpFHkP9OB",
+  authDomain: "ayb-vip-katering.firebaseapp.com",
+  projectId: "ayb-vip-katering",
+  storageBucket: "ayb-vip-katering.firebasestorage.app",
+  messagingSenderId: "108553921180",
+  appId: "1:108553921180:web:f03f8a4421b562009c8359"
+};
+
+// ═══════════════════════════════════════════════════════════
+// 🔥 INICIALIZACIÓN FIREBASE (automática)
+// ═══════════════════════════════════════════════════════════
+let FB_READY = false;
+let auth = null;
+let db = null;
+
+try {
+  if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+    firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.firestore();
+    // Habilitar persistencia offline
+    db.enablePersistence().catch(e => console.log('Persistencia:', e.code));
+    FB_READY = true;
+    console.log('🔥 Firebase conectado correctamente');
+  } else {
+    console.log('⚠️ Modo DEMO: configura firebaseConfig para usar Firebase');
+  }
+} catch(e) {
+  console.log('⚠️ Firebase no disponible, usando modo demo', e);
+}
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let currentUser = null;
+let currentPage = 'dashboard';
+let authMode = 'login';
+let notifications = [];
+let notifOpen = false;
+let sidebarCollapsed = false;
+
+// ═══════════════════════════════════════════════════════════
+// MENU DATABASE (from your Excel)
+// ═══════════════════════════════════════════════════════════
+const DB = {
+  desayunos: ["Puré de papá con queso frito","Queso frito","Huevo hervido","Avena con frutas","Sandwich variado","Café, leche, jugos naturales","Puré de yautia","Huevo revuelto","Salchichas de desayuno","Pankes","Frutas frescas","Mangú de guineos verdes","Huevos revueltos","Pingulinas","Sandwich con yogurt","Mangú de plátano","Salami con vegetales","Huevos fritos","Omelette","Yogurt con frutas","Pan tostado con mantequilla","Huevos revueltos con jamón","Puré de papas","Jugo de chinola y limón","Arepas con queso blanco","Chuleta frita","Puré de guineos verdes","Café con leche","Huevo revuelto con puerro","Salami frito","Avena caliente","Cebollas a parte","Pankes y frutas","Salami con verduras","Salchicha con cebolla"],
+  comidas: ["Arroz con puerro y topín de pimientos","Lomo a las finas hierbas","Dorado frito","Ensalada tipile","Pastelón de plátano maduro","Berenjena parmesana","Moro de gandules","Pechuga a la King","Costillas al caldero","Ensalada de vegetales hervidos","Papas salteadas","Arepitas de maíz","Chofán mixto","Pechurina","Cerdo teriyaki","Ensalada mix lechuga con Cherry","Canelones de queso","Arroz primavera","Pechuga a la crema","Lomo a la mostaza","Ensalada de espinacas y rúgula","Lasaña de berenjenas","Arepitas de yuca","Vegetales al grill","Arroz blanco","Habichuela yacomelo","Pechuga a la plancha","Bistec encebollado","Ensalada de aguacate y tomate","Moro de habichuelas negras","Osobuco al vino","Ensalada César","Arroz con fideos y maíz","Pechuga con chimichurri","Ensalada mexicana","Pastelón de papa con zanahoria","Platanitos fritos","Arroz con vegetales","Albóndigas guisadas","Pollo al caldero","Habichuelas rojas","Pollo frito","Ensalada coleslaw","Brócoli gratinado","Torrejas de berenjena","Chuleta agridulce","Berenjenas a la criolla","Costilla al horno","Ensalada verde","Yanikequito","Arroz con maíz","Bistec con verduras","Lasaña de res","Ropa vieja","Lentejas","Pollo al vino","Pasta blanca","Ensalada tricolor","Moro rojo","Bajita de pechuga a la criolla","Filete de dorado frito","Muslo de pollo al horno","Suflé de vegetales","Chuleta de cerdo al horno","Canelones mozzarella y espinacas","Ensalada de tomate y aguacate","Costillas a la BBQ","Habichuela negra","Alitas fritas","Moro negro con topín de maduro","Pechuga con hongos y vainita","Costillas al horno","Pasta al horno","Habichuelas guisadas","Cerdo a la criolla","Pastelón de berenjenas","Guandules guisados","Pollo al horno en chimichurri","Canelones dos quesos","Ensalada rusa","Osobuco al vino con verduras","Ensalada Waldorf","Yuca frita","Mariscada","Bistec encebollado con batata","Bacalao a la criolla","Cerdo teriyaki con vegetales","Dorado al limón","Domplines","Ensalada capresa","Arroz blanco con lentejas"],
+  cenas: ["Lasaña de res","Lasaña de pollo","Panes con ajo","Ensalada César","Tacos y burritos","Wraps de pollo con queso","Wraps de atún con queso y lechuga","Guineos encebollados","Longaniza","Alitas Buffalo","Ensalada verde","Yuca al ajillo","Chuleta agridulce","Queso frito","Hamburguesas con papas","Hot dogs full","Wraps de jamón y queso","Sandwiches surtidos","Quesadillas","Mini pizzas"],
+  snacks: ["Quipes","Pastelitos","Croquetas","Hamburguesas con papas","Wraps de pollo","Wraps de jamón y queso","Hot dogs full","Sandwiches","Mini empanadas","Tostones con queso","Bolitas de yuca","Arepitas de maíz","Deditos de queso"],
+  bebidas: ["Agua","Refrescos naturales","Jugos de chinola","Jugos de limón","Jugos de naranja","Café","Leche","Té de jengibre","Morir soñando","Jugo de parcha","Jugo de tamarindo","Limonada","Agua de coco"],
+  vegano: {
+    desayunos: ["Mangú de plátano verde con cebolla","Avena con leche de coco y frutas","Tostadas de aguacate con tomate","Batido de guineo con maní","Arepas de maíz con aguacate","Frutas tropicales (mango, piña, lechosa)","Revoltillo de tofu con vegetales","Pan integral con mantequilla de maní","Yuca hervida con mojo de ajo","Smoothie de chinola y espinacas","Panqueques de avena con guineo","Granola casera con leche de almendras"],
+    comidas: ["Moro de habichuelas negras vegano","Arroz con vegetales salteados","Ensalada de quinoa con aguacate","Habichuelas guisadas con arroz","Berenjenas a la criolla","Pasta primavera con vegetales","Chofán de vegetales","Ensalada de lentejas con pimientos","Tostones con guacamole","Sopa de auyama","Pastelón de plátano con vegetales","Ensalada de garbanzos con cilantro","Arroz con gandules vegano","Yuca al mojo con ensalada","Vegetales al grill con chimichurri","Espaguetis con salsa de tomate fresco","Crema de brócoli","Canelones de espinaca y tofu","Rollitos de repollo con arroz","Cazuela de vegetales dominicanos"],
+    cenas: ["Wraps de vegetales con hummus","Sopa de lentejas","Ensalada tropical con mango","Tacos de frijoles negros","Hamburguesas de habichuelas","Quesadillas veganas con guacamole","Bowl de arroz integral con vegetales","Tostones con ensalada","Crema de auyama"]
+  }
+};
+
+// Custom menus added by user
+let customMenus = { desayunos:[], comidas:[], cenas:[], snacks:[] };
+
+// ═══════════════════════════════════════════════════════════
+// RECIPES DATABASE
+// ═══════════════════════════════════════════════════════════
+const RECIPES = {
+  "Arroz blanco": { cat:"Carbohidrato", tiempo:"25 min", ingredientes:[{n:"Arroz",c:0.25,u:"lb"},{n:"Agua",c:0.5,u:"taza"},{n:"Aceite",c:0.5,u:"cda"},{n:"Sal",c:0.125,u:"cdta"}], pasos:["Lavar el arroz hasta que el agua salga clara","Hervir agua con aceite y sal","Agregar arroz cuando hierva","Cocinar tapado a fuego bajo 20 min"] },
+  "Moro de habichuelas negras": { cat:"Carbohidrato", tiempo:"40 min", ingredientes:[{n:"Arroz",c:0.2,u:"lb"},{n:"Habichuelas negras",c:0.1,u:"lb"},{n:"Cebolla",c:0.03,u:"lb"},{n:"Ají",c:0.02,u:"lb"},{n:"Cilantro",c:0.5,u:"ramita"},{n:"Aceite de oliva",c:0.5,u:"cda"},{n:"Sal",c:0.125,u:"cdta"},{n:"Orégano",c:0.0625,u:"cdta"}], pasos:["Sofreír cebolla, ají y cilantro","Agregar habichuelas con su caldo","Añadir arroz y agua necesaria","Cocinar tapado a fuego bajo 30 min"] },
+  "Pollo al caldero": { cat:"Proteína", tiempo:"45 min", ingredientes:[{n:"Pollo (muslos/pechugas)",c:0.5,u:"lb"},{n:"Limón agrio",c:0.25,u:"und"},{n:"Ajo",c:0.5,u:"diente"},{n:"Cebolla",c:0.03,u:"lb"},{n:"Salsa de tomate",c:0.5,u:"cda"},{n:"Aceite",c:1,u:"cda"},{n:"Orégano",c:0.125,u:"cdta"},{n:"Sal",c:0.25,u:"cdta"},{n:"Azúcar",c:0.25,u:"cdta"}], pasos:["Limpiar pollo con limón agrio","Sazonar con ajo, orégano y sal","Dorar en aceite con azúcar caramelizada","Agregar sofrito y salsa de tomate","Cocinar tapado 35 min a fuego medio"] },
+  "Bistec encebollado": { cat:"Proteína", tiempo:"30 min", ingredientes:[{n:"Carne de res (bistec)",c:0.5,u:"lb"},{n:"Cebolla",c:0.1,u:"lb"},{n:"Ajo",c:0.5,u:"diente"},{n:"Limón agrio",c:0.25,u:"und"},{n:"Aceite",c:1,u:"cda"},{n:"Vinagre",c:0.5,u:"cdta"},{n:"Sal",c:0.25,u:"cdta"},{n:"Pimienta",c:0.0625,u:"cdta"}], pasos:["Sazonar bistec con limón, ajo, sal y pimienta","Sellar a fuego alto en aceite caliente","Retirar y sofreír cebollas en rodajas","Regresar carne, agregar vinagre, cocinar 5 min"] },
+  "Pechuga a la crema": { cat:"Proteína", tiempo:"35 min", ingredientes:[{n:"Pechuga de pollo",c:0.5,u:"lb"},{n:"Crema de leche",c:2,u:"cda"},{n:"Cebolla",c:0.03,u:"lb"},{n:"Ajo",c:0.5,u:"diente"},{n:"Mantequilla",c:0.5,u:"cda"},{n:"Sal",c:0.25,u:"cdta"},{n:"Pimienta",c:0.0625,u:"cdta"},{n:"Harina",c:0.5,u:"cda"}], pasos:["Sazonar y sellar pechugas en mantequilla","Sofreír cebolla y ajo","Espolvorear harina y mezclar","Agregar crema de leche y cocinar 15 min"] },
+  "Ensalada César": { cat:"Ensalada", tiempo:"15 min", ingredientes:[{n:"Lechuga romana",c:0.15,u:"lb"},{n:"Queso parmesano",c:0.03,u:"lb"},{n:"Crutones",c:0.05,u:"lb"},{n:"Aderezo César",c:1,u:"cda"},{n:"Limón",c:0.25,u:"und"}], pasos:["Lavar y picar la lechuga romana","Preparar aderezo con limón","Mezclar con crutones y queso rallado","Servir inmediatamente bien fría"] },
+  "Pastelón de plátano maduro": { cat:"Acompañante", tiempo:"50 min", ingredientes:[{n:"Plátanos maduros",c:0.5,u:"lb"},{n:"Carne molida",c:0.25,u:"lb"},{n:"Queso mozzarella",c:0.06,u:"lb"},{n:"Huevo",c:0.25,u:"und"},{n:"Cebolla",c:0.03,u:"lb"},{n:"Ajo",c:0.25,u:"diente"},{n:"Salsa de tomate",c:0.5,u:"cda"},{n:"Aceite",c:0.5,u:"cda"}], pasos:["Freír plátanos maduros en tajadas","Preparar relleno: sofreír carne con cebolla, ajo y salsa","Hacer capas: plátano, carne, queso en molde","Batir huevo y verter encima","Hornear 25 min a 350°F"] },
+  "Habichuelas guisadas": { cat:"Acompañante", tiempo:"35 min", ingredientes:[{n:"Habichuelas rojas",c:0.15,u:"lb"},{n:"Auyama",c:0.06,u:"lb"},{n:"Papa",c:0.06,u:"lb"},{n:"Cebolla",c:0.02,u:"lb"},{n:"Ajo",c:0.25,u:"diente"},{n:"Cilantro",c:0.5,u:"ramita"},{n:"Salsa de tomate",c:0.5,u:"cda"},{n:"Aceite",c:0.5,u:"cda"},{n:"Sal",c:0.125,u:"cdta"}], pasos:["Sofreír cebolla, ajo y cilantro","Agregar habichuelas con su caldo","Añadir auyama y papa en cubos","Cocinar a fuego medio hasta espesar"] }
+};
+
+// ═══════════════════════════════════════════════════════════
+// INVENTORY
+// ═══════════════════════════════════════════════════════════
+const CATEGORIES = ["Carnes","Aves","Pescados","Granos","Arroz","Vegetales","Frutas","Lácteos","Condimentos","Aceites","Enlatados","Harinas","Bebidas","Snacks","Limpieza","Desechables","Otros"];
+
+let inventory = [
+  {id:1,nombre:"Arroz largo grano",cat:"Arroz",cant:200,u:"lb",min:50,precio:0.85},
+  {id:2,nombre:"Habichuelas rojas",cat:"Granos",cant:80,u:"lb",min:20,precio:1.20},
+  {id:3,nombre:"Habichuelas negras",cat:"Granos",cant:60,u:"lb",min:20,precio:1.25},
+  {id:4,nombre:"Pechuga de pollo",cat:"Aves",cant:150,u:"lb",min:40,precio:2.50},
+  {id:5,nombre:"Carne de res (bistec)",cat:"Carnes",cant:100,u:"lb",min:30,precio:4.50},
+  {id:6,nombre:"Cerdo",cat:"Carnes",cant:80,u:"lb",min:25,precio:3.00},
+  {id:7,nombre:"Dorado filete",cat:"Pescados",cant:50,u:"lb",min:15,precio:5.50},
+  {id:8,nombre:"Plátanos maduros",cat:"Vegetales",cant:120,u:"und",min:30,precio:0.25},
+  {id:9,nombre:"Plátanos verdes",cat:"Vegetales",cant:100,u:"und",min:30,precio:0.20},
+  {id:10,nombre:"Cebolla",cat:"Vegetales",cant:40,u:"lb",min:10,precio:0.80},
+  {id:11,nombre:"Ajo",cat:"Condimentos",cant:15,u:"lb",min:5,precio:3.00},
+  {id:12,nombre:"Tomates",cat:"Vegetales",cant:30,u:"lb",min:10,precio:1.00},
+  {id:13,nombre:"Lechuga",cat:"Vegetales",cant:25,u:"und",min:8,precio:0.75},
+  {id:14,nombre:"Aceite vegetal",cat:"Aceites",cant:10,u:"gal",min:3,precio:8.00},
+  {id:15,nombre:"Aceite de oliva",cat:"Aceites",cant:5,u:"gal",min:2,precio:22.00},
+  {id:16,nombre:"Sal",cat:"Condimentos",cant:20,u:"lb",min:5,precio:0.50},
+  {id:17,nombre:"Orégano",cat:"Condimentos",cant:5,u:"lb",min:2,precio:6.00},
+  {id:18,nombre:"Queso mozzarella",cat:"Lácteos",cant:30,u:"lb",min:10,precio:4.00},
+  {id:19,nombre:"Crema de leche",cat:"Lácteos",cant:15,u:"lt",min:5,precio:3.50},
+  {id:20,nombre:"Huevos",cat:"Lácteos",cant:200,u:"und",min:50,precio:0.15},
+  {id:21,nombre:"Mantequilla",cat:"Lácteos",cant:10,u:"lb",min:3,precio:3.00},
+  {id:22,nombre:"Harina de trigo",cat:"Harinas",cant:50,u:"lb",min:15,precio:0.60},
+  {id:23,nombre:"Salsa de tomate",cat:"Enlatados",cant:20,u:"lt",min:5,precio:2.00},
+  {id:24,nombre:"Pasta espaguetis",cat:"Harinas",cant:30,u:"lb",min:10,precio:1.00},
+  {id:25,nombre:"Guandules",cat:"Granos",cant:40,u:"lb",min:10,precio:1.50},
+];
+
+// Copia de inventario por defecto (para reset y modo demo)
+const INVENTORY_DEFAULT = JSON.parse(JSON.stringify(inventory));
+
+// Listeners en tiempo real activos
+let realtimeUnsubs = [];
+
+// ═══════════════════════════════════════════════════════════
+// 🔥 FIRESTORE: CARGAR DATOS
+// ═══════════════════════════════════════════════════════════
+async function loadFromFirestore() {
+  if (!FB_READY || !db) return;
+  
+  try {
+    // Cargar inventario
+    const invSnap = await db.collection('inventario').get();
+    if (!invSnap.empty) {
+      inventory = [];
+      invSnap.forEach(doc => {
+        inventory.push({ id: doc.id, ...doc.data() });
+      });
+      console.log(`📦 Inventario: ${inventory.length} productos cargados`);
+    } else {
+      // Primera vez: subir datos iniciales a Firestore
+      console.log('📦 Subiendo inventario inicial a Firestore...');
+      await uploadInitialInventory();
+    }
+    
+    // Cargar menús personalizados
+    const menuSnap = await db.collection('menus_custom').get();
+    if (!menuSnap.empty) {
+      customMenus = { desayunos:[], comidas:[], cenas:[], snacks:[] };
+      menuSnap.forEach(doc => {
+        const d = doc.data();
+        if (customMenus[d.categoria]) {
+          customMenus[d.categoria].push({ _id: doc.id, nombre: d.nombre });
+        }
+      });
+      console.log('📋 Menús personalizados cargados');
+    }
+    
+    renderPage();
+  } catch(e) {
+    console.error('Error cargando datos:', e);
+    addNotif('⚠️ Error cargando datos de la nube');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🔥 FIRESTORE: SUBIR INVENTARIO INICIAL
+// ═══════════════════════════════════════════════════════════
+async function uploadInitialInventory() {
+  if (!FB_READY) return;
+  const batch = db.batch();
+  INVENTORY_DEFAULT.forEach(item => {
+    const ref = db.collection('inventario').doc();
+    batch.set(ref, {
+      nombre: item.nombre,
+      categoria: item.cat,
+      cantidad: item.cant,
+      unidad: item.u,
+      minimo: item.min,
+      precio: item.precio,
+      creadoPor: currentUser?.email || '',
+      fecha: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  });
+  await batch.commit();
+  // Recargar para obtener IDs reales
+  const snap = await db.collection('inventario').get();
+  inventory = [];
+  snap.forEach(doc => inventory.push({ id: doc.id, ...doc.data() }));
+  console.log('✅ Inventario inicial subido a Firestore');
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🔥 FIRESTORE: LISTENERS EN TIEMPO REAL
+// ═══════════════════════════════════════════════════════════
+function startRealtimeListeners() {
+  if (!FB_READY) return;
+  
+  // Listener del inventario - se actualiza en tiempo real
+  const unsubInv = db.collection('inventario').onSnapshot(snap => {
+    const newInv = [];
+    snap.forEach(doc => newInv.push({ id: doc.id, ...doc.data() }));
+    
+    // Detectar cambios
+    snap.docChanges().forEach(change => {
+      const d = change.doc.data();
+      if (change.type === 'added' && inventory.length > 0) {
+        // Solo notificar si no es carga inicial
+      }
+      if (change.type === 'modified') {
+        addNotif(`🔄 Producto actualizado: "${d.nombre}" - Stock: ${d.cantidad} ${d.unidad}`);
+        if (d.cantidad <= d.minimo) {
+          addNotif(`⚠️ ALERTA STOCK BAJO: "${d.nombre}" (${d.cantidad}/${d.minimo} ${d.unidad})`);
+        }
+      }
+    });
+    
+    inventory = newInv;
+    if (currentPage === 'inventario' || currentPage === 'dashboard') renderPage();
+  }, err => console.error('Error listener inventario:', err));
+  realtimeUnsubs.push(unsubInv);
+  
+  // Listener de menús personalizados
+  const unsubMenus = db.collection('menus_custom').onSnapshot(snap => {
+    customMenus = { desayunos:[], comidas:[], cenas:[], snacks:[] };
+    snap.forEach(doc => {
+      const d = doc.data();
+      if (customMenus[d.categoria]) {
+        customMenus[d.categoria].push({ _id: doc.id, nombre: d.nombre });
+      }
+    });
+    if (currentPage === 'menus') renderPage();
+  }, err => console.error('Error listener menus:', err));
+  realtimeUnsubs.push(unsubMenus);
+  
+  // Listener de movimientos (últimos 50)
+  const unsubMov = db.collection('movimientos')
+    .orderBy('fecha', 'desc')
+    .limit(50)
+    .onSnapshot(snap => {
+      snap.docChanges().forEach(change => {
+        if (change.type === 'added') {
+          const d = change.doc.data();
+          if (d.fecha) { // Evitar notificaciones de carga inicial
+            // Las notificaciones se manejan en el listener de inventario
+          }
+        }
+      });
+    }, err => console.error('Error listener movimientos:', err));
+  realtimeUnsubs.push(unsubMov);
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🔥 FIRESTORE: GUARDAR PRODUCTO (Nuevo o Editar)
+// ═══════════════════════════════════════════════════════════
+async function saveToFirestore_Inventory(itemData, editId) {
+  if (!FB_READY) return null;
+  
+  const data = {
+    nombre: itemData.nombre,
+    categoria: itemData.cat,
+    cantidad: itemData.cant,
+    unidad: itemData.u,
+    minimo: itemData.min,
+    precio: itemData.precio,
+    actualizadoPor: currentUser?.email || '',
+    actualizado: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  
+  try {
+    if (editId) {
+      await db.collection('inventario').doc(editId).update(data);
+      return editId;
+    } else {
+      data.creadoPor = currentUser?.email || '';
+      data.fecha = firebase.firestore.FieldValue.serverTimestamp();
+      const ref = await db.collection('inventario').add(data);
+      return ref.id;
+    }
+  } catch(e) {
+    console.error('Error guardando inventario:', e);
+    addNotif('❌ Error al guardar producto');
+    return null;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🔥 FIRESTORE: REGISTRAR MOVIMIENTO
+// ═══════════════════════════════════════════════════════════
+async function saveToFirestore_Movement(item, type, qty, newQty) {
+  if (!FB_READY) return;
+  
+  try {
+    // Actualizar cantidad en inventario
+    await db.collection('inventario').doc(item.id).update({
+      cantidad: newQty,
+      actualizadoPor: currentUser?.email || '',
+      actualizado: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    // Guardar movimiento
+    await db.collection('movimientos').add({
+      productoId: item.id,
+      productoNombre: item.nombre,
+      tipo: type,
+      cantidad: qty,
+      stockAnterior: item.cantidad || item.cant,
+      stockNuevo: newQty,
+      usuario: currentUser?.email || '',
+      fecha: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch(e) {
+    console.error('Error registrando movimiento:', e);
+    addNotif('❌ Error al registrar movimiento');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🔥 FIRESTORE: GUARDAR MENÚ PERSONALIZADO
+// ═══════════════════════════════════════════════════════════
+async function saveToFirestore_Menu(nombre, categoria) {
+  if (!FB_READY) return;
+  
+  try {
+    await db.collection('menus_custom').add({
+      nombre: nombre,
+      categoria: categoria,
+      creadoPor: currentUser?.email || '',
+      fecha: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch(e) {
+    console.error('Error guardando menú:', e);
+  }
+}
+// ═══════════════════════════════════════════════════════════
+const NAV = [
+  {id:'dashboard',label:'Dashboard',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>'},
+  {id:'menus',label:'Menús Semanales',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>'},
+  {id:'vegano',label:'Menú Vegano',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66C7 17.5 9 14 17 8z"/><path d="M20.59 2.41a2 2 0 00-2.83 0L15 5.17 18.83 9l2.76-2.76a2 2 0 000-2.83z"/></svg>'},
+  {id:'generador',label:'Generador Menú',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16,3 21,3 21,8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21,16 21,21 16,21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>'},
+  {id:'recetas',label:'Recetas',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 13.87A4 4 0 014 10a4 4 0 018 0 4 4 0 018 0 4 4 0 01-2 3.87V16a2 2 0 01-2 2H8a2 2 0 01-2-2v-2.13z"/><line x1="6" y1="20" x2="18" y2="20"/></svg>'},
+  {id:'calculadora',label:'Calculadora',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/></svg>'},
+  {id:'inventario',label:'Inventario',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>'},
+];
+
+// ═══════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════
+function switchAuth(mode) {
+  authMode = mode;
+  document.getElementById('tab-login').classList.toggle('active', mode==='login');
+  document.getElementById('tab-register').classList.toggle('active', mode==='register');
+  document.getElementById('register-name').style.display = mode==='register' ? 'block' : 'none';
+  document.getElementById('auth-btn').textContent = mode==='register' ? 'CREAR CUENTA' : 'INGRESAR';
+  document.getElementById('auth-error').style.display = 'none';
+}
+
+function doAuth() {
+  const email = document.getElementById('auth-email').value;
+  const pass = document.getElementById('auth-password').value;
+  const name = document.getElementById('reg-name').value;
+  const errEl = document.getElementById('auth-error');
+  const btn = document.getElementById('auth-btn');
+
+  if (!email || !pass) { errEl.textContent = 'Complete todos los campos'; errEl.style.display = 'block'; return; }
+  if (authMode === 'register' && !name) { errEl.textContent = 'Ingrese su nombre'; errEl.style.display = 'block'; return; }
+
+  errEl.style.display = 'none';
+  btn.textContent = '⏳ CONECTANDO...';
+  btn.disabled = true;
+
+  if (FB_READY) {
+    // ═══ FIREBASE AUTH ═══
+    if (authMode === 'register') {
+      auth.createUserWithEmailAndPassword(email, pass)
+        .then(cred => cred.user.updateProfile({ displayName: name }))
+        .then(() => loginSuccess(name, email))
+        .catch(e => {
+          const msgs = {
+            'auth/email-already-in-use': 'Este correo ya está registrado',
+            'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres',
+            'auth/invalid-email': 'Correo electrónico inválido'
+          };
+          errEl.textContent = msgs[e.code] || e.message;
+          errEl.style.display = 'block';
+          btn.textContent = 'CREAR CUENTA'; btn.disabled = false;
+        });
+    } else {
+      auth.signInWithEmailAndPassword(email, pass)
+        .then(cred => loginSuccess(cred.user.displayName || email.split('@')[0], email))
+        .catch(e => {
+          const msgs = {
+            'auth/user-not-found': 'No existe una cuenta con este correo',
+            'auth/wrong-password': 'Contraseña incorrecta',
+            'auth/invalid-email': 'Correo electrónico inválido',
+            'auth/invalid-credential': 'Credenciales inválidas. Verifique correo y contraseña'
+          };
+          errEl.textContent = msgs[e.code] || e.message;
+          errEl.style.display = 'block';
+          btn.textContent = 'INGRESAR'; btn.disabled = false;
+        });
+    }
+  } else {
+    // ═══ MODO DEMO (sin Firebase) ═══
+    loginSuccess(name || email.split('@')[0], email);
+  }
+}
+
+function loginSuccess(name, email) {
+  currentUser = { name, email };
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('app-page').classList.add('visible');
+  document.getElementById('user-avatar').textContent = name[0].toUpperCase();
+  document.getElementById('user-name-display').textContent = name;
+  
+  // Actualizar badge de Firebase
+  const badge = document.querySelector('.firebase-badge');
+  if (badge) badge.innerHTML = FB_READY 
+    ? '<p>🔥 Firebase conectado · Datos sincronizados en la nube</p>'
+    : '<p>⚠️ Modo Demo · Los datos no se guardan</p>';
+
+  buildSidebar();
+  
+  // Si Firebase está listo, cargar datos de Firestore
+  if (FB_READY) {
+    loadFromFirestore();
+    startRealtimeListeners();
+  }
+  
+  navigate('dashboard');
+  addNotif('Sesión iniciada: ' + name);
+}
+
+function doLogout() {
+  // Detener listeners en tiempo real
+  realtimeUnsubs.forEach(fn => fn());
+  realtimeUnsubs = [];
+  
+  if (FB_READY) {
+    auth.signOut().then(() => {
+      resetState();
+    }).catch(e => console.error('Error al cerrar sesión:', e));
+  } else {
+    resetState();
+  }
+}
+
+function resetState() {
+  currentUser = null;
+  inventory = [...INVENTORY_DEFAULT];
+  customMenus = { desayunos:[], comidas:[], cenas:[], snacks:[] };
+  notifications = [];
+  document.getElementById('login-page').style.display = 'flex';
+  document.getElementById('app-page').classList.remove('visible');
+  document.getElementById('auth-btn').textContent = 'INGRESAR';
+  document.getElementById('auth-btn').disabled = false;
+}
+
+// Auto-login si hay sesión activa en Firebase
+if (FB_READY) {
+  auth.onAuthStateChanged(user => {
+    if (user && !currentUser) {
+      loginSuccess(user.displayName || user.email.split('@')[0], user.email);
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// SIDEBAR & NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function buildSidebar() {
+  const nav = document.getElementById('sidebar-nav');
+  nav.innerHTML = NAV.map(n => `
+    <button class="nav-item ${n.id===currentPage?'active':''}" onclick="navigate('${n.id}')" id="nav-${n.id}">
+      ${n.icon}<span>${n.label}</span>
+    </button>
+  `).join('');
+}
+
+function toggleSidebar() {
+  sidebarCollapsed = !sidebarCollapsed;
+  document.getElementById('sidebar').classList.toggle('collapsed', sidebarCollapsed);
+}
+
+// ═══════════════════════════════════════════════════════════
+// THEME & ACCESSIBILITY
+// ═══════════════════════════════════════════════════════════
+let themePanelOpen = false;
+let currentTheme = localStorage.getItem('ayb-theme') || 'dark';
+let currentFontSize = localStorage.getItem('ayb-fontsize') || 'normal';
+
+// Apply saved theme on load
+if (currentTheme !== 'dark') document.documentElement.setAttribute('data-theme', currentTheme);
+if (currentFontSize !== 'normal') document.documentElement.setAttribute('data-fontsize', currentFontSize);
+
+function toggleThemePanel() {
+  themePanelOpen = !themePanelOpen;
+  document.getElementById('theme-panel').classList.toggle('open', themePanelOpen);
+  if (themePanelOpen) updateThemeButtons();
+}
+
+function setTheme(theme) {
+  currentTheme = theme;
+  if (theme === 'dark') {
+    document.documentElement.removeAttribute('data-theme');
+  } else {
+    document.documentElement.setAttribute('data-theme', theme);
+  }
+  localStorage.setItem('ayb-theme', theme);
+  updateThemeButtons();
+}
+
+function setFontSize(size) {
+  currentFontSize = size;
+  if (size === 'normal') {
+    document.documentElement.removeAttribute('data-fontsize');
+  } else {
+    document.documentElement.setAttribute('data-fontsize', size);
+  }
+  localStorage.setItem('ayb-fontsize', size);
+}
+
+function updateThemeButtons() {
+  document.querySelectorAll('.theme-opt').forEach(btn => btn.classList.remove('active'));
+  const activeBtn = document.getElementById('theme-' + currentTheme);
+  if (activeBtn) activeBtn.classList.add('active');
+}
+
+// Close theme panel on outside click
+document.addEventListener('click', e => {
+  if (themePanelOpen && !e.target.closest('.theme-panel') && !e.target.closest('[title*="tema"]')) {
+    themePanelOpen = false;
+    document.getElementById('theme-panel').classList.remove('open');
+  }
+});
+
+function navigate(page) {
+  currentPage = page;
+  document.getElementById('topbar-title').textContent = NAV.find(n=>n.id===page)?.label || 'Dashboard';
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const navBtn = document.getElementById('nav-'+page);
+  if (navBtn) navBtn.classList.add('active');
+  renderPage();
+}
+
+// ═══════════════════════════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════
+function addNotif(msg) {
+  notifications.unshift({ id: Date.now(), msg, time: new Date().toLocaleTimeString(), read: false });
+  updateNotifBadge();
+}
+
+function updateNotifBadge() {
+  const unread = notifications.filter(n => !n.read).length;
+  const badge = document.getElementById('notif-badge');
+  badge.style.display = unread > 0 ? 'flex' : 'none';
+  badge.textContent = unread;
+}
+
+function toggleNotifs() {
+  notifOpen = !notifOpen;
+  document.getElementById('notif-panel').classList.toggle('open', notifOpen);
+  if (notifOpen) {
+    notifications.forEach(n => n.read = true);
+    updateNotifBadge();
+    const list = document.getElementById('notif-list');
+    if (notifications.length === 0) {
+      list.innerHTML = '<div class="notif-empty">Sin notificaciones</div>';
+    } else {
+      list.innerHTML = notifications.slice(0,20).map(n => `
+        <div class="notif-item">
+          <span style="color:var(--accent);flex-shrink:0;margin-top:2px">🔔</span>
+          <div><div class="notif-msg">${n.msg}</div><div class="notif-time">${n.time}</div></div>
+        </div>
+      `).join('');
+    }
+  }
+}
+
+// Close notifs on outside click
+document.addEventListener('click', e => {
+  if (notifOpen && !e.target.closest('.notif-btn') && !e.target.closest('.notif-panel')) {
+    notifOpen = false;
+    document.getElementById('notif-panel').classList.remove('open');
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+function getRandom(arr, n=1) { return [...arr].sort(()=>Math.random()-0.5).slice(0,n); }
+function fmtQty(v, u) { return v >= 100 ? Math.round(v)+' '+u : v >= 10 ? v.toFixed(1)+' '+u : v.toFixed(2)+' '+u; }
+function tag(color, text) { return `<span class="tag" style="background:${color}18;color:${color}">${text}</span>`; }
+function esc(s) { return s.replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS: Normalizar campos de inventario (Firebase vs Local)
+// ═══════════════════════════════════════════════════════════
+function inv(item) {
+  return {
+    id: item.id,
+    nombre: item.nombre,
+    cat: item.categoria || item.cat || '',
+    cant: item.cantidad !== undefined ? item.cantidad : (item.cant || 0),
+    u: item.unidad || item.u || 'und',
+    min: item.minimo !== undefined ? item.minimo : (item.min || 0),
+    precio: item.precio || 0,
+  };
+}
+
+// Custom menus normalizados (Firebase guarda objetos, demo guarda strings)
+function getCustomMenuItems(cat) {
+  const arr = customMenus[cat] || [];
+  return arr.map(item => typeof item === 'string' ? item : item.nombre);
+}
+
+// ═══════════════════════════════════════════════════════════
+// PAGE RENDERER
+// ═══════════════════════════════════════════════════════════
+function renderPage() {
+  const c = document.getElementById('content');
+  switch(currentPage) {
+    case 'dashboard': c.innerHTML = renderDashboard(); break;
+    case 'menus': c.innerHTML = renderMenus(); break;
+    case 'vegano': c.innerHTML = renderVegano(); break;
+    case 'generador': c.innerHTML = renderGenerador(); break;
+    case 'recetas': c.innerHTML = renderRecetas(); break;
+    case 'calculadora': c.innerHTML = renderCalculadora(); break;
+    case 'inventario': c.innerHTML = renderInventario(); break;
+  }
+}
+
+// ═══════════════════ DASHBOARD ═══════════════════
+function renderDashboard() {
+  const stats = [
+    {v: DB.comidas.length+DB.desayunos.length+DB.cenas.length, l:'Platos en Menú', c:'var(--accent)'},
+    {v: Object.keys(RECIPES).length, l:'Recetas con Cálculo', c:'var(--gold)'},
+    {v: DB.vegano.desayunos.length+DB.vegano.comidas.length+DB.vegano.cenas.length, l:'Opciones Veganas', c:'var(--green)'},
+    {v: inventory.length, l:'Productos en Inventario', c:'var(--blue)'},
+  ];
+  const lowStock = inventory.map(inv).filter(i=>i.cant<=i.min);
+  const cats = [
+    {l:"Desayunos",c:DB.desayunos.length,cl:"var(--orange)"},
+    {l:"Comidas",c:DB.comidas.length,cl:"var(--red)"},
+    {l:"Cenas",c:DB.cenas.length,cl:"var(--blue)"},
+    {l:"Snacks",c:DB.snacks.length,cl:"var(--purple)"},
+    {l:"Bebidas",c:DB.bebidas.length,cl:"var(--green)"},
+    {l:"Vegano",c:DB.vegano.comidas.length,cl:"#1abc9c"},
+  ];
+  const popular = ["Arroz blanco","Bistec encebollado","Pechuga a la crema","Pollo al caldero","Moro de habichuelas negras","Ensalada verde","Pastelón de plátano maduro","Habichuelas guisadas"];
+
+  return `
+    ${lowStock.length>0?`<div class="alert-box alert-danger fade-up"><span>⚠️</span><div><strong style="color:var(--red)">Stock Bajo:</strong> <span style="color:var(--text-secondary);font-size:12px">${lowStock.map(i=>i.nombre).join(', ')}</span></div></div>`:''}
+    <div class="grid grid-4" style="margin-bottom:24px">
+      ${stats.map((s,i)=>`<div class="card stat-card fade-up" style="animation-delay:${i*0.08}s"><div class="stat-value" style="color:${s.c}">${s.v}</div><div class="stat-label">${s.l.toUpperCase()}</div></div>`).join('')}
+    </div>
+    <div class="grid grid-2">
+      <div class="card fade-up" style="animation-delay:0.3s">
+        <h3 style="color:var(--text-primary);font-size:15px;margin-bottom:16px">🍽️ Platos Más Populares</h3>
+        ${popular.map((p,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg-card2)">
+          <span style="font-size:13px">${p}</span>
+          <div style="width:${Math.max(30,100-i*10)}px;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--accent) ${100-i*10}%,transparent)"></div>
+        </div>`).join('')}
+      </div>
+      <div class="card fade-up" style="animation-delay:0.4s">
+        <h3 style="color:var(--text-primary);font-size:15px;margin-bottom:16px">📊 Distribución por Categoría</h3>
+        ${cats.map(c=>`<div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:12px">${c.l}</span><span style="color:${c.cl};font-size:12px;font-weight:600">${c.c}</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,c.c*1.1)}%;background:${c.cl}"></div></div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+// ═══════════════════ MENUS ═══════════════════
+let menuTab = 'desayunos';
+let menuSearch = '';
+function renderMenus() {
+  const tabs = [{id:'desayunos',l:'🌅 Desayunos',c:'var(--orange)'},{id:'comidas',l:'🍽️ Comidas',c:'var(--red)'},{id:'cenas',l:'🌙 Cenas',c:'var(--blue)'},{id:'snacks',l:'🍿 Snacks',c:'var(--purple)'}];
+  const items = [...(DB[menuTab]||[]), ...getCustomMenuItems(menuTab)].filter(i=>i.toLowerCase().includes(menuSearch.toLowerCase()));
+  const col = tabs.find(t=>t.id===menuTab)?.c || 'var(--accent)';
+
+  return `
+    <div class="tabs">
+      ${tabs.map(t=>`<button class="tab-btn ${menuTab===t.id?'active':''}" style="${menuTab===t.id?`border-color:${t.c};color:${t.c};background:${t.c}12`:''}" onclick="menuTab='${t.id}';renderPage()">${t.l}</button>`).join('')}
+      <button class="btn btn-primary" style="margin-left:auto" onclick="promptAddMenu()">+ Agregar Plato</button>
+    </div>
+    <div class="search-bar" style="margin-bottom:16px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input placeholder="Buscar platos..." value="${menuSearch}" oninput="menuSearch=this.value;renderPage()">
+      ${tag(col, items.length+' platos')}
+    </div>
+    <div class="grid grid-auto">
+      ${items.map((item,i)=>{
+        const isCustom = getCustomMenuItems(menuTab).includes(item);
+        return `<div class="card menu-card fade-up" style="border-left-color:${col};animation-delay:${(i%12)*0.03}s;padding:13px 18px">
+          <span style="font-size:13px;color:var(--text-secondary)">${item}</span>
+          <div style="display:flex;gap:6px">${isCustom?tag('var(--green)','Nuevo'):''}${tag('var(--text-dim)','#'+(i+1))}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function promptAddMenu() {
+  const name = prompt(`Nuevo plato para ${menuTab}:`);
+  if (name && name.trim()) {
+    const trimmed = name.trim();
+    
+    if (FB_READY) {
+      // Guardar en Firebase
+      saveToFirestore_Menu(trimmed, menuTab);
+      addNotif(`Nuevo plato agregado: "${trimmed}" en ${menuTab}`);
+      // El listener en tiempo real actualiza customMenus automáticamente
+    } else {
+      // Modo demo: guardar local
+      customMenus[menuTab].push(trimmed);
+      addNotif(`Nuevo plato agregado: "${trimmed}" en ${menuTab}`);
+      renderPage();
+    }
+  }
+}
+
+// ═══════════════════ VEGANO ═══════════════════
+function renderVegano() {
+  const secs = [
+    {k:'desayunos',l:'🌅 Desayunos Veganos',c:'var(--orange)',items:DB.vegano.desayunos},
+    {k:'comidas',l:'🥗 Comidas Veganas',c:'var(--green)',items:DB.vegano.comidas},
+    {k:'cenas',l:'🌙 Cenas Veganas',c:'var(--blue)',items:DB.vegano.cenas},
+  ];
+  return `
+    <div class="card fade-up" style="margin-bottom:20px;display:flex;align-items:center;gap:16px;border-left:4px solid var(--green)">
+      <span style="font-size:36px">🌿</span>
+      <div><h3 style="color:var(--green);margin:0;font-size:18px">Menú Vegano — Productos de RD</h3>
+      <p style="color:var(--text-muted);margin:4px 0 0;font-size:13px">Opciones 100% vegetales con ingredientes disponibles en República Dominicana</p></div>
+    </div>
+    ${secs.map(s=>`
+      <h3 style="color:${s.c};font-size:15px;margin:0 0 12px">${s.l}</h3>
+      <div class="grid grid-auto" style="margin-bottom:24px">
+        ${s.items.map((item,i)=>`<div class="card menu-card fade-up" style="border-left-color:${s.c};animation-delay:${i*0.04}s;padding:12px 16px">
+          <span style="font-size:13px;color:var(--text-secondary)">${item}</span>
+        </div>`).join('')}
+      </div>
+    `).join('')}`;
+}
+
+// ═══════════════════ GENERADOR ═══════════════════
+let genPersonas=50, genDays=5, genVegan=false, genResult=null;
+function renderGenerador() {
+  let resultHTML = '';
+  if (genResult) {
+    const dayNames = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+    resultHTML = `<div class="alert-box alert-info fade-up"><span>📋</span><span style="font-size:13px;font-weight:600;color:#ff8888">Menú generado para ${genPersonas} personas · ${genDays} días ${genVegan?'· Incluye vegano 🌿':''}</span></div>` +
+    genResult.map((day,di)=>`
+      <div class="card fade-up" style="margin-bottom:16px;animation-delay:${di*0.08}s">
+        <h3 style="color:var(--accent);font-size:16px;margin:0 0 16px;padding-bottom:10px;border-bottom:1px solid var(--border)">📅 ${dayNames[di%7]}</h3>
+        <div class="grid ${genVegan?'grid-4':'grid-3'}">
+          ${[{l:'🌅 Desayuno',items:day.des,c:'var(--orange)'},{l:'🍽️ Comida',items:day.com,c:'var(--red)'},{l:'🌙 Cena',items:day.cen,c:'var(--blue)'},...(genVegan?[{l:'🌿 Vegano',items:day.veg,c:'var(--green)'}]:[])].map(s=>`
+            <div><div style="color:${s.c};font-size:12px;font-weight:700;margin-bottom:8px;letter-spacing:0.5px">${s.l}</div>
+            ${s.items.map(it=>`<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--bg-card2)">• ${it}</div>`).join('')}</div>
+          `).join('')}
+        </div>
+        <div style="display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--bg-card2)">
+          <span style="color:var(--text-muted);font-size:11px">🍿 ${day.snk.join(', ')}</span>
+          <span style="color:var(--text-muted);font-size:11px">🥤 ${day.beb.join(', ')}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  return `
+    <div class="card fade-up" style="margin-bottom:20px">
+      <h3 style="color:var(--text-primary);margin:0 0 16px;font-size:16px">⚡ Configurar Generación</h3>
+      <div class="grid grid-3" style="align-items:end">
+        <div><label style="color:var(--text-muted);font-size:12px;display:block;margin-bottom:6px">Personas</label>
+          <input class="input" type="number" value="${genPersonas}" onchange="genPersonas=+this.value" style="margin:0"></div>
+        <div><label style="color:var(--text-muted);font-size:12px;display:block;margin-bottom:6px">Días (1-7)</label>
+          <input class="input" type="number" value="${genDays}" min="1" max="7" onchange="genDays=Math.min(7,+this.value)" style="margin:0"></div>
+        <div><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:14px 0">
+          <input type="checkbox" ${genVegan?'checked':''} onchange="genVegan=this.checked" style="accent-color:var(--green)">
+          <span style="color:var(--green);font-size:13px">Incluir Vegano</span></label></div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:16px" onclick="doGenerate()">🔀 GENERAR MENÚ ALEATORIO</button>
+    </div>
+    ${resultHTML}`;
+}
+
+function doGenerate() {
+  genResult = [];
+  for (let d=0; d<genDays; d++) {
+    const day = {
+      des: getRandom(DB.desayunos, 4), com: getRandom(DB.comidas, 5), cen: getRandom(DB.cenas, 3),
+      snk: getRandom(DB.snacks, 2), beb: getRandom(DB.bebidas, 3),
+    };
+    if (genVegan) day.veg = [...getRandom(DB.vegano.desayunos,2),...getRandom(DB.vegano.comidas,3),...getRandom(DB.vegano.cenas,1)];
+    genResult.push(day);
+  }
+  renderPage();
+}
+
+// ═══════════════════ RECETAS ═══════════════════
+let selectedRecipe = null;
+let recipePersonas = 10;
+function renderRecetas() {
+  if (selectedRecipe) {
+    const r = RECIPES[selectedRecipe];
+    return `
+      <button class="btn btn-secondary" onclick="selectedRecipe=null;renderPage()" style="margin-bottom:16px">← Volver a Recetas</button>
+      <div class="card fade-up">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+          <div><h2 style="color:var(--text-primary);margin:0;font-size:22px;font-family:var(--font-display)">${selectedRecipe}</h2>
+            <div style="display:flex;gap:8px;margin-top:8px">${tag('var(--accent)',r.cat)} ${tag('var(--orange)','⏱ '+r.tiempo)}</div></div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <label style="color:var(--text-muted);font-size:12px">Personas:</label>
+            <input class="input" type="number" value="${recipePersonas}" min="1" style="width:80px;margin:0;text-align:center" onchange="recipePersonas=Math.max(1,+this.value);renderPage()">
+          </div>
+        </div>
+        <h4 style="color:var(--orange);font-size:14px;margin:0 0 12px">📋 Ingredientes para ${recipePersonas} personas</h4>
+        <div class="grid grid-2" style="margin-bottom:24px">
+          ${r.ingredientes.map(ing=>{
+            const qty = ing.c * recipePersonas;
+            return `<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg-card2);border-radius:8px;border:1px solid var(--border)">
+              <span style="font-size:13px">${ing.n}</span>
+              <span style="color:#ff8888;font-size:13px;font-weight:600">${fmtQty(qty, ing.u)}</span>
+            </div>`;
+          }).join('')}
+        </div>
+        <h4 style="color:var(--blue);font-size:14px;margin:0 0 12px">👨‍🍳 Preparación</h4>
+        ${r.pasos.map((p,i)=>`<div class="recipe-step"><div class="step-num">${i+1}</div><p style="font-size:13px;line-height:1.5;margin:0">${p}</p></div>`).join('')}
+      </div>`;
+  }
+  const names = Object.keys(RECIPES);
+  return `<div class="grid grid-auto">${names.map((name,i)=>{
+    const r = RECIPES[name];
+    return `<div class="card fade-up" style="cursor:pointer;animation-delay:${i*0.06}s" onclick="selectedRecipe='${esc(name)}';renderPage()">
+      <h4 style="color:var(--text-primary);margin:0 0 8px;font-size:15px">${name}</h4>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${tag('var(--accent)',r.cat)} ${tag('var(--orange)','⏱ '+r.tiempo)} ${tag('var(--blue)',r.ingredientes.length+' ingr.')}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ═══════════════════ CALCULADORA ═══════════════════
+let calcPersonas = 100;
+let calcUnit = 'lb';
+let calcSelected = ['Arroz blanco','Pollo al caldero','Ensalada César'];
+
+function renderCalculadora() {
+  const allDishes = Object.keys(RECIPES);
+  let totals = {};
+  calcSelected.forEach(dish => {
+    const r = RECIPES[dish]; if (!r) return;
+    r.ingredientes.forEach(ing => {
+      const qty = ing.c * calcPersonas;
+      if (!totals[ing.n]) totals[ing.n] = {c:0, u:ing.u};
+      totals[ing.n].c += qty;
+    });
+  });
+  const sorted = Object.entries(totals).sort((a,b)=>b[1].c-a[1].c);
+
+  return `
+    <div class="card fade-up" style="margin-bottom:20px">
+      <h3 style="color:var(--text-primary);margin:0 0 16px">⚙️ Configuración del Cálculo</h3>
+      <div class="grid grid-2">
+        <div><label style="color:var(--text-muted);font-size:12px;display:block;margin-bottom:6px">Cantidad de Personas</label>
+          <input class="input" type="number" value="${calcPersonas}" onchange="calcPersonas=Math.max(1,+this.value);renderPage()" style="margin:0;font-size:20px;font-weight:700;text-align:center"></div>
+        <div><label style="color:var(--text-muted);font-size:12px;display:block;margin-bottom:6px">Unidad de Peso</label>
+          <div style="display:flex;gap:8px">${['lb','oz','g','kg'].map(u=>`<button class="btn ${calcUnit===u?'btn-primary':'btn-secondary'}" style="flex:1;justify-content:center;font-size:14px" onclick="calcUnit='${u}';renderPage()">${u}</button>`).join('')}</div></div>
+      </div>
+    </div>
+    <div class="card fade-up" style="margin-bottom:20px;animation-delay:0.1s">
+      <h4 style="color:var(--text-primary);margin:0 0 12px;font-size:14px">Seleccionar Platos</h4>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${allDishes.map(d=>`<button class="btn btn-sm" style="background:${calcSelected.includes(d)?'var(--accent)':'var(--border)'};color:${calcSelected.includes(d)?'#fff':'var(--text-muted)'}" onclick="toggleCalcDish('${esc(d)}')">${d}</button>`).join('')}
+      </div>
+    </div>
+    ${sorted.length>0?`<div class="card fade-up" style="animation-delay:0.2s">
+      <h3 style="color:var(--orange);margin:0 0 16px">📊 Lista de Compras para ${calcPersonas} Personas</h3>
+      <div class="grid grid-auto">${sorted.map(([name,data])=>{
+        let v=data.c, u=data.u;
+        const convs={lb_oz:16,lb_g:453.592,lb_kg:0.453592};
+        if(['lb','oz','g','kg'].includes(u)&&u!==calcUnit){const k=u+'_'+calcUnit;const rk=calcUnit+'_'+u;if(convs[k]){v*=convs[k];u=calcUnit;}else if(convs[rk]){v/=convs[rk];u=calcUnit;}}
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-card2);border-radius:10px;border:1px solid var(--border)">
+          <span style="font-size:13px">${name}</span><span style="color:#ff8888;font-size:14px;font-weight:700">${fmtQty(v,u)}</span></div>`;
+      }).join('')}</div>
+    </div>`:''}`;
+}
+
+function toggleCalcDish(dish) {
+  const i = calcSelected.indexOf(dish);
+  if (i >= 0) calcSelected.splice(i,1); else calcSelected.push(dish);
+  renderPage();
+}
+
+// ═══════════════════ INVENTARIO ═══════════════════
+let invSearch = '';
+let invCat = 'Todos';
+let invShowAdd = false;
+let invEditId = null;
+let invMoveId = null;
+
+function renderInventario() {
+  const allNorm = inventory.map(inv);
+  const lowStock = allNorm.filter(i=>i.cant<=i.min);
+  const filtered = allNorm.filter(i=>(invCat==='Todos'||i.cat===invCat) && i.nombre.toLowerCase().includes(invSearch.toLowerCase()));
+
+  let formHTML = '';
+  if (invShowAdd || invEditId) {
+    const raw = invEditId ? inventory.find(i=>String(i.id)===String(invEditId)) : null;
+    const item = raw ? inv(raw) : {nombre:'',cat:'Otros',cant:0,u:'lb',min:0,precio:0};
+    formHTML = `<div class="card fade-up" style="margin-bottom:16px;border:1px solid rgba(196,30,30,0.2)">
+      <h4 style="color:var(--text-primary);margin:0 0 14px">${invEditId?'Editar':'Agregar'} Producto</h4>
+      <div class="grid grid-3">
+        <div style="grid-column:1/3"><input class="input" id="inv-nombre" placeholder="Nombre del producto" value="${item.nombre}"></div>
+        <select class="input" id="inv-cat">${CATEGORIES.map(c=>`<option ${item.cat===c?'selected':''}>${c}</option>`).join('')}</select>
+        <input class="input" id="inv-cant" type="number" placeholder="Cantidad" value="${item.cant}">
+        <select class="input" id="inv-u">${['lb','oz','g','kg','und','lt','gal','caja','paq','bot'].map(u=>`<option ${item.u===u?'selected':''}>${u}</option>`).join('')}</select>
+        <input class="input" id="inv-min" type="number" placeholder="Stock mínimo" value="${item.min}">
+        <input class="input" id="inv-precio" type="number" step="0.01" placeholder="Precio RD$" value="${item.precio}">
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-primary" onclick="saveInvItem()">Guardar</button>
+        <button class="btn btn-secondary" onclick="invShowAdd=false;invEditId=null;renderPage()">Cancelar</button>
+      </div>
+    </div>`;
+  }
+
+  let moveHTML = '';
+  if (invMoveId) {
+    const raw = inventory.find(i=>String(i.id)===String(invMoveId));
+    if (raw) {
+      const item = inv(raw);
+      moveHTML = `<div class="card fade-up" style="margin-bottom:16px;border:1px solid rgba(243,156,18,0.3)">
+      <h4 style="color:var(--orange);margin:0 0 14px">📦 Movimiento: ${item.nombre}</h4>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <select class="input" id="move-type" style="margin:0;width:150px"><option value="salida">📤 Salida</option><option value="entrada">📥 Entrada</option></select>
+        <input class="input" type="number" id="move-qty" placeholder="Cantidad" style="margin:0;width:120px">
+        <span style="color:var(--text-muted);font-size:12px">${item.u}</span>
+        <button class="btn btn-primary" onclick="doInvMove('${item.id}')">Registrar</button>
+        <button class="btn btn-secondary" onclick="invMoveId=null;renderPage()">Cancelar</button>
+      </div>
+      <p style="color:var(--text-dim);font-size:11px;margin:8px 0 0">Stock actual: ${item.cant} ${item.u} · Mínimo: ${item.min} ${item.u}</p>
+    </div>`;
+    }
+  }
+
+  return `
+    ${lowStock.length>0?`<div class="alert-box alert-danger fade-up">
+      <span>⚠️</span><div><strong style="color:var(--red);font-size:13px">PRODUCTOS CON STOCK BAJO (${lowStock.length})</strong>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">${lowStock.map(i=>tag('var(--red)',i.nombre+': '+i.cant+'/'+i.min+' '+i.u)).join('')}</div></div>
+    </div>`:''}
+    <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+      <div class="search-bar" style="flex:1;min-width:200px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input placeholder="Buscar producto..." value="${invSearch}" oninput="invSearch=this.value;renderPage()">
+      </div>
+      <select class="input" style="margin:0;width:180px" onchange="invCat=this.value;renderPage()">
+        <option ${invCat==='Todos'?'selected':''}>Todos</option>
+        ${CATEGORIES.map(c=>`<option ${invCat===c?'selected':''}>${c}</option>`).join('')}
+      </select>
+      <button class="btn btn-primary" onclick="invShowAdd=true;invEditId=null;renderPage()">+ Agregar</button>
+      ${tag('var(--text-muted)', inventory.length+' productos')}
+      ${FB_READY?tag('var(--green)','🔥 Sincronizado'):tag('var(--orange)','⚠️ Demo')}
+    </div>
+    ${formHTML}${moveHTML}
+    <div class="table-wrap">
+      <table>
+        <thead><tr>${['PRODUCTO','CATEGORÍA','STOCK','MÍN','UNIDAD','PRECIO','ESTADO','ACCIONES'].map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+        <tbody>${filtered.map(item=>{
+          const low = item.cant <= item.min;
+          return `<tr>
+            <td><span style="color:var(--text-primary);font-weight:500">${item.nombre}</span></td>
+            <td>${tag('var(--text-dim)',item.cat)}</td>
+            <td><span style="color:${low?'var(--red)':'var(--green)'};font-weight:700">${item.cant}</span></td>
+            <td style="color:var(--text-muted)">${item.min}</td>
+            <td style="color:var(--text-muted)">${item.u}</td>
+            <td style="color:var(--orange)">RD$${(+item.precio).toFixed(2)}</td>
+            <td>${low?tag('var(--red)','⚠️ Bajo'):tag('var(--green)','✅ OK')}</td>
+            <td><div style="display:flex;gap:6px">
+              <button class="btn btn-sm btn-secondary" style="color:var(--orange)" onclick="invMoveId='${item.id}';renderPage()">📦</button>
+              <button class="btn btn-sm btn-secondary" style="color:var(--blue)" onclick="editInvItem('${item.id}')">✏️</button>
+            </div></td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+async function saveInvItem() {
+  const nombre = document.getElementById('inv-nombre').value;
+  if (!nombre) return;
+  const data = {
+    nombre,
+    cat: document.getElementById('inv-cat').value,
+    cant: +document.getElementById('inv-cant').value,
+    u: document.getElementById('inv-u').value,
+    min: +document.getElementById('inv-min').value,
+    precio: +document.getElementById('inv-precio').value,
+  };
+  
+  if (FB_READY) {
+    // ═══ GUARDAR EN FIREBASE ═══
+    const docId = await saveToFirestore_Inventory(data, invEditId || null);
+    if (docId) {
+      addNotif(invEditId ? `Producto actualizado: "${nombre}"` : `Nuevo producto agregado: "${nombre}"`);
+    }
+    // El listener en tiempo real actualiza el inventario automáticamente
+  } else {
+    // ═══ MODO DEMO: guardar local ═══
+    if (invEditId) {
+      const idx = inventory.findIndex(i=>String(i.id)===String(invEditId));
+      if (idx>=0) inventory[idx] = {...inventory[idx], ...data};
+      addNotif(`Producto actualizado: "${nombre}"`);
+    } else {
+      inventory.push({id:Date.now(), ...data});
+      addNotif(`Nuevo producto agregado: "${nombre}"`);
+    }
+  }
+  
+  invShowAdd = false; invEditId = null;
+  renderPage();
+}
+
+function editInvItem(id) {
+  invEditId = id; invShowAdd = true; invMoveId = null;
+  renderPage();
+}
+
+// Handle both string IDs (Firebase) and number IDs (demo)
+function findInvById(id) {
+  return inventory.find(i => String(i.id) === String(id));
+}
+
+async function doInvMove(id) {
+  const item = inventory.find(i=>String(i.id)===String(id));
+  if (!item) return;
+  const type = document.getElementById('move-type').value;
+  const qty = +document.getElementById('move-qty').value;
+  if (qty <= 0) return;
+  
+  const currentQty = item.cantidad !== undefined ? item.cantidad : item.cant;
+  const newQty = type==='entrada' ? currentQty + qty : Math.max(0, currentQty - qty);
+  
+  if (FB_READY) {
+    // ═══ GUARDAR EN FIREBASE ═══
+    await saveToFirestore_Movement(item, type, qty, newQty);
+    addNotif(`${type==='entrada'?'📥 Entrada':'📤 Salida'}: ${qty} ${item.unidad||item.u} de "${item.nombre}" · Stock: ${newQty}`);
+    if (newQty <= (item.minimo||item.min)) {
+      addNotif(`⚠️ ALERTA: "${item.nombre}" por debajo del mínimo (${newQty}/${item.minimo||item.min})`);
+    }
+    // El listener en tiempo real actualiza el inventario automáticamente
+  } else {
+    // ═══ MODO DEMO ═══
+    item.cant = newQty;
+    addNotif(`${type==='entrada'?'📥 Entrada':'📤 Salida'}: ${qty} ${item.u} de "${item.nombre}" · Stock: ${newQty} ${item.u}`);
+    if (newQty <= item.min) addNotif(`⚠️ ALERTA: "${item.nombre}" por debajo del mínimo (${newQty}/${item.min} ${item.u})`);
+  }
+  
+  invMoveId = null;
+  renderPage();
+}
+</script>
+</body>
+</html>
