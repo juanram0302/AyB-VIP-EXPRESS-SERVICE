@@ -486,9 +486,10 @@ tr td:last-child { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 /* ═══════════════════ THEME PANEL ═══════════════════ */
 .theme-panel {
   display: none;
-  position: absolute; right: 0; top: 42px; width: 260px;
+  position: fixed; right: 120px; top: 52px; width: 260px;
   background: var(--bg-card); border: 1px solid var(--border-light);
-  border-radius: var(--radius); box-shadow: var(--shadow-lg); z-index: 100;
+  border-radius: var(--radius); box-shadow: 0 10px 40px rgba(0,0,0,0.6); z-index: 99999;
+  max-height: 80vh; overflow-y: auto;
 }
 .theme-panel.open { display: block; animation: scaleIn 0.25s ease; }
 .theme-opt {
