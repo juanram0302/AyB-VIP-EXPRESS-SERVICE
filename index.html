@@ -781,17 +781,139 @@ const DB = {
 let customMenus = { desayunos:[], comidas:[], cenas:[], snacks:[] };
 
 // ═══════════════════════════════════════════════════════════
-// RECIPES DATABASE
+// RECIPES DATABASE — PORCIONES PROFESIONALES DE KATERING
+// Cada ingrediente: n=nombre, g=gramos por persona (base), u=unidad display, tipo, info
 // ═══════════════════════════════════════════════════════════
+
+// CONFIGURACIÓN DE PORCIONES (editable por el usuario)
+let portionConfig = JSON.parse(localStorage.getItem('ayb-portions') || 'null') || {
+  buffer: 15, size: 'normal'
+};
+function getPortionMultiplier() { return {small:0.8,normal:1.0,generous:1.2}[portionConfig.size]||1.0; }
+function getBufferMultiplier() { return 1 + (portionConfig.buffer / 100); }
+function savePortionConfig() { localStorage.setItem('ayb-portions', JSON.stringify(portionConfig)); }
+
+const G_PER_LB = 453.6, G_PER_OZ = 28.35, CUCHARON_G = 150;
+
 const RECIPES = {
-  "Arroz blanco": { cat:"Carbohidrato", tiempo:"25 min", ingredientes:[{n:"Arroz",c:0.25,u:"lb"},{n:"Agua",c:0.5,u:"taza"},{n:"Aceite",c:0.5,u:"cda"},{n:"Sal",c:0.125,u:"cdta"}], pasos:["Lavar el arroz hasta que el agua salga clara","Hervir agua con aceite y sal","Agregar arroz cuando hierva","Cocinar tapado a fuego bajo 20 min"] },
-  "Moro de habichuelas negras": { cat:"Carbohidrato", tiempo:"40 min", ingredientes:[{n:"Arroz",c:0.2,u:"lb"},{n:"Habichuelas negras",c:0.1,u:"lb"},{n:"Cebolla",c:0.03,u:"lb"},{n:"Ají",c:0.02,u:"lb"},{n:"Cilantro",c:0.5,u:"ramita"},{n:"Aceite de oliva",c:0.5,u:"cda"},{n:"Sal",c:0.125,u:"cdta"},{n:"Orégano",c:0.0625,u:"cdta"}], pasos:["Sofreír cebolla, ají y cilantro","Agregar habichuelas con su caldo","Añadir arroz y agua necesaria","Cocinar tapado a fuego bajo 30 min"] },
-  "Pollo al caldero": { cat:"Proteína", tiempo:"45 min", ingredientes:[{n:"Pollo (muslos/pechugas)",c:0.5,u:"lb"},{n:"Limón agrio",c:0.25,u:"und"},{n:"Ajo",c:0.5,u:"diente"},{n:"Cebolla",c:0.03,u:"lb"},{n:"Salsa de tomate",c:0.5,u:"cda"},{n:"Aceite",c:1,u:"cda"},{n:"Orégano",c:0.125,u:"cdta"},{n:"Sal",c:0.25,u:"cdta"},{n:"Azúcar",c:0.25,u:"cdta"}], pasos:["Limpiar pollo con limón agrio","Sazonar con ajo, orégano y sal","Dorar en aceite con azúcar caramelizada","Agregar sofrito y salsa de tomate","Cocinar tapado 35 min a fuego medio"] },
-  "Bistec encebollado": { cat:"Proteína", tiempo:"30 min", ingredientes:[{n:"Carne de res (bistec)",c:0.5,u:"lb"},{n:"Cebolla",c:0.1,u:"lb"},{n:"Ajo",c:0.5,u:"diente"},{n:"Limón agrio",c:0.25,u:"und"},{n:"Aceite",c:1,u:"cda"},{n:"Vinagre",c:0.5,u:"cdta"},{n:"Sal",c:0.25,u:"cdta"},{n:"Pimienta",c:0.0625,u:"cdta"}], pasos:["Sazonar bistec con limón, ajo, sal y pimienta","Sellar a fuego alto en aceite caliente","Retirar y sofreír cebollas en rodajas","Regresar carne, agregar vinagre, cocinar 5 min"] },
-  "Pechuga a la crema": { cat:"Proteína", tiempo:"35 min", ingredientes:[{n:"Pechuga de pollo",c:0.5,u:"lb"},{n:"Crema de leche",c:2,u:"cda"},{n:"Cebolla",c:0.03,u:"lb"},{n:"Ajo",c:0.5,u:"diente"},{n:"Mantequilla",c:0.5,u:"cda"},{n:"Sal",c:0.25,u:"cdta"},{n:"Pimienta",c:0.0625,u:"cdta"},{n:"Harina",c:0.5,u:"cda"}], pasos:["Sazonar y sellar pechugas en mantequilla","Sofreír cebolla y ajo","Espolvorear harina y mezclar","Agregar crema de leche y cocinar 15 min"] },
-  "Ensalada César": { cat:"Ensalada", tiempo:"15 min", ingredientes:[{n:"Lechuga romana",c:0.15,u:"lb"},{n:"Queso parmesano",c:0.03,u:"lb"},{n:"Crutones",c:0.05,u:"lb"},{n:"Aderezo César",c:1,u:"cda"},{n:"Limón",c:0.25,u:"und"}], pasos:["Lavar y picar la lechuga romana","Preparar aderezo con limón","Mezclar con crutones y queso rallado","Servir inmediatamente bien fría"] },
-  "Pastelón de plátano maduro": { cat:"Acompañante", tiempo:"50 min", ingredientes:[{n:"Plátanos maduros",c:0.5,u:"lb"},{n:"Carne molida",c:0.25,u:"lb"},{n:"Queso mozzarella",c:0.06,u:"lb"},{n:"Huevo",c:0.25,u:"und"},{n:"Cebolla",c:0.03,u:"lb"},{n:"Ajo",c:0.25,u:"diente"},{n:"Salsa de tomate",c:0.5,u:"cda"},{n:"Aceite",c:0.5,u:"cda"}], pasos:["Freír plátanos maduros en tajadas","Preparar relleno: sofreír carne con cebolla, ajo y salsa","Hacer capas: plátano, carne, queso en molde","Batir huevo y verter encima","Hornear 25 min a 350°F"] },
-  "Habichuelas guisadas": { cat:"Acompañante", tiempo:"35 min", ingredientes:[{n:"Habichuelas rojas",c:0.15,u:"lb"},{n:"Auyama",c:0.06,u:"lb"},{n:"Papa",c:0.06,u:"lb"},{n:"Cebolla",c:0.02,u:"lb"},{n:"Ajo",c:0.25,u:"diente"},{n:"Cilantro",c:0.5,u:"ramita"},{n:"Salsa de tomate",c:0.5,u:"cda"},{n:"Aceite",c:0.5,u:"cda"},{n:"Sal",c:0.125,u:"cdta"}], pasos:["Sofreír cebolla, ajo y cilantro","Agregar habichuelas con su caldo","Añadir auyama y papa en cubos","Cocinar a fuego medio hasta espesar"] }
+  // ═══════ DESAYUNOS ═══════
+  "Mangú de plátano": { cat:"Desayuno", tiempo:"20 min", notas:"Plato nacional dominicano. Servir con cebolla roja, queso frito, salami o huevos.",
+    ingredientes:[{n:"Plátanos verdes",g:200,u:"und",tipo:"base",info:"1 plátano por persona"},{n:"Mantequilla",g:10,u:"cda",tipo:"grasa",info:"½ cda por persona"},{n:"Cebolla roja",g:30,u:"lb",tipo:"vegetal",info:"Para cebolla encurtida"},{n:"Vinagre",g:5,u:"cda",tipo:"acido",info:"Para la cebolla"},{n:"Aceite",g:5,u:"cda",tipo:"grasa",info:"Para sofreír cebolla"},{n:"Sal",g:2,u:"cdta",tipo:"condimento",info:"Al gusto"}],
+    pasos:["Pelar y hervir plátanos en agua con sal hasta blandos (~15 min)","Escurrir reservando ½ taza de agua","Machacar con mantequilla y agua reservada hasta suave","Cortar cebolla en aros, sofreír con vinagre y aceite","Servir mangú con cebolla encima"] },
+  "Huevos revueltos": { cat:"Desayuno", tiempo:"8 min", notas:"Base de desayuno. Agregar jamón, puerro o vegetales según el menú.",
+    ingredientes:[{n:"Huevos",g:100,u:"und",tipo:"proteina",info:"2 huevos por persona"},{n:"Aceite o mantequilla",g:5,u:"cda",tipo:"grasa",info:"Para cocinar"},{n:"Sal",g:1,u:"cdta",tipo:"condimento",info:"Al gusto"},{n:"Pimienta",g:0.3,u:"cdta",tipo:"condimento",info:"Al gusto"}],
+    pasos:["Batir huevos con sal y pimienta","Calentar sartén con aceite a fuego medio","Verter huevos y revolver suavemente","Cocinar hasta cuajados pero jugosos"] },
+  "Queso frito": { cat:"Desayuno", tiempo:"10 min", notas:"Queso de freír dominicano. 2 tajadas por persona.",
+    ingredientes:[{n:"Queso de freír",g:80,u:"lb",tipo:"proteina",info:"2 tajadas gruesas por persona"},{n:"Aceite",g:15,u:"cda",tipo:"grasa",info:"Para freír"}],
+    pasos:["Cortar queso en tajadas de 1cm de grosor","Calentar aceite a fuego medio-alto","Freír hasta dorado por ambos lados (~2 min por lado)","Escurrir en papel absorbente"] },
+  "Salami frito": { cat:"Desayuno", tiempo:"8 min", notas:"Salami dominicano. 3-4 rodajas por persona.",
+    ingredientes:[{n:"Salami",g:60,u:"lb",tipo:"proteina",info:"3-4 rodajas por persona"},{n:"Aceite",g:5,u:"cda",tipo:"grasa",info:"Poco aceite, suelta grasa propia"}],
+    pasos:["Cortar salami en rodajas de medio cm","Freír en sartén caliente hasta dorado","No necesita mucho aceite, suelta su propia grasa"] },
+  "Avena con frutas": { cat:"Desayuno", tiempo:"15 min", notas:"Avena cremosa. Servir caliente o fría según preferencia.",
+    ingredientes:[{n:"Avena en hojuelas",g:40,u:"lb",tipo:"base",info:"⅓ taza por persona"},{n:"Leche",g:200,u:"ml",tipo:"liquido",info:"1 taza por persona"},{n:"Azúcar o miel",g:15,u:"cda",tipo:"endulzante",info:"1 cda por persona"},{n:"Canela",g:1,u:"cdta",tipo:"condimento",info:"Pizca por persona"},{n:"Frutas (guineo, fresa)",g:50,u:"lb",tipo:"fruta",info:"Trozos para decorar"}],
+    pasos:["Hervir leche con canela","Agregar avena revolviendo constantemente","Cocinar 5-8 min a fuego medio hasta espesar","Endulzar al gusto","Servir con frutas picadas encima"] },
+  "Sandwich variado": { cat:"Desayuno", tiempo:"10 min", notas:"Sándwich básico con jamón y queso. Puede tostarse.",
+    ingredientes:[{n:"Pan de sándwich",g:60,u:"und",tipo:"base",info:"2 rebanadas por persona"},{n:"Jamón",g:30,u:"lb",tipo:"proteina",info:"2 lonjas por persona"},{n:"Queso amarillo",g:20,u:"lb",tipo:"lacteo",info:"1 lonja por persona"},{n:"Mantequilla",g:5,u:"cda",tipo:"grasa",info:"Para untar"},{n:"Lechuga",g:10,u:"lb",tipo:"vegetal",info:"1 hoja"}],
+    pasos:["Untar mantequilla en el pan","Colocar jamón, queso y lechuga","Cerrar y cortar diagonal","Puede tostarse en plancha"] },
+  "Puré de papa": { cat:"Desayuno", tiempo:"25 min", notas:"Acompañante de desayuno cremoso.",
+    ingredientes:[{n:"Papa",g:200,u:"lb",tipo:"base",info:"1 papa mediana por persona"},{n:"Mantequilla",g:15,u:"cda",tipo:"grasa",info:"1 cda por persona"},{n:"Leche",g:30,u:"ml",tipo:"liquido",info:"Para la textura"},{n:"Sal",g:2,u:"cdta",tipo:"condimento",info:"Al gusto"}],
+    pasos:["Pelar y cortar papas en cubos","Hervir en agua con sal hasta blandas (~15 min)","Escurrir y machacar con prensapapas","Agregar mantequilla y leche caliente","Mezclar hasta suave y cremoso"] },
+
+  // ═══════ COMIDAS (principales) ═══════
+  "Arroz blanco": { cat:"Carbohidrato", tiempo:"25 min", notas:"1 lb crudo rinde ~3 lb cocido. 1 cucharón = ~150g cocido.",
+    ingredientes:[{n:"Arroz",g:150,u:"lb",tipo:"base",info:"⅓ lb crudo → 1 cucharón cocido"},{n:"Agua",g:300,u:"ml",tipo:"liquido",info:"Proporción 2:1"},{n:"Aceite",g:7,u:"cda",tipo:"grasa",info:"½ cda por persona"},{n:"Sal",g:2,u:"cdta",tipo:"condimento",info:"Al gusto"}],
+    pasos:["Lavar arroz hasta agua clara","Hervir agua con aceite y sal","Agregar arroz, revolver una vez","Bajar fuego al mínimo, tapar 20 min","Soltar con tenedor"] },
+  "Moro de habichuelas negras": { cat:"Carbohidrato", tiempo:"40 min", notas:"Plato completo con arroz y habichuelas.",
+    ingredientes:[{n:"Arroz",g:130,u:"lb",tipo:"base",info:"Menos arroz porque lleva habichuelas"},{n:"Habichuelas negras",g:80,u:"lb",tipo:"base",info:"¼ taza por persona"},{n:"Caldo de habichuelas",g:200,u:"ml",tipo:"liquido",info:"Caldo de cocción"},{n:"Agua",g:100,u:"ml",tipo:"liquido",info:"Completar"},{n:"Cebolla",g:20,u:"lb",tipo:"vegetal",info:"Sofrito"},{n:"Ají cubanela",g:15,u:"lb",tipo:"vegetal",info:"½ ají cada 5 personas"},{n:"Cilantro",g:3,u:"ramita",tipo:"hierba",info:"½ ramita"},{n:"Aceite de oliva",g:7,u:"cda",tipo:"grasa",info:"½ cda"},{n:"Sal",g:2,u:"cdta",tipo:"condimento",info:"Al gusto"}],
+    pasos:["Sofreír cebolla, ají y cilantro","Agregar habichuelas con caldo","Añadir agua y sal, hervir","Agregar arroz lavado","Cuando seque, tapar 30 min a fuego bajo"] },
+  "Moro de gandules": { cat:"Carbohidrato", tiempo:"40 min", notas:"Gandules con arroz, estilo dominicano.",
+    ingredientes:[{n:"Arroz",g:130,u:"lb",tipo:"base",info:"Proporción similar al moro negro"},{n:"Guandules",g:80,u:"lb",tipo:"base",info:"¼ taza por persona"},{n:"Leche de coco",g:50,u:"ml",tipo:"liquido",info:"Da sabor especial"},{n:"Agua",g:200,u:"ml",tipo:"liquido",info:"Para cocción"},{n:"Cebolla",g:20,u:"lb",tipo:"vegetal",info:"Sofrito"},{n:"Ajo",g:3,u:"diente",tipo:"condimento",info:"Sofrito"},{n:"Cilantro",g:3,u:"ramita",tipo:"hierba",info:"½ ramita"},{n:"Aceite",g:7,u:"cda",tipo:"grasa",info:"½ cda"},{n:"Sal",g:2,u:"cdta",tipo:"condimento",info:"Al gusto"}],
+    pasos:["Sofreír cebolla, ajo y cilantro","Agregar guandules y leche de coco","Añadir agua, sal, hervir","Agregar arroz y cocinar tapado 30 min"] },
+  "Pollo al caldero": { cat:"Proteína", tiempo:"45 min", notas:"2 piezas por persona (muslo + cadera).",
+    ingredientes:[{n:"Pollo (piezas)",g:250,u:"lb",tipo:"proteina",info:"2 piezas ~¼ pollo"},{n:"Limón agrio",g:15,u:"und",tipo:"acido",info:"¼ limón"},{n:"Ajo",g:5,u:"diente",tipo:"condimento",info:"½ diente"},{n:"Cebolla",g:20,u:"lb",tipo:"vegetal",info:"Sofrito"},{n:"Salsa de tomate",g:15,u:"cda",tipo:"salsa",info:"1 cda"},{n:"Aceite",g:10,u:"cda",tipo:"grasa",info:"Para dorar"},{n:"Orégano",g:1,u:"cdta",tipo:"condimento",info:"Pizca"},{n:"Sal",g:3,u:"cdta",tipo:"condimento",info:"Al gusto"},{n:"Azúcar",g:2,u:"cdta",tipo:"condimento",info:"Para caramelo"}],
+    pasos:["Limpiar pollo con limón","Sazonar con ajo, orégano, sal — reposar 15 min","Caramelizar azúcar en aceite","Dorar piezas por ambos lados","Agregar sofrito y salsa de tomate","Tapar y cocinar 35 min"] },
+  "Bistec encebollado": { cat:"Proteína", tiempo:"30 min", notas:"1 filete de ~180g (6 oz) por persona.",
+    ingredientes:[{n:"Carne de res (bistec)",g:180,u:"lb",tipo:"proteina",info:"1 filete 6oz"},{n:"Cebolla",g:40,u:"lb",tipo:"vegetal",info:"Abundante"},{n:"Ajo",g:5,u:"diente",tipo:"condimento",info:"½ diente"},{n:"Limón agrio",g:15,u:"und",tipo:"acido",info:"¼ limón"},{n:"Aceite",g:10,u:"cda",tipo:"grasa",info:"Para sellar"},{n:"Vinagre",g:3,u:"cdta",tipo:"acido",info:"Toque"},{n:"Sal",g:3,u:"cdta",tipo:"condimento",info:"Al gusto"},{n:"Pimienta",g:0.5,u:"cdta",tipo:"condimento",info:"Al gusto"}],
+    pasos:["Sazonar bistec con limón, ajo, sal — reposar 10 min","Sellar a fuego alto 2-3 min por lado","Retirar, sofreír cebollas","Regresar carne, agregar vinagre, cocinar 5 min"] },
+  "Pechuga a la crema": { cat:"Proteína", tiempo:"35 min", notas:"1 pechuga mediana (~200g) por persona.",
+    ingredientes:[{n:"Pechuga de pollo",g:200,u:"lb",tipo:"proteina",info:"1 pechuga mediana"},{n:"Crema de leche",g:30,u:"cda",tipo:"lacteo",info:"2 cdas"},{n:"Cebolla",g:15,u:"lb",tipo:"vegetal",info:"Salsa"},{n:"Ajo",g:5,u:"diente",tipo:"condimento",info:"½ diente"},{n:"Mantequilla",g:8,u:"cda",tipo:"grasa",info:"½ cda"},{n:"Sal",g:3,u:"cdta",tipo:"condimento",info:"Al gusto"},{n:"Pimienta",g:0.5,u:"cdta",tipo:"condimento",info:"Al gusto"},{n:"Harina",g:5,u:"cda",tipo:"espesante",info:"Para espesar"}],
+    pasos:["Sazonar y sellar pechugas en mantequilla","Sofreír cebolla y ajo","Espolvorear harina, mezclar","Agregar crema, cocinar 15 min"] },
+  "Pollo al horno": { cat:"Proteína", tiempo:"60 min", notas:"Muslos o piezas al horno. 2 piezas por persona.",
+    ingredientes:[{n:"Pollo (muslos/piezas)",g:250,u:"lb",tipo:"proteina",info:"2 piezas"},{n:"Limón",g:15,u:"und",tipo:"acido",info:"¼ limón"},{n:"Ajo",g:5,u:"diente",tipo:"condimento",info:"½ diente"},{n:"Aceite de oliva",g:7,u:"cda",tipo:"grasa",info:"Para marinar"},{n:"Orégano",g:1,u:"cdta",tipo:"condimento",info:"Pizca"},{n:"Paprika",g:1,u:"cdta",tipo:"condimento",info:"Pizca"},{n:"Sal",g:3,u:"cdta",tipo:"condimento",info:"Al gusto"}],
+    pasos:["Marinar pollo con limón, ajo, orégano, paprika, aceite y sal","Reposar mínimo 30 min (mejor overnight)","Hornear a 375°F (190°C) por 45 min","Voltear a mitad de tiempo","Verificar que jugos salgan claros"] },
+  "Chuleta de cerdo": { cat:"Proteína", tiempo:"35 min", notas:"1 chuleta por persona (~200g).",
+    ingredientes:[{n:"Chuleta de cerdo",g:200,u:"lb",tipo:"proteina",info:"1 chuleta por persona"},{n:"Limón",g:15,u:"und",tipo:"acido",info:"¼ limón"},{n:"Ajo",g:5,u:"diente",tipo:"condimento",info:"½ diente"},{n:"Aceite",g:10,u:"cda",tipo:"grasa",info:"Para freír/hornear"},{n:"Sal",g:3,u:"cdta",tipo:"condimento",info:"Al gusto"},{n:"Orégano",g:1,u:"cdta",tipo:"condimento",info:"Pizca"}],
+    pasos:["Sazonar con limón, ajo, orégano y sal","Reposar 15 min","Freír en aceite caliente o hornear a 375°F 25 min","Dorar bien por ambos lados"] },
+  "Dorado frito": { cat:"Proteína", tiempo:"25 min", notas:"1 filete de ~200g por persona.",
+    ingredientes:[{n:"Filete de dorado",g:200,u:"lb",tipo:"proteina",info:"1 filete por persona"},{n:"Limón",g:15,u:"und",tipo:"acido",info:"¼ limón"},{n:"Ajo",g:3,u:"diente",tipo:"condimento",info:"Para marinar"},{n:"Harina",g:10,u:"cda",tipo:"espesante",info:"Para empanizar"},{n:"Aceite",g:20,u:"cda",tipo:"grasa",info:"Para freír"},{n:"Sal",g:3,u:"cdta",tipo:"condimento",info:"Al gusto"}],
+    pasos:["Limpiar filetes con limón","Sazonar con ajo y sal","Pasar por harina","Freír en aceite caliente hasta dorado por ambos lados"] },
+  "Costillas al horno": { cat:"Proteína", tiempo:"90 min", notas:"~300g de costilla por persona (incluye hueso).",
+    ingredientes:[{n:"Costillas de cerdo",g:300,u:"lb",tipo:"proteina",info:"~⅔ lb con hueso"},{n:"Salsa BBQ",g:30,u:"cda",tipo:"salsa",info:"2 cdas por porción"},{n:"Ajo",g:5,u:"diente",tipo:"condimento",info:"½ diente"},{n:"Sal",g:3,u:"cdta",tipo:"condimento",info:"Al gusto"},{n:"Pimienta",g:1,u:"cdta",tipo:"condimento",info:"Al gusto"},{n:"Aceite",g:5,u:"cda",tipo:"grasa",info:"Para el molde"}],
+    pasos:["Sazonar costillas con ajo, sal y pimienta","Envolver en papel aluminio","Hornear a 325°F (165°C) por 1 hora","Destapar, untar salsa BBQ","Subir a 400°F 15 min para caramelizar"] },
+  "Albóndigas guisadas": { cat:"Proteína", tiempo:"40 min", notas:"4-5 albóndigas por persona.",
+    ingredientes:[{n:"Carne molida",g:150,u:"lb",tipo:"proteina",info:"Para 4-5 albóndigas"},{n:"Pan rallado",g:15,u:"cda",tipo:"base",info:"Liga de las albóndigas"},{n:"Huevo",g:25,u:"und",tipo:"liga",info:"¼ huevo por porción"},{n:"Salsa de tomate",g:30,u:"cda",tipo:"salsa",info:"2 cdas de salsa"},{n:"Cebolla",g:15,u:"lb",tipo:"vegetal",info:"Sofrito + albóndigas"},{n:"Ajo",g:3,u:"diente",tipo:"condimento",info:"Sofrito"},{n:"Sal",g:2,u:"cdta",tipo:"condimento",info:"Al gusto"}],
+    pasos:["Mezclar carne con pan rallado, huevo, cebolla picada fina y sal","Formar bolitas de ~30g cada una","Dorar en aceite caliente","Preparar salsa: sofreír cebolla, ajo, agregar salsa de tomate","Agregar albóndigas a la salsa y cocinar 20 min"] },
+  "Ensalada César": { cat:"Ensalada", tiempo:"15 min", notas:"Porción de acompañamiento.",
+    ingredientes:[{n:"Lechuga romana",g:100,u:"lb",tipo:"vegetal",info:"~3 hojas grandes"},{n:"Queso parmesano",g:15,u:"lb",tipo:"lacteo",info:"1 cda rallado"},{n:"Crutones",g:20,u:"lb",tipo:"pan",info:"Un puñado"},{n:"Aderezo César",g:20,u:"cda",tipo:"salsa",info:"1-2 cdas"},{n:"Limón",g:10,u:"und",tipo:"acido",info:"Un chorrito"}],
+    pasos:["Lavar y desinfectar lechuga","Picar en trozos, secar bien","Mezclar con aderezo al servir","Agregar crutones y parmesano"] },
+  "Ensalada verde": { cat:"Ensalada", tiempo:"10 min", notas:"Ensalada simple para acompañar.",
+    ingredientes:[{n:"Lechuga",g:80,u:"lb",tipo:"vegetal",info:"Hojas mixtas"},{n:"Tomate",g:40,u:"lb",tipo:"vegetal",info:"2-3 rodajas"},{n:"Pepino",g:30,u:"lb",tipo:"vegetal",info:"Rodajas"},{n:"Cebolla morada",g:10,u:"lb",tipo:"vegetal",info:"Aros finos"},{n:"Aceite de oliva",g:5,u:"cda",tipo:"grasa",info:"Para aderezar"},{n:"Vinagre",g:3,u:"cdta",tipo:"acido",info:"Para aderezar"},{n:"Sal",g:1,u:"cdta",tipo:"condimento",info:"Pizca"}],
+    pasos:["Lavar todos los vegetales","Picar lechuga, rodajar tomate y pepino","Cortar cebolla en aros finos","Aderezar con aceite, vinagre y sal al servir"] },
+  "Pastelón de plátano maduro": { cat:"Acompañante", tiempo:"50 min", notas:"1 porción = cuadro 8x8cm. Molde 13x9 rinde 12 porciones.",
+    ingredientes:[{n:"Plátanos maduros",g:200,u:"lb",tipo:"base",info:"~1 plátano"},{n:"Carne molida",g:100,u:"lb",tipo:"proteina",info:"Relleno"},{n:"Queso mozzarella",g:30,u:"lb",tipo:"lacteo",info:"Capa de queso"},{n:"Huevo",g:25,u:"und",tipo:"liga",info:"¼ huevo para sellar"},{n:"Cebolla",g:15,u:"lb",tipo:"vegetal",info:"Sofrito"},{n:"Ajo",g:3,u:"diente",tipo:"condimento",info:"Sofrito"},{n:"Salsa de tomate",g:15,u:"cda",tipo:"salsa",info:"1 cda"},{n:"Aceite",g:10,u:"cda",tipo:"grasa",info:"Para freír plátanos"}],
+    pasos:["Freír plátanos en tajadas","Sofreír carne con cebolla, ajo y salsa","Capas: plátano, carne, queso","Repetir, terminar con plátano","Batir huevos, verter encima","Hornear 25 min a 350°F"] },
+  "Habichuelas guisadas": { cat:"Acompañante", tiempo:"35 min", notas:"1 cucharón por persona.",
+    ingredientes:[{n:"Habichuelas rojas",g:100,u:"lb",tipo:"base",info:"¼ lb = 1 cucharón"},{n:"Auyama",g:30,u:"lb",tipo:"vegetal",info:"Espesor"},{n:"Papa",g:30,u:"lb",tipo:"vegetal",info:"Espesar"},{n:"Cebolla",g:15,u:"lb",tipo:"vegetal",info:"Sofrito"},{n:"Ajo",g:3,u:"diente",tipo:"condimento",info:"Sofrito"},{n:"Cilantro",g:3,u:"ramita",tipo:"hierba",info:"½ ramita"},{n:"Salsa de tomate",g:15,u:"cda",tipo:"salsa",info:"1 cda"},{n:"Aceite",g:5,u:"cda",tipo:"grasa",info:"Sofrito"},{n:"Sal",g:2,u:"cdta",tipo:"condimento",info:"Al gusto"}],
+    pasos:["Sofreír cebolla, ajo y cilantro","Agregar habichuelas con caldo","Añadir auyama y papa en cubos","Cocinar 25 min hasta espesar"] },
+  "Tostones": { cat:"Acompañante", tiempo:"20 min", notas:"3-4 tostones por persona.",
+    ingredientes:[{n:"Plátanos verdes",g:150,u:"und",tipo:"base",info:"½ plátano por persona (3-4 tostones)"},{n:"Aceite (para freír)",g:20,u:"cda",tipo:"grasa",info:"Freír en abundante aceite"},{n:"Sal",g:2,u:"cdta",tipo:"condimento",info:"Al gusto"}],
+    pasos:["Pelar plátanos y cortar en rodajas de 3cm","Freír a fuego medio hasta dorados","Sacar y aplastar con tostonera","Freír otra vez hasta crujientes","Sal al gusto"] },
+  "Espaguetis con salsa": { cat:"Carbohidrato", tiempo:"25 min", notas:"Pasta como acompañante o plato principal.",
+    ingredientes:[{n:"Pasta espaguetis",g:100,u:"lb",tipo:"base",info:"~¼ lb cruda por persona"},{n:"Salsa de tomate",g:40,u:"cda",tipo:"salsa",info:"3 cdas de salsa"},{n:"Cebolla",g:15,u:"lb",tipo:"vegetal",info:"Sofrito"},{n:"Ajo",g:3,u:"diente",tipo:"condimento",info:"Sofrito"},{n:"Aceite de oliva",g:5,u:"cda",tipo:"grasa",info:"Para la salsa"},{n:"Sal",g:2,u:"cdta",tipo:"condimento",info:"Para el agua y la salsa"}],
+    pasos:["Hervir agua con sal, cocinar pasta al dente","Sofreír cebolla y ajo en aceite de oliva","Agregar salsa de tomate, cocinar 10 min","Mezclar pasta con salsa"] },
+  "Lasaña de res": { cat:"Proteína", tiempo:"60 min", notas:"1 porción cuadrada. Molde grande rinde 12 porciones.",
+    ingredientes:[{n:"Láminas de lasaña",g:60,u:"lb",tipo:"base",info:"2-3 láminas por porción"},{n:"Carne molida",g:120,u:"lb",tipo:"proteina",info:"Para la salsa"},{n:"Queso mozzarella",g:40,u:"lb",tipo:"lacteo",info:"Capas de queso"},{n:"Salsa de tomate",g:40,u:"cda",tipo:"salsa",info:"Salsa boloñesa"},{n:"Crema de leche",g:20,u:"cda",tipo:"lacteo",info:"Salsa bechamel"},{n:"Cebolla",g:15,u:"lb",tipo:"vegetal",info:"Sofrito"},{n:"Ajo",g:3,u:"diente",tipo:"condimento",info:"Sofrito"},{n:"Sal",g:2,u:"cdta",tipo:"condimento",info:"Al gusto"}],
+    pasos:["Preparar salsa boloñesa: sofreír carne con cebolla, ajo, salsa","Hervir láminas de lasaña","Hacer capas: lámina, carne, queso","Repetir 3 veces","Cubrir con crema y queso","Hornear 30 min a 350°F"] },
+
+  // ═══════ CENAS ═══════
+  "Hamburguesas": { cat:"Cena", tiempo:"20 min", notas:"1 hamburguesa completa por persona.",
+    ingredientes:[{n:"Carne molida (hamburguesa)",g:150,u:"lb",tipo:"proteina",info:"1 torta de ~150g"},{n:"Pan de hamburguesa",g:60,u:"und",tipo:"base",info:"1 pan por persona"},{n:"Lechuga",g:10,u:"lb",tipo:"vegetal",info:"1 hoja"},{n:"Tomate",g:20,u:"lb",tipo:"vegetal",info:"1 rodaja"},{n:"Queso amarillo",g:20,u:"lb",tipo:"lacteo",info:"1 lonja"},{n:"Kétchup",g:10,u:"cda",tipo:"salsa",info:"Al gusto"},{n:"Papas (para freír)",g:100,u:"lb",tipo:"base",info:"Porción de papas fritas"},{n:"Aceite",g:20,u:"cda",tipo:"grasa",info:"Para freír papas"}],
+    pasos:["Formar tortas con la carne, sazonar con sal","Cocinar en plancha o parrilla 4 min por lado","Tostar pan en la plancha","Armar: pan, lechuga, carne, queso, tomate","Servir con papas fritas"] },
+  "Hot dogs": { cat:"Cena", tiempo:"15 min", notas:"1-2 hot dogs por persona.",
+    ingredientes:[{n:"Salchichas",g:100,u:"und",tipo:"proteina",info:"2 salchichas"},{n:"Pan de hot dog",g:60,u:"und",tipo:"base",info:"2 panes"},{n:"Kétchup",g:10,u:"cda",tipo:"salsa",info:"Al gusto"},{n:"Mostaza",g:5,u:"cda",tipo:"salsa",info:"Al gusto"},{n:"Cebolla",g:10,u:"lb",tipo:"vegetal",info:"Picada"},{n:"Repollo",g:20,u:"lb",tipo:"vegetal",info:"Para ensalada"}],
+    pasos:["Hervir o asar salchichas","Tostar panes","Armar con salsas y vegetales"] },
+  "Tacos": { cat:"Cena", tiempo:"25 min", notas:"2-3 tacos por persona.",
+    ingredientes:[{n:"Tortillas de maíz",g:60,u:"und",tipo:"base",info:"3 tortillas"},{n:"Carne molida",g:120,u:"lb",tipo:"proteina",info:"Para el relleno"},{n:"Lechuga",g:20,u:"lb",tipo:"vegetal",info:"Picada"},{n:"Tomate",g:20,u:"lb",tipo:"vegetal",info:"Picado"},{n:"Queso rallado",g:15,u:"lb",tipo:"lacteo",info:"Para decorar"},{n:"Crema agria",g:15,u:"cda",tipo:"lacteo",info:"1 cda"},{n:"Cebolla",g:15,u:"lb",tipo:"vegetal",info:"Sofrito"},{n:"Sal",g:2,u:"cdta",tipo:"condimento",info:"Al gusto"},{n:"Comino",g:1,u:"cdta",tipo:"condimento",info:"Para sazonar carne"}],
+    pasos:["Sofreír carne con cebolla y comino","Calentar tortillas en comal","Armar: tortilla, carne, lechuga, tomate, queso, crema"] },
+  "Alitas Buffalo": { cat:"Cena", tiempo:"40 min", notas:"6-8 alitas por persona.",
+    ingredientes:[{n:"Alitas de pollo",g:250,u:"lb",tipo:"proteina",info:"6-8 alitas"},{n:"Salsa picante",g:20,u:"cda",tipo:"salsa",info:"Para bañar"},{n:"Mantequilla",g:10,u:"cda",tipo:"grasa",info:"Para la salsa"},{n:"Aceite",g:20,u:"cda",tipo:"grasa",info:"Para freír"},{n:"Sal",g:2,u:"cdta",tipo:"condimento",info:"Al gusto"}],
+    pasos:["Sazonar alitas con sal","Freír hasta doradas y crujientes","Mezclar salsa picante con mantequilla derretida","Bañar alitas en la salsa","Servir con palitos de apio y aderezo"] },
+
+  // ═══════ SNACKS ═══════
+  "Quipes": { cat:"Snack", tiempo:"45 min", notas:"2-3 quipes por persona.",
+    ingredientes:[{n:"Trigo (bulgur)",g:50,u:"lb",tipo:"base",info:"Para la masa"},{n:"Carne molida",g:60,u:"lb",tipo:"proteina",info:"Relleno"},{n:"Cebolla",g:15,u:"lb",tipo:"vegetal",info:"Masa y relleno"},{n:"Aceite",g:20,u:"cda",tipo:"grasa",info:"Para freír"},{n:"Sal",g:2,u:"cdta",tipo:"condimento",info:"Al gusto"}],
+    pasos:["Remojar trigo 30 min, escurrir","Mezclar con carne cruda y cebolla para la masa","Preparar relleno: sofreír carne con cebolla","Formar quipes: bolita de masa, rellenar, cerrar","Freír en aceite caliente hasta dorados"] },
+  "Pastelitos": { cat:"Snack", tiempo:"40 min", notas:"2-3 pastelitos por persona.",
+    ingredientes:[{n:"Harina de trigo",g:50,u:"lb",tipo:"base",info:"Para la masa"},{n:"Pollo desmechado",g:40,u:"lb",tipo:"proteina",info:"Relleno"},{n:"Aceite",g:20,u:"cda",tipo:"grasa",info:"Para freír"},{n:"Sal",g:1,u:"cdta",tipo:"condimento",info:"Al gusto"},{n:"Cebolla",g:10,u:"lb",tipo:"vegetal",info:"Sofrito del relleno"}],
+    pasos:["Preparar masa con harina, agua y sal","Preparar relleno de pollo sofrito","Estirar masa, cortar círculos","Rellenar y cerrar en media luna","Freír hasta dorados"] },
+
+  // ═══════ BEBIDAS ═══════
+  "Jugo natural": { cat:"Bebida", tiempo:"10 min", notas:"1 vaso de 12oz por persona.",
+    ingredientes:[{n:"Frutas (chinola/limón/naranja)",g:150,u:"lb",tipo:"fruta",info:"Para 1 vaso"},{n:"Azúcar",g:20,u:"cda",tipo:"endulzante",info:"1-2 cdas"},{n:"Agua",g:200,u:"ml",tipo:"liquido",info:"Para mezclar"}],
+    pasos:["Lavar y exprimir frutas","Mezclar con agua y azúcar","Colar si es necesario","Servir con hielo"] },
+  "Café con leche": { cat:"Bebida", tiempo:"5 min", notas:"1 taza por persona.",
+    ingredientes:[{n:"Café molido",g:10,u:"cda",tipo:"base",info:"1 cda por taza"},{n:"Leche",g:150,u:"ml",tipo:"liquido",info:"¾ taza"},{n:"Azúcar",g:15,u:"cda",tipo:"endulzante",info:"Al gusto"},{n:"Agua",g:100,u:"ml",tipo:"liquido",info:"Para el café"}],
+    pasos:["Preparar café bien cargado","Calentar leche","Mezclar café con leche al gusto","Endulzar"] }
+};
+
+// UNIT CONVERTER DATABASE
+const UNIT_CONVERSIONS = {
+  // Volumen
+  'cda_ml': 15, 'cdta_ml': 5, 'taza_ml': 240, 'lt_ml': 1000, 'gal_ml': 3785, 'oz_fl_ml': 29.57,
+  // Peso  
+  'lb_g': 453.6, 'oz_g': 28.35, 'kg_g': 1000,
+  // Especiales cocina
+  'cda_cdta': 3, 'taza_cda': 16, 'gal_lt': 3.785, 'lt_taza': 4.17,
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -1051,6 +1173,8 @@ const NAV = [
   {id:'generador',label:'Generador Menú',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16,3 21,3 21,8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21,16 21,21 16,21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>'},
   {id:'recetas',label:'Recetas',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 13.87A4 4 0 014 10a4 4 0 018 0 4 4 0 018 0 4 4 0 01-2 3.87V16a2 2 0 01-2 2H8a2 2 0 01-2-2v-2.13z"/><line x1="6" y1="20" x2="18" y2="20"/></svg>'},
   {id:'calculadora',label:'Calculadora',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/></svg>'},
+  {id:'convertidor',label:'Convertidor',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7,23 3,19 7,15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>'},
+  {id:'presupuesto',label:'Presupuesto',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>'},
   {id:'inventario',label:'Inventario',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>'},
 ];
 
@@ -1302,6 +1426,41 @@ document.addEventListener('click', e => {
 // ═══════════════════════════════════════════════════════════
 function getRandom(arr, n=1) { return [...arr].sort(()=>Math.random()-0.5).slice(0,n); }
 function fmtQty(v, u) { return v >= 100 ? Math.round(v)+' '+u : v >= 10 ? v.toFixed(1)+' '+u : v.toFixed(2)+' '+u; }
+
+// Formatear cantidad de ingrediente desde gramos a su unidad natural
+function fmtIngredient(totalGrams, displayUnit) {
+  // Conversión según unidad de display
+  const conversions = {
+    'lb': { factor: 1/G_PER_LB, fmt: (v) => v >= 1 ? v.toFixed(1)+' lb' : (v*16).toFixed(1)+' oz' },
+    'ml': { factor: 1, fmt: (v) => v >= 1000 ? (v/1000).toFixed(1)+' lt' : Math.round(v)+' ml' },
+    'und': { factor: 1/50, fmt: (v) => v >= 1 ? Math.ceil(v)+' und' : '1 und' }, // ~50g por unidad promedio
+    'cda': { factor: 1/15, fmt: (v) => v >= 1 ? Math.ceil(v)+' cda' : '1 cda' }, // 1 cda = ~15g
+    'cdta': { factor: 1/5, fmt: (v) => v >= 1 ? Math.ceil(v)+' cdta' : '1 cdta' }, // 1 cdta = ~5g
+    'diente': { factor: 1/5, fmt: (v) => Math.ceil(v)+' diente'+(Math.ceil(v)>1?'s':'') },
+    'ramita': { factor: 1/3, fmt: (v) => Math.ceil(v)+' ramita'+(Math.ceil(v)>1?'s':'') },
+    'taza': { factor: 1/240, fmt: (v) => v >= 1 ? v.toFixed(1)+' taza'+(v>1.1?'s':'') : Math.round(v*240)+' ml' },
+  };
+  
+  const conv = conversions[displayUnit];
+  if (!conv) return Math.round(totalGrams)+'g';
+  
+  const converted = totalGrams * conv.factor;
+  const primary = conv.fmt(converted);
+  
+  // Agregar equivalencia en gramos para cantidades grandes (proteínas, bases)
+  if (totalGrams >= 50 && displayUnit === 'lb') {
+    const grams = Math.round(totalGrams);
+    return `${primary} <span style="color:var(--text-dim);font-size:11px">(${grams >= 1000 ? (grams/1000).toFixed(1)+'kg' : grams+'g'})</span>`;
+  }
+  
+  return primary;
+}
+
+// Cucharones equivalentes (para arroz, habichuelas, etc)
+function getCucharones(totalGramsCocido) {
+  const c = Math.round(totalGramsCocido / CUCHARON_G);
+  return c > 0 ? c : 1;
+}
 function tag(color, text) { return `<span class="tag" style="background:${color}18;color:${color}">${text}</span>`; }
 function esc(s) { return s.replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
 
@@ -1338,6 +1497,8 @@ function renderPage() {
     case 'generador': c.innerHTML = renderGenerador(); break;
     case 'recetas': c.innerHTML = renderRecetas(); break;
     case 'calculadora': c.innerHTML = renderCalculadora(); break;
+    case 'convertidor': c.innerHTML = renderConvertidor(); break;
+    case 'presupuesto': c.innerHTML = renderPresupuesto(); break;
     case 'inventario': c.innerHTML = renderInventario(); break;
   }
 }
@@ -1517,24 +1678,77 @@ let recipePersonas = 10;
 function renderRecetas() {
   if (selectedRecipe) {
     const r = RECIPES[selectedRecipe];
-    return `
-      <button class="btn btn-secondary" onclick="selectedRecipe=null;renderPage()" style="margin-bottom:16px">← Volver a Recetas</button>
-      <div class="card fade-up">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px">
-          <div><h2 style="color:var(--text-primary);margin:0;font-size:22px;font-family:var(--font-display)">${selectedRecipe}</h2>
-            <div style="display:flex;gap:8px;margin-top:8px">${tag('var(--accent)',r.cat)} ${tag('var(--orange)','⏱ '+r.tiempo)}</div></div>
-          <div style="display:flex;align-items:center;gap:10px">
-            <label style="color:var(--text-muted);font-size:12px">Personas:</label>
-            <input class="input" type="number" value="${recipePersonas}" min="1" style="width:80px;margin:0;text-align:center" onchange="recipePersonas=Math.max(1,+this.value);renderPage()">
+    const mult = getPortionMultiplier();
+    const buf = getBufferMultiplier();
+    const totalMult = recipePersonas * mult * buf;
+    
+    // Portion config panel
+    const configHTML = `
+      <div class="card fade-up" style="margin-bottom:16px;border:1px solid rgba(243,156,18,0.2)">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+          <h4 style="color:var(--orange);margin:0;font-size:14px">⚙️ Configuración de Porciones</h4>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <label style="color:var(--text-muted);font-size:11px">Personas:</label>
+            <input class="input" type="number" value="${recipePersonas}" min="1" max="1000" style="width:80px;margin:0;text-align:center;font-size:18px;font-weight:700" onchange="recipePersonas=Math.max(1,+this.value);renderPage()">
           </div>
         </div>
-        <h4 style="color:var(--orange);font-size:14px;margin:0 0 12px">📋 Ingredientes para ${recipePersonas} personas</h4>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:150px">
+            <label style="color:var(--text-muted);font-size:10px;font-weight:600;display:block;margin-bottom:4px">TAMAÑO PORCIÓN</label>
+            <div style="display:flex;gap:4px">
+              ${['small','normal','generous'].map(s => {
+                const labels = {small:'🍽️ Liviana', normal:'🍽️🍽️ Normal', generous:'🍽️🍽️🍽️ Generosa'};
+                const active = portionConfig.size === s;
+                return `<button class="btn btn-sm ${active?'btn-primary':'btn-secondary'}" style="flex:1;justify-content:center;font-size:11px" onclick="portionConfig.size='${s}';savePortionConfig();renderPage()">${labels[s]}</button>`;
+              }).join('')}
+            </div>
+          </div>
+          <div style="flex:1;min-width:150px">
+            <label style="color:var(--text-muted);font-size:10px;font-weight:600;display:block;margin-bottom:4px">BUFFER EXTRA (que no falte)</label>
+            <div style="display:flex;gap:4px">
+              ${[0,10,15,20].map(b => {
+                const active = portionConfig.buffer === b;
+                return `<button class="btn btn-sm ${active?'btn-primary':'btn-secondary'}" style="flex:1;justify-content:center;font-size:11px" onclick="portionConfig.buffer=${b};savePortionConfig();renderPage()">${b===0?'Sin extra':'+'+b+'%'}</button>`;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:10px;padding:8px 12px;background:var(--bg-deep);border-radius:8px;display:flex;gap:16px;flex-wrap:wrap">
+          <span style="color:var(--text-muted);font-size:11px">📊 Personas: <strong style="color:var(--text-primary)">${recipePersonas}</strong></span>
+          <span style="color:var(--text-muted);font-size:11px">🍽️ Porción: <strong style="color:var(--text-primary)">${{small:'Liviana (×0.8)',normal:'Normal (×1.0)',generous:'Generosa (×1.2)'}[portionConfig.size]}</strong></span>
+          <span style="color:var(--text-muted);font-size:11px">➕ Buffer: <strong style="color:var(--text-primary)">${portionConfig.buffer}%</strong></span>
+          <span style="color:var(--orange);font-size:11px;font-weight:700">= Multiplicador total: ×${totalMult.toFixed(1)}</span>
+        </div>
+      </div>`;
+    
+    return `
+      <button class="btn btn-secondary" onclick="selectedRecipe=null;renderPage()" style="margin-bottom:16px">← Volver a Recetas</button>
+      ${configHTML}
+      <div class="card fade-up">
+        <div style="margin-bottom:20px">
+          <h2 style="color:var(--text-primary);margin:0;font-size:22px;font-family:var(--font-display)">${selectedRecipe}</h2>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">${tag('var(--accent)',r.cat)} ${tag('var(--orange)','⏱ '+r.tiempo)}</div>
+          ${r.notas ? `<p style="color:var(--text-muted);font-size:12px;margin:8px 0 0;font-style:italic">💡 ${r.notas}</p>` : ''}
+        </div>
+        <h4 style="color:var(--orange);font-size:14px;margin:0 0 4px">📋 Ingredientes para ${recipePersonas} personas ${portionConfig.buffer > 0 ? `(+${portionConfig.buffer}% extra)` : ''}</h4>
+        <p style="color:var(--text-dim);font-size:11px;margin:0 0 12px">Porción ${portionConfig.size==='small'?'liviana':portionConfig.size==='generous'?'generosa':'normal'} · 1 cucharón de servir ≈ 150g</p>
         <div class="grid grid-2" style="margin-bottom:24px">
           ${r.ingredientes.map(ing=>{
-            const qty = ing.c * recipePersonas;
-            return `<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg-card2);border-radius:8px;border:1px solid var(--border)">
-              <span style="font-size:13px">${ing.n}</span>
-              <span style="color:#ff8888;font-size:13px;font-weight:600">${fmtQty(qty, ing.u)}</span>
+            const totalG = ing.g * totalMult;
+            const formatted = fmtIngredient(totalG, ing.u);
+            const isBase = ['base','proteina'].includes(ing.tipo);
+            const cucharonInfo = (ing.tipo === 'base' && totalG > 100) 
+              ? ` <span style="color:var(--blue);font-size:10px">≈ ${getCucharones(totalG * (ing.u==='lb'?2.5:1))} cucharones</span>` 
+              : '';
+            return `<div style="padding:10px 12px;background:var(--bg-card2);border-radius:8px;border:1px solid ${isBase?'rgba(196,30,30,0.2)':'var(--border)'}">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="font-size:13px;${isBase?'font-weight:600;color:var(--text-primary)':''}">${ing.n}</span>
+                <span style="color:#ff8888;font-size:13px;font-weight:600">${formatted}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:4px">
+                <span style="color:var(--text-dim);font-size:10px">${ing.info}</span>
+                ${cucharonInfo}
+              </div>
             </div>`;
           }).join('')}
         </div>
@@ -1543,11 +1757,25 @@ function renderRecetas() {
       </div>`;
   }
   const names = Object.keys(RECIPES);
-  return `<div class="grid grid-auto">${names.map((name,i)=>{
+  return `
+    <div class="card fade-up" style="margin-bottom:16px;border:1px solid rgba(243,156,18,0.15)">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <span style="color:var(--text-muted);font-size:12px">⚙️ Porción: <strong style="color:var(--text-primary)">${{small:'Liviana',normal:'Normal',generous:'Generosa'}[portionConfig.size]}</strong> · Buffer: <strong style="color:var(--text-primary)">+${portionConfig.buffer}%</strong></span>
+        <span style="color:var(--text-dim);font-size:11px">Ajustable dentro de cada receta</span>
+      </div>
+    </div>
+    <div class="grid grid-auto">${names.map((name,i)=>{
     const r = RECIPES[name];
+    const proteinas = r.ingredientes.filter(i=>i.tipo==='proteina');
+    const bases = r.ingredientes.filter(i=>i.tipo==='base');
+    const mainIng = [...proteinas,...bases][0];
+    const perPerson = mainIng ? `${mainIng.g}g/persona` : '';
     return `<div class="card fade-up" style="cursor:pointer;animation-delay:${i*0.06}s" onclick="selectedRecipe='${esc(name)}';renderPage()">
       <h4 style="color:var(--text-primary);margin:0 0 8px;font-size:15px">${name}</h4>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">${tag('var(--accent)',r.cat)} ${tag('var(--orange)','⏱ '+r.tiempo)} ${tag('var(--blue)',r.ingredientes.length+' ingr.')}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${tag('var(--accent)',r.cat)} ${tag('var(--orange)','⏱ '+r.tiempo)} ${tag('var(--blue)',r.ingredientes.length+' ingr.')}
+      </div>
+      ${perPerson ? `<div style="color:var(--text-dim);font-size:11px;margin-top:6px">📏 ${mainIng.n}: ${perPerson}</div>` : ''}
     </div>`;
   }).join('')}</div>`;
 }
@@ -1559,16 +1787,18 @@ let calcSelected = ['Arroz blanco','Pollo al caldero','Ensalada César'];
 
 function renderCalculadora() {
   const allDishes = Object.keys(RECIPES);
+  const mult = getPortionMultiplier();
+  const buf = getBufferMultiplier();
   let totals = {};
   calcSelected.forEach(dish => {
     const r = RECIPES[dish]; if (!r) return;
     r.ingredientes.forEach(ing => {
-      const qty = ing.c * calcPersonas;
-      if (!totals[ing.n]) totals[ing.n] = {c:0, u:ing.u};
-      totals[ing.n].c += qty;
+      const totalG = ing.g * calcPersonas * mult * buf;
+      if (!totals[ing.n]) totals[ing.n] = {g:0, u:ing.u, tipo:ing.tipo};
+      totals[ing.n].g += totalG;
     });
   });
-  const sorted = Object.entries(totals).sort((a,b)=>b[1].c-a[1].c);
+  const sorted = Object.entries(totals).sort((a,b)=>b[1].g-a[1].g);
 
   return `
     <div class="card fade-up" style="margin-bottom:20px">
@@ -1579,6 +1809,11 @@ function renderCalculadora() {
         <div><label style="color:var(--text-muted);font-size:12px;display:block;margin-bottom:6px">Unidad de Peso</label>
           <div style="display:flex;gap:8px">${['lb','oz','g','kg'].map(u=>`<button class="btn ${calcUnit===u?'btn-primary':'btn-secondary'}" style="flex:1;justify-content:center;font-size:14px" onclick="calcUnit='${u}';renderPage()">${u}</button>`).join('')}</div></div>
       </div>
+      <div style="margin-top:10px;padding:8px 12px;background:var(--bg-deep);border-radius:8px;font-size:11px;color:var(--text-muted)">
+        🍽️ Porción: <strong style="color:var(--text-primary)">${{small:'Liviana',normal:'Normal',generous:'Generosa'}[portionConfig.size]}</strong> · 
+        Buffer: <strong style="color:var(--text-primary)">+${portionConfig.buffer}%</strong>
+        <span style="color:var(--text-dim)"> (ajustable en Recetas)</span>
+      </div>
     </div>
     <div class="card fade-up" style="margin-bottom:20px;animation-delay:0.1s">
       <h4 style="color:var(--text-primary);margin:0 0 12px;font-size:14px">Seleccionar Platos</h4>
@@ -1587,13 +1822,23 @@ function renderCalculadora() {
       </div>
     </div>
     ${sorted.length>0?`<div class="card fade-up" style="animation-delay:0.2s">
-      <h3 style="color:var(--orange);margin:0 0 16px">📊 Lista de Compras para ${calcPersonas} Personas</h3>
+      <h3 style="color:var(--orange);margin:0 0 4px">📊 Lista de Compras para ${calcPersonas} Personas</h3>
+      <p style="color:var(--text-dim);font-size:11px;margin:0 0 16px">Incluye buffer de +${portionConfig.buffer}% · Porción ${portionConfig.size==='small'?'liviana':portionConfig.size==='generous'?'generosa':'normal'}</p>
       <div class="grid grid-auto">${sorted.map(([name,data])=>{
-        let v=data.c, u=data.u;
-        const convs={lb_oz:16,lb_g:453.592,lb_kg:0.453592};
-        if(['lb','oz','g','kg'].includes(u)&&u!==calcUnit){const k=u+'_'+calcUnit;const rk=calcUnit+'_'+u;if(convs[k]){v*=convs[k];u=calcUnit;}else if(convs[rk]){v/=convs[rk];u=calcUnit;}}
-        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-card2);border-radius:10px;border:1px solid var(--border)">
-          <span style="font-size:13px">${name}</span><span style="color:#ff8888;font-size:14px;font-weight:700">${fmtQty(v,u)}</span></div>`;
+        let totalG = data.g;
+        let display = '';
+        const u = calcUnit;
+        if (u === 'lb') display = fmtQty(totalG / G_PER_LB, 'lb');
+        else if (u === 'oz') display = fmtQty(totalG / G_PER_OZ, 'oz');
+        else if (u === 'kg') display = fmtQty(totalG / 1000, 'kg');
+        else display = fmtQty(totalG, 'g');
+        // For non-weight items, use original unit
+        if (!['lb','base','proteina','vegetal','lacteo','pan'].includes(data.tipo) && ['cda','cdta','diente','ramita','und','ml'].includes(data.u)) {
+          display = fmtIngredient(totalG, data.u);
+        }
+        const isMain = ['base','proteina'].includes(data.tipo);
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-card2);border-radius:10px;border:1px solid ${isMain?'rgba(196,30,30,0.2)':'var(--border)'}">
+          <span style="font-size:13px;${isMain?'font-weight:600':''}color:var(--text-${isMain?'primary':'secondary'})">${name}</span><span style="color:#ff8888;font-size:14px;font-weight:700">${display}</span></div>`;
       }).join('')}</div>
     </div>`:''}`;
 }
@@ -1601,6 +1846,263 @@ function renderCalculadora() {
 function toggleCalcDish(dish) {
   const i = calcSelected.indexOf(dish);
   if (i >= 0) calcSelected.splice(i,1); else calcSelected.push(dish);
+  renderPage();
+}
+
+// ═══════════════════ CONVERTIDOR ═══════════════════
+let convFrom = 'cda', convTo = 'ml', convValue = 1;
+const CONV_UNITS = {
+  'Volumen': ['ml','lt','taza','gal','cda','cdta','oz_fl'],
+  'Peso': ['g','kg','lb','oz'],
+};
+const CONV_LABELS = {ml:'Mililitros',lt:'Litros',taza:'Tazas',gal:'Galones',cda:'Cucharadas',cdta:'Cucharaditas',oz_fl:'Onzas fluidas',g:'Gramos',kg:'Kilogramos',lb:'Libras',oz:'Onzas'};
+
+function convertUnit(val, from, to) {
+  if (from === to) return val;
+  // Convert everything to base unit (ml for volume, g for weight)
+  const toBase = {ml:1,lt:1000,taza:240,gal:3785,cda:15,cdta:5,oz_fl:29.57,g:1,kg:1000,lb:453.6,oz:28.35};
+  const volUnits = ['ml','lt','taza','gal','cda','cdta','oz_fl'];
+  const wtUnits = ['g','kg','lb','oz'];
+  const isVol = volUnits.includes(from) && volUnits.includes(to);
+  const isWt = wtUnits.includes(from) && wtUnits.includes(to);
+  if (!isVol && !isWt) return null; // Can't convert between vol and weight
+  const base = val * toBase[from];
+  return base / toBase[to];
+}
+
+function renderConvertidor() {
+  const result = convertUnit(convValue, convFrom, convTo);
+  const allUnits = [...CONV_UNITS['Volumen'], ...CONV_UNITS['Peso']];
+  
+  // Quick reference table
+  const quickRef = [
+    {from:'cda',to:'ml',v:1,label:'1 cucharada'},
+    {from:'cdta',to:'ml',v:1,label:'1 cucharadita'},
+    {from:'taza',to:'ml',v:1,label:'1 taza'},
+    {from:'lb',to:'g',v:1,label:'1 libra'},
+    {from:'oz',to:'g',v:1,label:'1 onza'},
+    {from:'kg',to:'lb',v:1,label:'1 kilogramo'},
+    {from:'gal',to:'lt',v:1,label:'1 galón'},
+    {from:'lt',to:'taza',v:1,label:'1 litro'},
+    {from:'cda',to:'cdta',v:1,label:'1 cucharada'},
+    {from:'taza',to:'cda',v:1,label:'1 taza'},
+    {from:'lb',to:'oz',v:1,label:'1 libra'},
+    {from:'gal',to:'ml',v:1,label:'1 galón'},
+  ];
+
+  return `
+    <div class="card fade-up" style="margin-bottom:20px">
+      <h3 style="color:var(--text-primary);margin:0 0 16px">🔄 Convertidor de Unidades</h3>
+      <div class="grid grid-3" style="align-items:end;gap:12px">
+        <div>
+          <label style="color:var(--text-muted);font-size:12px;display:block;margin-bottom:6px">Cantidad</label>
+          <input class="input" type="number" value="${convValue}" step="0.1" min="0" style="margin:0;font-size:20px;font-weight:700;text-align:center" onchange="convValue=+this.value;renderPage()">
+        </div>
+        <div>
+          <label style="color:var(--text-muted);font-size:12px;display:block;margin-bottom:6px">De</label>
+          <select class="input" style="margin:0" onchange="convFrom=this.value;renderPage()">
+            ${Object.entries(CONV_UNITS).map(([group,units]) => 
+              `<optgroup label="${group}">${units.map(u => `<option value="${u}" ${u===convFrom?'selected':''}>${CONV_LABELS[u]}</option>`).join('')}</optgroup>`
+            ).join('')}
+          </select>
+        </div>
+        <div>
+          <label style="color:var(--text-muted);font-size:12px;display:block;margin-bottom:6px">A</label>
+          <select class="input" style="margin:0" onchange="convTo=this.value;renderPage()">
+            ${Object.entries(CONV_UNITS).map(([group,units]) => 
+              `<optgroup label="${group}">${units.map(u => `<option value="${u}" ${u===convTo?'selected':''}>${CONV_LABELS[u]}</option>`).join('')}</optgroup>`
+            ).join('')}
+          </select>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:20px;padding:20px;background:var(--bg-deep);border-radius:12px">
+        ${result !== null ? `
+          <span style="font-size:28px;font-weight:800;color:var(--accent)">${result >= 100 ? Math.round(result) : result >= 1 ? result.toFixed(2) : result.toFixed(3)}</span>
+          <span style="font-size:16px;color:var(--text-muted);margin-left:8px">${CONV_LABELS[convTo]}</span>
+          <div style="color:var(--text-dim);font-size:12px;margin-top:8px">${convValue} ${CONV_LABELS[convFrom]} = ${result >= 100 ? Math.round(result) : result.toFixed(3)} ${CONV_LABELS[convTo]}</div>
+        ` : `<span style="color:var(--orange);font-size:14px">⚠️ No se puede convertir entre volumen y peso directamente</span>
+          <div style="color:var(--text-dim);font-size:11px;margin-top:4px">Selecciona unidades del mismo tipo (ambas de volumen o ambas de peso)</div>`}
+      </div>
+    </div>
+    <div class="card fade-up" style="animation-delay:0.1s">
+      <h4 style="color:var(--orange);margin:0 0 16px;font-size:14px">📋 Tabla de Referencia Rápida</h4>
+      <div class="grid grid-2">
+        ${quickRef.map(q => {
+          const r = convertUnit(q.v, q.from, q.to);
+          return `<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg-card2);border-radius:8px;border:1px solid var(--border)">
+            <span style="font-size:12px;color:var(--text-secondary)">${q.label}</span>
+            <span style="font-size:12px;font-weight:700;color:var(--accent)">${r >= 100 ? Math.round(r) : r.toFixed(2)} ${CONV_LABELS[q.to]}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+// ═══════════════════ PRESUPUESTO DIARIO ═══════════════════
+let budgetPersonas = 50;
+let budgetSelected = {
+  desayuno: ['Mangú de plátano','Huevos revueltos','Queso frito','Café con leche'],
+  comida: ['Arroz blanco','Pollo al caldero','Habichuelas guisadas','Ensalada verde'],
+  cena: ['Hamburguesas'],
+  snack: ['Jugo natural']
+};
+let budgetDay = 'comida';
+
+function getIngredientPrice(name, totalGrams) {
+  // Match ingredient name to inventory item to get price per unit
+  const lname = name.toLowerCase();
+  for (const item of inventory) {
+    const iname = (inv(item,'nombre')||item.nombre||'').toLowerCase();
+    if (lname.includes(iname.split(' ')[0]) || iname.includes(lname.split(' ')[0]) || 
+        (lname.includes('pollo') && iname.includes('pollo')) ||
+        (lname.includes('pechuga') && iname.includes('pechuga')) ||
+        (lname.includes('carne') && iname.includes('carne')) ||
+        (lname.includes('cerdo') && iname.includes('cerdo')) ||
+        (lname.includes('arroz') && iname.includes('arroz')) ||
+        (lname.includes('habichuela') && iname.includes('habichuela')) ||
+        (lname.includes('cebolla') && iname.includes('cebolla')) ||
+        (lname.includes('ajo') && iname.includes('ajo')) ||
+        (lname.includes('aceite') && iname.includes('aceite') && !lname.includes('oliva') === !iname.includes('oliva')) ||
+        (lname.includes('huevo') && iname.includes('huevo')) ||
+        (lname.includes('queso') && iname.includes('queso')) ||
+        (lname.includes('leche') && iname.includes('leche')) ||
+        (lname.includes('tomate') && (iname.includes('tomate') || iname.includes('salsa'))) ||
+        (lname.includes('plátano') && iname.includes('plátano')) ||
+        (lname.includes('harina') && iname.includes('harina')) ||
+        (lname.includes('pasta') && iname.includes('pasta')) ||
+        (lname.includes('dorado') && iname.includes('dorado')) ||
+        (lname.includes('sal') && iname === 'sal')) {
+      
+      const precio = inv(item,'precio') || item.precio || 0;
+      const u = inv(item,'u') || item.u || 'lb';
+      // Convert price per unit to price per gram
+      let pricePerG = 0;
+      if (u === 'lb') pricePerG = precio / G_PER_LB;
+      else if (u === 'kg') pricePerG = precio / 1000;
+      else if (u === 'gal') pricePerG = precio / 3785;
+      else if (u === 'lt') pricePerG = precio / 1000;
+      else if (u === 'und') pricePerG = precio / 50; // ~50g average per unit
+      else pricePerG = precio / G_PER_LB;
+      
+      return totalGrams * pricePerG;
+    }
+  }
+  // Default estimate: $2/lb average
+  return totalGrams * (2 / G_PER_LB);
+}
+
+function renderPresupuesto() {
+  const mult = getPortionMultiplier();
+  const buf = getBufferMultiplier();
+  const totalMult = budgetPersonas * mult * buf;
+  
+  const mealTabs = [
+    {id:'desayuno',l:'🌅 Desayuno',c:'var(--orange)'},
+    {id:'comida',l:'🍽️ Comida',c:'var(--red)'},
+    {id:'cena',l:'🌙 Cena',c:'var(--blue)'},
+    {id:'snack',l:'🍿 Snack/Bebida',c:'var(--purple)'}
+  ];
+  
+  const recipeNames = Object.keys(RECIPES);
+  const catMap = {desayuno:'Desayuno',comida:['Carbohidrato','Proteína','Acompañante','Ensalada'],cena:'Cena',snack:['Snack','Bebida']};
+  
+  // Calculate totals
+  let grandTotal = 0;
+  let mealCosts = {};
+  let allIngredients = {};
+  
+  mealTabs.forEach(meal => {
+    let mealCost = 0;
+    (budgetSelected[meal.id]||[]).forEach(dish => {
+      const r = RECIPES[dish]; if (!r) return;
+      r.ingredientes.forEach(ing => {
+        const totalG = ing.g * totalMult;
+        const cost = getIngredientPrice(ing.n, totalG);
+        mealCost += cost;
+        if (!allIngredients[ing.n]) allIngredients[ing.n] = {g:0,cost:0,u:ing.u,tipo:ing.tipo};
+        allIngredients[ing.n].g += totalG;
+        allIngredients[ing.n].cost += cost;
+      });
+    });
+    mealCosts[meal.id] = mealCost;
+    grandTotal += mealCost;
+  });
+  
+  const sortedIngs = Object.entries(allIngredients).sort((a,b)=>b[1].cost-a[1].cost);
+  const costPerPerson = budgetPersonas > 0 ? grandTotal / budgetPersonas : 0;
+
+  return `
+    <div class="card fade-up" style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+        <h3 style="color:var(--text-primary);margin:0">💰 Presupuesto Diario</h3>
+        <div style="display:flex;align-items:center;gap:10px">
+          <label style="color:var(--text-muted);font-size:12px">Personas:</label>
+          <input class="input" type="number" value="${budgetPersonas}" min="1" style="width:80px;margin:0;text-align:center;font-size:18px;font-weight:700" onchange="budgetPersonas=Math.max(1,+this.value);renderPage()">
+        </div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap">
+        ${mealTabs.map(t => `<div style="flex:1;min-width:120px;padding:12px;background:var(--bg-deep);border-radius:8px;border-left:3px solid ${t.c};text-align:center">
+          <div style="font-size:10px;color:var(--text-muted)">${t.l}</div>
+          <div style="font-size:18px;font-weight:800;color:${t.c}">$${(mealCosts[t.id]||0).toFixed(2)}</div>
+        </div>`).join('')}
+        <div style="flex:1;min-width:120px;padding:12px;background:var(--bg-deep);border-radius:8px;border-left:3px solid var(--green);text-align:center">
+          <div style="font-size:10px;color:var(--text-muted)">💰 TOTAL DÍA</div>
+          <div style="font-size:22px;font-weight:800;color:var(--green)">$${grandTotal.toFixed(2)}</div>
+          <div style="font-size:10px;color:var(--text-dim)">$${costPerPerson.toFixed(2)}/persona</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card fade-up" style="margin-bottom:16px">
+      <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
+        ${mealTabs.map(t => `<button class="btn btn-sm" style="background:${budgetDay===t.id?t.c:'var(--border)'};color:${budgetDay===t.id?'#fff':'var(--text-muted)'}" onclick="budgetDay='${t.id}';renderPage()">${t.l}</button>`).join('')}
+      </div>
+      <h4 style="color:var(--text-primary);margin:0 0 12px;font-size:14px">Seleccionar platos para ${mealTabs.find(t=>t.id===budgetDay).l}</h4>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${recipeNames.map(d => {
+          const r = RECIPES[d];
+          const cats = Array.isArray(catMap[budgetDay]) ? catMap[budgetDay] : [catMap[budgetDay]];
+          const relevant = cats.some(c => r.cat === c) || budgetDay === 'comida';
+          const selected = (budgetSelected[budgetDay]||[]).includes(d);
+          if (!relevant && !selected) return '';
+          return `<button class="btn btn-sm" style="background:${selected?'var(--accent)':'var(--border)'};color:${selected?'#fff':'var(--text-muted)'};font-size:11px" onclick="toggleBudgetDish('${budgetDay}','${esc(d)}')">${d} <span style="opacity:0.6;font-size:10px">(${r.cat})</span></button>`;
+        }).filter(Boolean).join('')}
+      </div>
+    </div>
+    
+    ${sortedIngs.length > 0 ? `<div class="card fade-up" style="animation-delay:0.15s">
+      <h4 style="color:var(--orange);margin:0 0 4px;font-size:14px">📊 Desglose de Costos — ${budgetPersonas} personas (+${portionConfig.buffer}% buffer)</h4>
+      <p style="color:var(--text-dim);font-size:11px;margin:0 0 12px">Precios basados en tu inventario. Los ingredientes sin precio usan estimado de $2/lb.</p>
+      <div style="overflow-x:auto"><table><thead><tr>
+        <th>Ingrediente</th><th>Cantidad</th><th>Costo Est.</th>
+      </tr></thead><tbody>
+        ${sortedIngs.map(([name,data]) => `<tr>
+          <td style="${['base','proteina'].includes(data.tipo)?'font-weight:600':''}">${name}</td>
+          <td>${fmtIngredient(data.g, data.u)}</td>
+          <td style="color:var(--green);font-weight:600">$${data.cost.toFixed(2)}</td>
+        </tr>`).join('')}
+        <tr style="border-top:2px solid var(--accent)">
+          <td style="font-weight:800;color:var(--text-primary)">TOTAL</td>
+          <td></td>
+          <td style="font-weight:800;color:var(--green);font-size:16px">$${grandTotal.toFixed(2)}</td>
+        </tr>
+      </tbody></table></div>
+    </div>` : '<div class="card"><p style="color:var(--text-muted)">Selecciona platos arriba para ver el presupuesto</p></div>'}
+    
+    <div class="card fade-up" style="margin-top:16px;animation-delay:0.2s;border:1px solid rgba(243,156,18,0.15)">
+      <h4 style="color:var(--orange);margin:0 0 8px;font-size:13px">💡 Notas</h4>
+      <p style="color:var(--text-muted);font-size:11px;margin:0;line-height:1.6">
+        • Los costos se calculan usando los precios de tu <strong>Inventario</strong> — actualízalos para mayor precisión<br>
+        • Buffer actual: +${portionConfig.buffer}% · Porción: ${portionConfig.size} (ajustable en Recetas)<br>
+        • Costo por persona: <strong>$${costPerPerson.toFixed(2)}</strong> · Costo semanal (×5 días): <strong>$${(grandTotal*5).toFixed(2)}</strong>
+      </p>
+    </div>`;
+}
+
+function toggleBudgetDish(meal, dish) {
+  if (!budgetSelected[meal]) budgetSelected[meal] = [];
+  const i = budgetSelected[meal].indexOf(dish);
+  if (i >= 0) budgetSelected[meal].splice(i,1); else budgetSelected[meal].push(dish);
   renderPage();
 }
 
