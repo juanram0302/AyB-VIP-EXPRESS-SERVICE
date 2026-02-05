@@ -1103,11 +1103,13 @@ async function saveToFirestore_Inventory(itemData, editId) {
   try {
     if (editId) {
       await db.collection('inventario').doc(editId).update(data);
+      logActivity('inventario', `Actualizó "${data.nombre}"`, `Stock: ${data.cantidad} ${data.unidad}`);
       return editId;
     } else {
       data.creadoPor = currentUser?.email || '';
       data.fecha = firebase.firestore.FieldValue.serverTimestamp();
       const ref = await db.collection('inventario').add(data);
+      logActivity('inventario', `Agregó nuevo producto: "${data.nombre}"`, `Stock: ${data.cantidad} ${data.unidad}, Precio: $${data.precio}`);
       return ref.id;
     }
   } catch(e) {
@@ -1142,6 +1144,9 @@ async function saveToFirestore_Movement(item, type, qty, newQty) {
       usuario: currentUser?.email || '',
       fecha: firebase.firestore.FieldValue.serverTimestamp()
     });
+    
+    const tipoLabel = type === 'entrada' ? '📥 Entrada' : '📤 Salida';
+    logActivity('movimiento', `${tipoLabel} de ${qty} ${inv(item).u} de "${inv(item).nombre}"`, `Stock: ${inv(item).cant} → ${newQty}`);
   } catch(e) {
     console.error('Error registrando movimiento:', e);
     addNotif('❌ Error al registrar movimiento');
@@ -1161,9 +1166,91 @@ async function saveToFirestore_Menu(nombre, categoria) {
       creadoPor: currentUser?.email || '',
       fecha: firebase.firestore.FieldValue.serverTimestamp()
     });
+    logActivity('menu', `Agregó "${nombre}" a ${categoria}`);
   } catch(e) {
     console.error('Error guardando menú:', e);
   }
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🔔 SISTEMA DE ACTIVIDAD EN TIEMPO REAL
+// ═══════════════════════════════════════════════════════════
+let activityFeed = []; // Últimas actividades para el dashboard
+const MY_SESSION_ID = Date.now() + '_' + Math.random().toString(36).substr(2,6);
+let activityInitialLoad = true; // Para no notificar en carga inicial
+
+async function logActivity(tipo, descripcion, detalles) {
+  if (!FB_READY || !db) return;
+  try {
+    await db.collection('actividad').add({
+      tipo: tipo, // 'inventario', 'menu', 'movimiento', 'login', 'receta'
+      descripcion: descripcion,
+      detalles: detalles || '',
+      usuario: currentUser?.email || 'anónimo',
+      usuarioNombre: currentUser?.displayName || currentUser?.email?.split('@')[0] || 'anónimo',
+      sessionId: MY_SESSION_ID,
+      fecha: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch(e) {
+    console.error('Error registrando actividad:', e);
+  }
+}
+
+function getActivityIcon(tipo) {
+  const icons = {
+    inventario: '📦', menu: '🍽️', movimiento: '🔄',
+    login: '👤', receta: '👨‍🍳', sistema: '⚙️'
+  };
+  return icons[tipo] || '📋';
+}
+
+function timeAgo(date) {
+  if (!date) return 'ahora';
+  const now = new Date();
+  const d = date.toDate ? date.toDate() : new Date(date);
+  const diff = Math.floor((now - d) / 1000);
+  if (diff < 60) return 'hace un momento';
+  if (diff < 3600) return `hace ${Math.floor(diff/60)} min`;
+  if (diff < 86400) return `hace ${Math.floor(diff/3600)}h`;
+  if (diff < 604800) return `hace ${Math.floor(diff/86400)} día${Math.floor(diff/86400)>1?'s':''}`;
+  return d.toLocaleDateString('es-DO');
+}
+
+function startActivityListener() {
+  if (!FB_READY) return;
+  
+  const unsubActivity = db.collection('actividad')
+    .orderBy('fecha', 'desc')
+    .limit(30)
+    .onSnapshot(snap => {
+      // Actualizar feed completo
+      activityFeed = [];
+      snap.forEach(doc => {
+        activityFeed.push({ id: doc.id, ...doc.data() });
+      });
+      
+      // Notificar solo cambios nuevos de OTROS usuarios
+      if (!activityInitialLoad) {
+        snap.docChanges().forEach(change => {
+          if (change.type === 'added') {
+            const d = change.doc.data();
+            // Solo notificar si es de otro usuario/sesión
+            if (d.sessionId !== MY_SESSION_ID && d.fecha) {
+              const icon = getActivityIcon(d.tipo);
+              addNotif(`${icon} ${d.usuarioNombre}: ${d.descripcion}`);
+              // Si el dashboard está visible, actualizar
+              if (currentPage === 'dashboard') renderPage();
+            }
+          }
+        });
+      }
+      
+      activityInitialLoad = false;
+      // Actualizar dashboard si está visible (para el feed)
+      if (currentPage === 'dashboard') renderPage();
+    }, err => console.error('Error listener actividad:', err));
+  
+  realtimeUnsubs.push(unsubActivity);
 }
 // ═══════════════════════════════════════════════════════════
 const NAV = [
@@ -1260,6 +1347,8 @@ function loginSuccess(name, email) {
   if (FB_READY) {
     loadFromFirestore();
     startRealtimeListeners();
+    startActivityListener();
+    logActivity('login', `Inició sesión`, '');
   }
   
   navigate('dashboard');
@@ -1527,6 +1616,29 @@ function renderDashboard() {
     <div class="grid grid-4" style="margin-bottom:24px">
       ${stats.map((s,i)=>`<div class="card stat-card fade-up" style="animation-delay:${i*0.08}s"><div class="stat-value" style="color:${s.c}">${s.v}</div><div class="stat-label">${s.l.toUpperCase()}</div></div>`).join('')}
     </div>
+    ${activityFeed.length > 0 ? `
+    <div class="card fade-up" style="margin-bottom:24px;animation-delay:0.25s;border:1px solid rgba(243,156,18,0.15)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3 style="color:var(--orange);font-size:15px;margin:0">📡 Actividad Reciente</h3>
+        <span style="color:var(--text-dim);font-size:10px">${FB_READY ? '🟢 En vivo' : '⚪ Offline'}</span>
+      </div>
+      <div style="max-height:250px;overflow-y:auto">
+        ${activityFeed.slice(0,15).map((a,i) => {
+          const isMe = a.sessionId === MY_SESSION_ID;
+          return `<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--bg-card2);opacity:${isMe?'0.6':'1'}">
+            <span style="font-size:16px;flex-shrink:0;margin-top:2px">${getActivityIcon(a.tipo)}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;color:var(--text-primary)">
+                <strong style="color:${isMe?'var(--text-muted)':'var(--accent)'}">${isMe?'Tú':a.usuarioNombre||'Usuario'}</strong>
+                ${a.descripcion||''}
+              </div>
+              ${a.detalles?`<div style="font-size:10px;color:var(--text-dim);margin-top:2px">${a.detalles}</div>`:''}
+            </div>
+            <span style="font-size:10px;color:var(--text-dim);flex-shrink:0;white-space:nowrap">${timeAgo(a.fecha)}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>` : ''}
     <div class="grid grid-2">
       <div class="card fade-up" style="animation-delay:0.3s">
         <h3 style="color:var(--text-primary);font-size:15px;margin-bottom:16px">🍽️ Platos Más Populares</h3>
