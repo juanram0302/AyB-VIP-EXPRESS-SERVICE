@@ -690,7 +690,6 @@ tr td:last-child { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
     <input class="input" type="password" id="auth-password" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doAuth()">
     <p id="auth-error" style="color:#ff6b6b;font-size:13px;margin:6px 0 10px;display:none"></p>
     <button class="btn btn-primary btn-full" onclick="doAuth()" id="auth-btn">INGRESAR</button>
-    <button class="btn btn-full" onclick="enterDemoMode()" style="margin-top:8px;background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff;font-size:13px;padding:12px">🧪 MODO DEMO (158 productos)</button>
 
     <div class="firebase-badge">
       <p>🔥 Firebase Auth listo · Configura tus credenciales en el código</p>
@@ -1236,41 +1235,37 @@ async function uploadInitialInventory() {
 async function replaceFirebaseInventory() {
   if (!FB_READY) { alert('Firebase no está conectado'); return; }
   
-  const confirmMsg = `⚠️ Esto va a:\n\n1. BORRAR los ${inventory.length} productos actuales de Firebase\n2. SUBIR los ${INVENTORY_DEFAULT.length} productos nuevos\n\n¿Estás seguro?`;
+  // Obtener nombres actuales en Firebase
+  const existingSnap = await db.collection('inventario').get();
+  const existingNames = new Set();
+  existingSnap.forEach(doc => {
+    const d = doc.data();
+    existingNames.add((d.nombre || '').toLowerCase().trim());
+  });
+  
+  // Filtrar solo productos nuevos que no existen
+  const nuevos = INVENTORY_DEFAULT.filter(item => !existingNames.has(item.nombre.toLowerCase().trim()));
+  
+  if (nuevos.length === 0) {
+    alert('✅ Ya tienes todos los productos en Firebase. No hay nada nuevo que agregar.');
+    return;
+  }
+  
+  const confirmMsg = `📦 Se encontraron ${existingSnap.size} productos en Firebase.\n\n` +
+    `Se van a AGREGAR ${nuevos.length} productos nuevos (sin borrar los existentes).\n\n` +
+    `Total después: ${existingSnap.size + nuevos.length} productos.\n\n¿Continuar?`;
   if (!confirm(confirmMsg)) return;
   
   try {
-    // Mostrar progreso
-    addNotif('🔄 Borrando inventario anterior...');
+    addNotif('📤 Subiendo ' + nuevos.length + ' productos nuevos...');
     
-    // 1. Borrar todo el inventario actual
-    const existingSnap = await db.collection('inventario').get();
-    const deleteBatches = [];
-    let deleteBatch = db.batch();
-    let deleteCount = 0;
-    existingSnap.forEach(doc => {
-      deleteBatch.delete(doc.ref);
-      deleteCount++;
-      if (deleteCount % 450 === 0) { // Firestore limit is 500 per batch
-        deleteBatches.push(deleteBatch);
-        deleteBatch = db.batch();
-      }
-    });
-    deleteBatches.push(deleteBatch);
+    const batches = [];
+    let batch = db.batch();
+    let count = 0;
     
-    for (const b of deleteBatches) { await b.commit(); }
-    console.log(`🗑️ ${deleteCount} productos borrados de Firebase`);
-    addNotif(`🗑️ ${deleteCount} productos borrados`);
-    
-    // 2. Subir los nuevos productos en batches
-    addNotif('📤 Subiendo ' + INVENTORY_DEFAULT.length + ' productos nuevos...');
-    const uploadBatches = [];
-    let uploadBatch = db.batch();
-    let uploadCount = 0;
-    
-    INVENTORY_DEFAULT.forEach(item => {
+    nuevos.forEach(item => {
       const ref = db.collection('inventario').doc();
-      uploadBatch.set(ref, {
+      batch.set(ref, {
         nombre: item.nombre,
         categoria: item.cat,
         sub: item.sub || '',
@@ -1281,30 +1276,29 @@ async function replaceFirebaseInventory() {
         creadoPor: currentUser?.email || '',
         fecha: firebase.firestore.FieldValue.serverTimestamp()
       });
-      uploadCount++;
-      if (uploadCount % 450 === 0) {
-        uploadBatches.push(uploadBatch);
-        uploadBatch = db.batch();
+      count++;
+      if (count % 450 === 0) {
+        batches.push(batch);
+        batch = db.batch();
       }
     });
-    uploadBatches.push(uploadBatch);
+    batches.push(batch);
     
-    for (const b of uploadBatches) { await b.commit(); }
+    for (const b of batches) { await b.commit(); }
     
-    // 3. Recargar
+    // Recargar
     const snap = await db.collection('inventario').get();
     inventory = [];
     snap.forEach(doc => inventory.push({ id: doc.id, ...doc.data() }));
     
-    console.log(`✅ ${uploadCount} productos subidos a Firebase`);
-    addNotif(`✅ ¡Listo! ${uploadCount} productos subidos a Firebase`);
-    logActivity('inventario', `Reemplazó inventario completo`, `${deleteCount} borrados → ${uploadCount} nuevos`);
+    addNotif(`✅ ¡Listo! ${count} productos nuevos agregados`);
+    logActivity('inventario', `Agregó ${count} productos nuevos`, `Total: ${inventory.length} productos`);
     renderPage();
     
-    alert(`✅ ¡Inventario actualizado!\n\n${deleteCount} productos borrados\n${uploadCount} productos nuevos subidos\n\nTodo sincronizado en Firebase.`);
+    alert(`✅ ¡Inventario actualizado!\n\n${existingSnap.size} productos existentes (conservados)\n+ ${count} productos nuevos\n= ${inventory.length} productos total\n\nTodo sincronizado en Firebase.`);
     
   } catch(e) {
-    console.error('Error reemplazando inventario:', e);
+    console.error('Error agregando productos:', e);
     alert('❌ Error: ' + e.message);
   }
 }
@@ -1664,24 +1658,6 @@ function resetState() {
   document.getElementById('app-page').classList.remove('visible');
   document.getElementById('auth-btn').textContent = 'INGRESAR';
   document.getElementById('auth-btn').disabled = false;
-}
-
-function enterDemoMode() {
-  // Forzar modo demo con los 158 productos sin tocar Firebase
-  inventory = JSON.parse(JSON.stringify(INVENTORY_DEFAULT));
-  currentUser = { name: 'Demo', email: 'demo@ayb.com' };
-  document.getElementById('login-page').style.display = 'none';
-  document.getElementById('app-page').classList.add('visible');
-  document.getElementById('user-avatar').textContent = 'D';
-  document.getElementById('user-name-display').textContent = 'Modo Demo';
-  
-  const badge = document.querySelector('.firebase-badge');
-  if (badge) badge.innerHTML = '<p>🧪 Modo Demo · 158 productos cargados · Los datos no se guardan</p>';
-  
-  buildSidebar();
-  cargarPreciosExternos();
-  navigate('dashboard');
-  addNotif('🧪 Modo Demo activado con ' + INVENTORY_DEFAULT.length + ' productos');
 }
 
 // Auto-login si hay sesión activa en Firebase
@@ -3014,7 +2990,7 @@ function renderInventario() {
       <button class="btn btn-primary" onclick="invShowAdd=true;invEditId=null;autoPrecios={buscando:false,resultado:null,error:null};renderPage()">+ Agregar</button>
       <button class="btn btn-sm" onclick="actualizarTodosPrecios()" style="background:linear-gradient(135deg,#c41e1e,#e85d04);color:#fff;font-size:11px;padding:8px 12px" title="Actualizar todos los precios con base RD">🤖 Actualizar precios</button>
       <button class="btn btn-sm" onclick="showComparador=!showComparador;renderPage()" style="background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff;font-size:11px;padding:8px 12px">🏪 Comparar supermercados</button>
-      ${FB_READY ? `<button class="btn btn-sm" onclick="replaceFirebaseInventory()" style="background:linear-gradient(135deg,#9b59b6,#8e44ad);color:#fff;font-size:11px;padding:8px 12px" title="Reemplazar inventario de Firebase con los 158 productos">🔄 Cargar 158 productos a Firebase</button>` : ''}
+      ${FB_READY ? `<button class="btn btn-sm" onclick="replaceFirebaseInventory()" style="background:linear-gradient(135deg,#9b59b6,#8e44ad);color:#fff;font-size:11px;padding:8px 12px" title="Agregar productos nuevos a Firebase (sin borrar los existentes)">📤 Agregar productos nuevos a Firebase</button>` : ''}
       ${tag('var(--text-dim)', obtenerInfoPrecios())}
       ${tag('var(--text-muted)', inventory.length+' productos')}
       ${FB_READY?tag('var(--green)','🔥 Sincronizado'):tag('var(--orange)','⚠️ Demo')}
