@@ -656,6 +656,15 @@ tr td:last-child { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 [data-fontsize="xlarge"] td, [data-fontsize="xlarge"] th { font-size: 17px; padding: 14px 18px; }
 [data-fontsize="xlarge"] .input { font-size: 18px; padding: 16px; }
 [data-fontsize="xlarge"] .btn { font-size: 16px; padding: 14px 24px; }
+.loading-spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(243,156,18,0.3);
+  border-top-color: var(--orange);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -681,6 +690,7 @@ tr td:last-child { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
     <input class="input" type="password" id="auth-password" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doAuth()">
     <p id="auth-error" style="color:#ff6b6b;font-size:13px;margin:6px 0 10px;display:none"></p>
     <button class="btn btn-primary btn-full" onclick="doAuth()" id="auth-btn">INGRESAR</button>
+    <button class="btn btn-full" onclick="enterDemoMode()" style="margin-top:8px;background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff;font-size:13px;padding:12px">🧪 MODO DEMO (158 productos)</button>
 
     <div class="firebase-badge">
       <p>🔥 Firebase Auth listo · Configura tus credenciales en el código</p>
@@ -976,34 +986,196 @@ const UNIT_CONVERSIONS = {
 // ═══════════════════════════════════════════════════════════
 // INVENTORY
 // ═══════════════════════════════════════════════════════════
-const CATEGORIES = ["Carnes","Aves","Pescados","Granos","Arroz","Vegetales","Frutas","Lácteos","Condimentos","Aceites","Enlatados","Harinas","Bebidas","Snacks","Limpieza","Desechables","Otros"];
+const CATEGORIES = ["Res","Cerdo","Aves","Pescados","Mariscos","Granos","Arroz","Vegetales","Frutas","Lácteos","Condimentos","Aceites","Enlatados","Harinas","Embutidos","Bebidas","Snacks","Limpieza","Desechables","Otros"];
+
+// Subcategorías de cortes para filtro detallado
+const SUBCATS = {
+  "Res": ["Bistec","Carne molida","Costilla","Falda","Churrasco","Punta trasera","Pecho","Osobuco","Rabo"],
+  "Cerdo": ["Chuleta","Chuleta ahumada","Costilla","Pierna","Lomo","Pernil","Chicharrón"],
+  "Aves": ["Pechuga","Muslo","Muslo ancho","Alitas","Pollo entero","Cuarto trasero","Menudencia"],
+  "Pescados": ["Dorado","Chillo","Mero","Salmón","Bacalao","Tilapia","Atún fresco"],
+  "Mariscos": ["Camarones","Langosta","Pulpo","Calamar","Lambí"]
+};
+
+let invSubCat = '';
 
 let inventory = [
-  {id:1,nombre:"Arroz largo grano",cat:"Arroz",cant:200,u:"lb",min:50,precio:0.85},
-  {id:2,nombre:"Habichuelas rojas",cat:"Granos",cant:80,u:"lb",min:20,precio:1.20},
-  {id:3,nombre:"Habichuelas negras",cat:"Granos",cant:60,u:"lb",min:20,precio:1.25},
-  {id:4,nombre:"Pechuga de pollo",cat:"Aves",cant:150,u:"lb",min:40,precio:2.50},
-  {id:5,nombre:"Carne de res (bistec)",cat:"Carnes",cant:100,u:"lb",min:30,precio:4.50},
-  {id:6,nombre:"Cerdo",cat:"Carnes",cant:80,u:"lb",min:25,precio:3.00},
-  {id:7,nombre:"Dorado filete",cat:"Pescados",cant:50,u:"lb",min:15,precio:5.50},
-  {id:8,nombre:"Plátanos maduros",cat:"Vegetales",cant:120,u:"und",min:30,precio:0.25},
-  {id:9,nombre:"Plátanos verdes",cat:"Vegetales",cant:100,u:"und",min:30,precio:0.20},
-  {id:10,nombre:"Cebolla",cat:"Vegetales",cant:40,u:"lb",min:10,precio:0.80},
-  {id:11,nombre:"Ajo",cat:"Condimentos",cant:15,u:"lb",min:5,precio:3.00},
-  {id:12,nombre:"Tomates",cat:"Vegetales",cant:30,u:"lb",min:10,precio:1.00},
-  {id:13,nombre:"Lechuga",cat:"Vegetales",cant:25,u:"und",min:8,precio:0.75},
-  {id:14,nombre:"Aceite vegetal",cat:"Aceites",cant:10,u:"gal",min:3,precio:8.00},
-  {id:15,nombre:"Aceite de oliva",cat:"Aceites",cant:5,u:"gal",min:2,precio:22.00},
-  {id:16,nombre:"Sal",cat:"Condimentos",cant:20,u:"lb",min:5,precio:0.50},
-  {id:17,nombre:"Orégano",cat:"Condimentos",cant:5,u:"lb",min:2,precio:6.00},
-  {id:18,nombre:"Queso mozzarella",cat:"Lácteos",cant:30,u:"lb",min:10,precio:4.00},
-  {id:19,nombre:"Crema de leche",cat:"Lácteos",cant:15,u:"lt",min:5,precio:3.50},
-  {id:20,nombre:"Huevos",cat:"Lácteos",cant:200,u:"und",min:50,precio:0.15},
-  {id:21,nombre:"Mantequilla",cat:"Lácteos",cant:10,u:"lb",min:3,precio:3.00},
-  {id:22,nombre:"Harina de trigo",cat:"Harinas",cant:50,u:"lb",min:15,precio:0.60},
-  {id:23,nombre:"Salsa de tomate",cat:"Enlatados",cant:20,u:"lt",min:5,precio:2.00},
-  {id:24,nombre:"Pasta espaguetis",cat:"Harinas",cant:30,u:"lb",min:10,precio:1.00},
-  {id:25,nombre:"Guandules",cat:"Granos",cant:40,u:"lb",min:10,precio:1.50},
+  // ═══ RES ═══
+  {id:1,nombre:"Bistec de res",cat:"Res",sub:"Bistec",cant:100,u:"lb",min:30,precio:170.00},
+  {id:2,nombre:"Carne molida",cat:"Res",sub:"Carne molida",cant:80,u:"lb",min:25,precio:140.00},
+  {id:3,nombre:"Costilla de res",cat:"Res",sub:"Costilla",cant:50,u:"lb",min:15,precio:130.00},
+  {id:4,nombre:"Falda de res",cat:"Res",sub:"Falda",cant:40,u:"lb",min:10,precio:145.00},
+  {id:5,nombre:"Churrasco",cat:"Res",sub:"Churrasco",cant:60,u:"lb",min:20,precio:195.00},
+  {id:6,nombre:"Punta trasera",cat:"Res",sub:"Punta trasera",cant:40,u:"lb",min:10,precio:180.00},
+  {id:7,nombre:"Osobuco",cat:"Res",sub:"Osobuco",cant:30,u:"lb",min:10,precio:120.00},
+  {id:8,nombre:"Rabo de res",cat:"Res",sub:"Rabo",cant:25,u:"lb",min:8,precio:160.00},
+  // ═══ CERDO ═══
+  {id:9,nombre:"Chuleta de cerdo",cat:"Cerdo",sub:"Chuleta",cant:80,u:"lb",min:25,precio:120.00},
+  {id:10,nombre:"Chuleta ahumada",cat:"Cerdo",sub:"Chuleta ahumada",cant:40,u:"lb",min:12,precio:110.00},
+  {id:11,nombre:"Costilla de cerdo",cat:"Cerdo",sub:"Costilla",cant:50,u:"lb",min:15,precio:125.00},
+  {id:12,nombre:"Pierna de cerdo",cat:"Cerdo",sub:"Pierna",cant:40,u:"lb",min:10,precio:115.00},
+  {id:13,nombre:"Lomo de cerdo",cat:"Cerdo",sub:"Lomo",cant:30,u:"lb",min:10,precio:135.00},
+  {id:14,nombre:"Pernil",cat:"Cerdo",sub:"Pernil",cant:60,u:"lb",min:20,precio:110.00},
+  {id:15,nombre:"Chicharrón",cat:"Cerdo",sub:"Chicharrón",cant:20,u:"lb",min:8,precio:150.00},
+  // ═══ AVES ═══
+  {id:16,nombre:"Pechuga de pollo",cat:"Aves",sub:"Pechuga",cant:150,u:"lb",min:40,precio:152.00},
+  {id:17,nombre:"Muslo de pollo",cat:"Aves",sub:"Muslo",cant:80,u:"lb",min:25,precio:75.00},
+  {id:18,nombre:"Muslo ancho",cat:"Aves",sub:"Muslo ancho",cant:60,u:"lb",min:20,precio:85.00},
+  {id:19,nombre:"Alitas de pollo",cat:"Aves",sub:"Alitas",cant:50,u:"lb",min:15,precio:85.00},
+  {id:20,nombre:"Pollo entero",cat:"Aves",sub:"Pollo entero",cant:40,u:"lb",min:15,precio:84.00},
+  {id:21,nombre:"Cuarto trasero",cat:"Aves",sub:"Cuarto trasero",cant:60,u:"lb",min:20,precio:68.00},
+  // ═══ PESCADOS ═══
+  {id:22,nombre:"Dorado filete",cat:"Pescados",sub:"Dorado",cant:50,u:"lb",min:15,precio:250.00},
+  {id:23,nombre:"Chillo",cat:"Pescados",sub:"Chillo",cant:30,u:"lb",min:10,precio:220.00},
+  {id:24,nombre:"Mero",cat:"Pescados",sub:"Mero",cant:25,u:"lb",min:8,precio:280.00},
+  {id:25,nombre:"Salmón",cat:"Pescados",sub:"Salmón",cant:20,u:"lb",min:8,precio:450.00},
+  {id:26,nombre:"Bacalao",cat:"Pescados",sub:"Bacalao",cant:15,u:"lb",min:5,precio:180.00},
+  {id:27,nombre:"Tilapia",cat:"Pescados",sub:"Tilapia",cant:30,u:"lb",min:10,precio:120.00},
+  // ═══ MARISCOS ═══
+  {id:28,nombre:"Camarones",cat:"Mariscos",sub:"Camarones",cant:30,u:"lb",min:10,precio:350.00},
+  {id:29,nombre:"Langosta",cat:"Mariscos",sub:"Langosta",cant:15,u:"lb",min:5,precio:600.00},
+  {id:30,nombre:"Pulpo",cat:"Mariscos",sub:"Pulpo",cant:15,u:"lb",min:5,precio:320.00},
+  {id:31,nombre:"Lambí",cat:"Mariscos",sub:"Lambí",cant:10,u:"lb",min:4,precio:280.00},
+  // ═══ EMBUTIDOS ═══
+  {id:32,nombre:"Salami",cat:"Embutidos",cant:40,u:"lb",min:12,precio:75.00},
+  {id:33,nombre:"Jamón",cat:"Embutidos",cant:25,u:"lb",min:8,precio:120.00},
+  {id:34,nombre:"Salchicha",cat:"Embutidos",cant:30,u:"lb",min:10,precio:70.00},
+  {id:35,nombre:"Longaniza",cat:"Embutidos",cant:20,u:"lb",min:8,precio:100.00},
+  {id:36,nombre:"Jamoneta",cat:"Embutidos",cant:15,u:"lb",min:5,precio:100.00},
+  {id:37,nombre:"Tocineta",cat:"Embutidos",cant:15,u:"lb",min:5,precio:180.00},
+  // ═══ GRANOS ═══
+  {id:38,nombre:"Habichuelas rojas",cat:"Granos",cant:80,u:"lb",min:20,precio:60.00},
+  {id:39,nombre:"Habichuelas negras",cat:"Granos",cant:60,u:"lb",min:20,precio:55.00},
+  {id:40,nombre:"Habichuelas pintas",cat:"Granos",cant:40,u:"lb",min:10,precio:45.00},
+  {id:41,nombre:"Guandules secos",cat:"Granos",cant:50,u:"lb",min:15,precio:65.00},
+  {id:42,nombre:"Guandules verdes",cat:"Granos",cant:30,u:"lb",min:10,precio:110.00},
+  {id:43,nombre:"Lentejas",cat:"Granos",cant:30,u:"lb",min:10,precio:45.00},
+  {id:44,nombre:"Garbanzos",cat:"Granos",cant:20,u:"lb",min:8,precio:55.00},
+  // ═══ ARROZ ═══
+  {id:45,nombre:"Arroz largo grano",cat:"Arroz",cant:300,u:"lb",min:80,precio:45.00},
+  {id:46,nombre:"Arroz selecto",cat:"Arroz",cant:100,u:"lb",min:30,precio:37.00},
+  // ═══ VEGETALES ═══
+  {id:47,nombre:"Plátanos maduros",cat:"Vegetales",cant:150,u:"und",min:40,precio:25.00},
+  {id:48,nombre:"Plátanos verdes",cat:"Vegetales",cant:120,u:"und",min:40,precio:23.00},
+  {id:49,nombre:"Guineo verde",cat:"Vegetales",cant:80,u:"und",min:20,precio:5.00},
+  {id:50,nombre:"Cebolla",cat:"Vegetales",cant:50,u:"lb",min:15,precio:40.00},
+  {id:51,nombre:"Cebolla roja",cat:"Vegetales",cant:25,u:"lb",min:8,precio:40.00},
+  {id:52,nombre:"Tomates",cat:"Vegetales",cant:40,u:"lb",min:12,precio:45.00},
+  {id:53,nombre:"Lechuga",cat:"Vegetales",cant:30,u:"und",min:10,precio:13.00},
+  {id:54,nombre:"Papa",cat:"Vegetales",cant:60,u:"lb",min:20,precio:35.00},
+  {id:55,nombre:"Yuca",cat:"Vegetales",cant:50,u:"lb",min:15,precio:35.00},
+  {id:56,nombre:"Yautía",cat:"Vegetales",cant:30,u:"lb",min:10,precio:45.00},
+  {id:57,nombre:"Zanahoria",cat:"Vegetales",cant:30,u:"lb",min:10,precio:25.00},
+  {id:58,nombre:"Ají cubanela",cat:"Vegetales",cant:20,u:"lb",min:8,precio:25.00},
+  {id:59,nombre:"Ají gustoso",cat:"Vegetales",cant:10,u:"lb",min:4,precio:75.00},
+  {id:60,nombre:"Ají morrón",cat:"Vegetales",cant:15,u:"lb",min:5,precio:40.00},
+  {id:61,nombre:"Berenjena",cat:"Vegetales",cant:15,u:"lb",min:5,precio:15.00},
+  {id:62,nombre:"Brócoli",cat:"Vegetales",cant:15,u:"lb",min:5,precio:50.00},
+  {id:63,nombre:"Apio",cat:"Vegetales",cant:10,u:"lb",min:4,precio:30.00},
+  {id:64,nombre:"Repollo",cat:"Vegetales",cant:10,u:"und",min:3,precio:110.00},
+  {id:65,nombre:"Pepino",cat:"Vegetales",cant:20,u:"und",min:8,precio:15.00},
+  {id:66,nombre:"Tayota",cat:"Vegetales",cant:20,u:"und",min:8,precio:25.00},
+  {id:67,nombre:"Batata",cat:"Vegetales",cant:20,u:"lb",min:8,precio:33.00},
+  {id:68,nombre:"Remolacha",cat:"Vegetales",cant:10,u:"lb",min:4,precio:20.00},
+  {id:69,nombre:"Espinaca",cat:"Vegetales",cant:10,u:"lb",min:4,precio:60.00},
+  {id:70,nombre:"Maíz dulce",cat:"Vegetales",cant:15,u:"und",min:5,precio:15.00},
+  {id:71,nombre:"Vainitas",cat:"Vegetales",cant:10,u:"lb",min:4,precio:45.00},
+  {id:72,nombre:"Cilantro",cat:"Vegetales",cant:15,u:"paq",min:5,precio:50.00},
+  {id:73,nombre:"Perejil",cat:"Vegetales",cant:10,u:"paq",min:4,precio:25.00},
+  // ═══ FRUTAS ═══
+  {id:74,nombre:"Aguacate",cat:"Frutas",cant:30,u:"und",min:10,precio:30.00},
+  {id:75,nombre:"Naranja agria",cat:"Frutas",cant:30,u:"und",min:10,precio:12.00},
+  {id:76,nombre:"Limón",cat:"Frutas",cant:20,u:"lb",min:8,precio:60.00},
+  {id:77,nombre:"Piña",cat:"Frutas",cant:10,u:"und",min:4,precio:60.00},
+  {id:78,nombre:"Chinola",cat:"Frutas",cant:20,u:"und",min:8,precio:18.00},
+  {id:79,nombre:"Lechosa",cat:"Frutas",cant:10,u:"lb",min:4,precio:18.00},
+  {id:80,nombre:"Coco seco",cat:"Frutas",cant:15,u:"und",min:5,precio:50.00},
+  {id:81,nombre:"Mango",cat:"Frutas",cant:20,u:"und",min:8,precio:15.00},
+  {id:82,nombre:"Guineo maduro",cat:"Frutas",cant:30,u:"und",min:10,precio:5.00},
+  // ═══ LÁCTEOS ═══
+  {id:83,nombre:"Queso blanco",cat:"Lácteos",cant:30,u:"lb",min:10,precio:142.00},
+  {id:84,nombre:"Queso mozzarella",cat:"Lácteos",cant:30,u:"lb",min:10,precio:200.00},
+  {id:85,nombre:"Queso de freír",cat:"Lácteos",cant:20,u:"lb",min:8,precio:120.00},
+  {id:86,nombre:"Queso cheddar",cat:"Lácteos",cant:15,u:"lb",min:5,precio:220.00},
+  {id:87,nombre:"Crema de leche",cat:"Lácteos",cant:20,u:"lt",min:8,precio:185.00},
+  {id:88,nombre:"Leche",cat:"Lácteos",cant:30,u:"lt",min:10,precio:62.00},
+  {id:89,nombre:"Leche en polvo",cat:"Lácteos",cant:15,u:"sobre",min:5,precio:85.00},
+  {id:90,nombre:"Leche evaporada",cat:"Lácteos",cant:15,u:"lata",min:5,precio:65.00},
+  {id:91,nombre:"Leche condensada",cat:"Lácteos",cant:15,u:"lata",min:5,precio:75.00},
+  {id:92,nombre:"Huevos",cat:"Lácteos",cant:300,u:"und",min:60,precio:6.83},
+  {id:93,nombre:"Mantequilla",cat:"Lácteos",cant:15,u:"lb",min:5,precio:165.00},
+  {id:94,nombre:"Yogurt",cat:"Lácteos",cant:20,u:"und",min:8,precio:45.00},
+  {id:95,nombre:"Queso crema",cat:"Lácteos",cant:10,u:"lb",min:4,precio:180.00},
+  {id:96,nombre:"Nata",cat:"Lácteos",cant:10,u:"lt",min:4,precio:150.00},
+  // ═══ CONDIMENTOS ═══
+  {id:97,nombre:"Ajo",cat:"Condimentos",cant:20,u:"lb",min:5,precio:160.00},
+  {id:98,nombre:"Sal",cat:"Condimentos",cant:25,u:"lb",min:8,precio:15.00},
+  {id:99,nombre:"Orégano",cat:"Condimentos",cant:8,u:"lb",min:3,precio:50.00},
+  {id:100,nombre:"Pimienta",cat:"Condimentos",cant:5,u:"lb",min:2,precio:80.00},
+  {id:101,nombre:"Sazón completo",cat:"Condimentos",cant:10,u:"paq",min:4,precio:50.00},
+  {id:102,nombre:"Vinagre",cat:"Condimentos",cant:10,u:"bot",min:4,precio:18.00},
+  {id:103,nombre:"Canela",cat:"Condimentos",cant:3,u:"lb",min:1,precio:120.00},
+  {id:104,nombre:"Comino",cat:"Condimentos",cant:3,u:"lb",min:1,precio:90.00},
+  {id:105,nombre:"Achiote",cat:"Condimentos",cant:5,u:"bot",min:2,precio:45.00},
+  {id:106,nombre:"Cubito de pollo",cat:"Condimentos",cant:20,u:"paq",min:8,precio:25.00},
+  {id:107,nombre:"Salsa soya",cat:"Condimentos",cant:5,u:"bot",min:2,precio:85.00},
+  {id:108,nombre:"Salsa inglesa",cat:"Condimentos",cant:5,u:"bot",min:2,precio:95.00},
+  {id:109,nombre:"Mostaza",cat:"Condimentos",cant:5,u:"bot",min:2,precio:65.00},
+  {id:110,nombre:"Ketchup",cat:"Condimentos",cant:5,u:"bot",min:2,precio:75.00},
+  {id:111,nombre:"Mayonesa",cat:"Condimentos",cant:5,u:"bot",min:2,precio:95.00},
+  // ═══ ACEITES ═══
+  {id:112,nombre:"Aceite vegetal",cat:"Aceites",cant:15,u:"gal",min:5,precio:615.00},
+  {id:113,nombre:"Aceite de oliva",cat:"Aceites",cant:8,u:"lt",min:3,precio:450.00},
+  {id:114,nombre:"Aceite de maíz",cat:"Aceites",cant:5,u:"gal",min:2,precio:650.00},
+  {id:115,nombre:"Manteca",cat:"Aceites",cant:5,u:"lb",min:2,precio:55.00},
+  // ═══ HARINAS Y PASTAS ═══
+  {id:116,nombre:"Harina de trigo",cat:"Harinas",cant:60,u:"lb",min:20,precio:28.00},
+  {id:117,nombre:"Harina de maíz",cat:"Harinas",cant:20,u:"lb",min:8,precio:20.00},
+  {id:118,nombre:"Pasta espaguetis",cat:"Harinas",cant:40,u:"lb",min:12,precio:35.00},
+  {id:119,nombre:"Pasta coditos",cat:"Harinas",cant:20,u:"lb",min:8,precio:35.00},
+  {id:120,nombre:"Pasta tornillo",cat:"Harinas",cant:15,u:"lb",min:5,precio:38.00},
+  {id:121,nombre:"Pan de sándwich",cat:"Harinas",cant:15,u:"paq",min:5,precio:120.00},
+  {id:122,nombre:"Pan de agua",cat:"Harinas",cant:40,u:"und",min:15,precio:10.00},
+  {id:123,nombre:"Pan de hamburguesa",cat:"Harinas",cant:20,u:"paq",min:8,precio:85.00},
+  {id:124,nombre:"Pan de hot dog",cat:"Harinas",cant:15,u:"paq",min:5,precio:75.00},
+  {id:125,nombre:"Maicena",cat:"Harinas",cant:10,u:"lb",min:4,precio:45.00},
+  // ═══ ENLATADOS ═══
+  {id:126,nombre:"Salsa de tomate",cat:"Enlatados",cant:25,u:"lt",min:8,precio:120.00},
+  {id:127,nombre:"Pasta de tomate",cat:"Enlatados",cant:20,u:"lata",min:8,precio:45.00},
+  {id:128,nombre:"Guandules enlatados",cat:"Enlatados",cant:20,u:"lata",min:8,precio:69.00},
+  {id:129,nombre:"Maíz enlatado",cat:"Enlatados",cant:15,u:"lata",min:5,precio:60.00},
+  {id:130,nombre:"Atún en lata",cat:"Enlatados",cant:20,u:"lata",min:8,precio:90.00},
+  {id:131,nombre:"Sardina en lata",cat:"Enlatados",cant:15,u:"lata",min:5,precio:65.00},
+  {id:132,nombre:"Aceitunas",cat:"Enlatados",cant:10,u:"bot",min:4,precio:110.00},
+  {id:133,nombre:"Alcaparras",cat:"Enlatados",cant:5,u:"bot",min:2,precio:85.00},
+  {id:134,nombre:"Champiñones",cat:"Enlatados",cant:10,u:"lata",min:4,precio:75.00},
+  // ═══ BEBIDAS ═══
+  {id:135,nombre:"Agua",cat:"Bebidas",cant:30,u:"gal",min:10,precio:45.00},
+  {id:136,nombre:"Jugo de naranja",cat:"Bebidas",cant:15,u:"lt",min:5,precio:85.00},
+  {id:137,nombre:"Refresco 2 litros",cat:"Bebidas",cant:20,u:"und",min:8,precio:80.00},
+  {id:138,nombre:"Cerveza",cat:"Bebidas",cant:48,u:"und",min:24,precio:75.00},
+  {id:139,nombre:"Ron",cat:"Bebidas",cant:10,u:"bot",min:4,precio:450.00},
+  {id:140,nombre:"Vino tinto",cat:"Bebidas",cant:10,u:"bot",min:4,precio:350.00},
+  {id:141,nombre:"Café",cat:"Bebidas",cant:15,u:"lb",min:5,precio:80.00},
+  {id:142,nombre:"Chocolate",cat:"Bebidas",cant:10,u:"caja",min:4,precio:70.00},
+  {id:143,nombre:"Azúcar",cat:"Bebidas",cant:30,u:"lb",min:10,precio:34.00},
+  {id:144,nombre:"Azúcar blanca",cat:"Bebidas",cant:15,u:"lb",min:5,precio:43.00},
+  {id:145,nombre:"Avena",cat:"Bebidas",cant:10,u:"paq",min:4,precio:90.00},
+  // ═══ DESECHABLES ═══
+  {id:146,nombre:"Platos desechables",cat:"Desechables",cant:500,u:"und",min:100,precio:3.50},
+  {id:147,nombre:"Vasos desechables",cat:"Desechables",cant:500,u:"und",min:100,precio:2.50},
+  {id:148,nombre:"Cubiertos desechables",cat:"Desechables",cant:500,u:"und",min:100,precio:2.00},
+  {id:149,nombre:"Servilletas",cat:"Desechables",cant:500,u:"und",min:100,precio:1.00},
+  {id:150,nombre:"Papel aluminio",cat:"Desechables",cant:10,u:"rollo",min:3,precio:120.00},
+  {id:151,nombre:"Papel plástico",cat:"Desechables",cant:8,u:"rollo",min:3,precio:95.00},
+  {id:152,nombre:"Fundas térmicas",cat:"Desechables",cant:100,u:"und",min:30,precio:8.00},
+  {id:153,nombre:"Bandejas aluminio",cat:"Desechables",cant:50,u:"und",min:15,precio:25.00},
+  // ═══ LIMPIEZA ═══
+  {id:154,nombre:"Cloro",cat:"Limpieza",cant:5,u:"gal",min:2,precio:85.00},
+  {id:155,nombre:"Jabón lavaplatos",cat:"Limpieza",cant:5,u:"bot",min:2,precio:75.00},
+  {id:156,nombre:"Desinfectante",cat:"Limpieza",cant:5,u:"gal",min:2,precio:120.00},
+  {id:157,nombre:"Brillo verde",cat:"Limpieza",cant:20,u:"und",min:8,precio:12.00},
+  {id:158,nombre:"Bolsas de basura",cat:"Limpieza",cant:100,u:"und",min:30,precio:5.00},
 ];
 
 // Copia de inventario por defecto (para reset y modo demo)
@@ -1058,26 +1230,83 @@ async function loadFromFirestore() {
 // ═══════════════════════════════════════════════════════════
 async function uploadInitialInventory() {
   if (!FB_READY) return;
-  const batch = db.batch();
-  INVENTORY_DEFAULT.forEach(item => {
-    const ref = db.collection('inventario').doc();
-    batch.set(ref, {
-      nombre: item.nombre,
-      categoria: item.cat,
-      cantidad: item.cant,
-      unidad: item.u,
-      minimo: item.min,
-      precio: item.precio,
-      creadoPor: currentUser?.email || '',
-      fecha: firebase.firestore.FieldValue.serverTimestamp()
+  await replaceFirebaseInventory();
+}
+
+async function replaceFirebaseInventory() {
+  if (!FB_READY) { alert('Firebase no está conectado'); return; }
+  
+  const confirmMsg = `⚠️ Esto va a:\n\n1. BORRAR los ${inventory.length} productos actuales de Firebase\n2. SUBIR los ${INVENTORY_DEFAULT.length} productos nuevos\n\n¿Estás seguro?`;
+  if (!confirm(confirmMsg)) return;
+  
+  try {
+    // Mostrar progreso
+    addNotif('🔄 Borrando inventario anterior...');
+    
+    // 1. Borrar todo el inventario actual
+    const existingSnap = await db.collection('inventario').get();
+    const deleteBatches = [];
+    let deleteBatch = db.batch();
+    let deleteCount = 0;
+    existingSnap.forEach(doc => {
+      deleteBatch.delete(doc.ref);
+      deleteCount++;
+      if (deleteCount % 450 === 0) { // Firestore limit is 500 per batch
+        deleteBatches.push(deleteBatch);
+        deleteBatch = db.batch();
+      }
     });
-  });
-  await batch.commit();
-  // Recargar para obtener IDs reales
-  const snap = await db.collection('inventario').get();
-  inventory = [];
-  snap.forEach(doc => inventory.push({ id: doc.id, ...doc.data() }));
-  console.log('✅ Inventario inicial subido a Firestore');
+    deleteBatches.push(deleteBatch);
+    
+    for (const b of deleteBatches) { await b.commit(); }
+    console.log(`🗑️ ${deleteCount} productos borrados de Firebase`);
+    addNotif(`🗑️ ${deleteCount} productos borrados`);
+    
+    // 2. Subir los nuevos productos en batches
+    addNotif('📤 Subiendo ' + INVENTORY_DEFAULT.length + ' productos nuevos...');
+    const uploadBatches = [];
+    let uploadBatch = db.batch();
+    let uploadCount = 0;
+    
+    INVENTORY_DEFAULT.forEach(item => {
+      const ref = db.collection('inventario').doc();
+      uploadBatch.set(ref, {
+        nombre: item.nombre,
+        categoria: item.cat,
+        sub: item.sub || '',
+        cantidad: item.cant,
+        unidad: item.u,
+        minimo: item.min,
+        precio: item.precio,
+        creadoPor: currentUser?.email || '',
+        fecha: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      uploadCount++;
+      if (uploadCount % 450 === 0) {
+        uploadBatches.push(uploadBatch);
+        uploadBatch = db.batch();
+      }
+    });
+    uploadBatches.push(uploadBatch);
+    
+    for (const b of uploadBatches) { await b.commit(); }
+    
+    // 3. Recargar
+    const snap = await db.collection('inventario').get();
+    inventory = [];
+    snap.forEach(doc => inventory.push({ id: doc.id, ...doc.data() }));
+    
+    console.log(`✅ ${uploadCount} productos subidos a Firebase`);
+    addNotif(`✅ ¡Listo! ${uploadCount} productos subidos a Firebase`);
+    logActivity('inventario', `Reemplazó inventario completo`, `${deleteCount} borrados → ${uploadCount} nuevos`);
+    renderPage();
+    
+    alert(`✅ ¡Inventario actualizado!\n\n${deleteCount} productos borrados\n${uploadCount} productos nuevos subidos\n\nTodo sincronizado en Firebase.`);
+    
+  } catch(e) {
+    console.error('Error reemplazando inventario:', e);
+    alert('❌ Error: ' + e.message);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1437,6 +1666,24 @@ function resetState() {
   document.getElementById('auth-btn').disabled = false;
 }
 
+function enterDemoMode() {
+  // Forzar modo demo con los 158 productos sin tocar Firebase
+  inventory = JSON.parse(JSON.stringify(INVENTORY_DEFAULT));
+  currentUser = { name: 'Demo', email: 'demo@ayb.com' };
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('app-page').classList.add('visible');
+  document.getElementById('user-avatar').textContent = 'D';
+  document.getElementById('user-name-display').textContent = 'Modo Demo';
+  
+  const badge = document.querySelector('.firebase-badge');
+  if (badge) badge.innerHTML = '<p>🧪 Modo Demo · 158 productos cargados · Los datos no se guardan</p>';
+  
+  buildSidebar();
+  cargarPreciosExternos();
+  navigate('dashboard');
+  addNotif('🧪 Modo Demo activado con ' + INVENTORY_DEFAULT.length + ' productos');
+}
+
 // Auto-login si hay sesión activa en Firebase
 if (FB_READY) {
   auth.onAuthStateChanged(user => {
@@ -1447,7 +1694,396 @@ if (FB_READY) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// SIDEBAR & NAVIGATION
+// 🤖 SISTEMA DE AUTO-PRECIO (Base de datos de precios RD)
+// ═══════════════════════════════════════════════════════════
+// Los precios se cargan desde precios_rd.json (archivo externo actualizable)
+let PRECIOS_RD = {};
+let preciosLastUpdate = null;
+
+async function cargarPreciosExternos() {
+  try {
+    const resp = await fetch('./precios_rd.json?t=' + Date.now());
+    if (resp.ok) {
+      const data = await resp.json();
+      PRECIOS_RD = data.productos || {};
+      preciosLastUpdate = data.actualizado || null;
+      preciosZonas = data.zonas || {};
+      preciosSupers = data.supermercados || {};
+      console.log(`💰 Precios cargados: ${Object.keys(PRECIOS_RD).length} productos (${preciosLastUpdate})`);
+      verificarRecordatorioPrecios();
+    } else {
+      console.warn('⚠️ No se encontró precios_rd.json, usando base vacía');
+    }
+  } catch(e) {
+    console.warn('⚠️ Error cargando precios_rd.json:', e.message);
+  }
+}
+
+let preciosZonas = {};
+let preciosSupers = {};
+let zonaSeleccionada = localStorage.getItem('ayb-zona') || 'santo_domingo';
+let showComparador = false;
+
+function setZona(z) { zonaSeleccionada = z; localStorage.setItem('ayb-zona', z); renderPage(); }
+
+function getAjusteZona() {
+  return (preciosZonas[zonaSeleccionada] && preciosZonas[zonaSeleccionada].ajuste) || 1.0;
+}
+
+function compararSupermercados() {
+  const items = inventory.map(inv);
+  
+  // Filtrar por categoría seleccionada (igual que la tabla de inventario)
+  const filtered = items.filter(i => {
+    const catMatch = invCat === 'Todos' || i.cat === invCat;
+    const subMatch = !invSubCat || (i.sub && i.sub === invSubCat) || i.nombre.toLowerCase().includes(invSubCat.toLowerCase());
+    return catMatch && subMatch;
+  });
+  
+  // Deduplicar por nombre
+  const vistos = new Set();
+  const unicos = filtered.filter(item => {
+    const key = item.nombre.toLowerCase().trim();
+    if (vistos.has(key)) return false;
+    vistos.add(key);
+    return true;
+  });
+  
+  const ajuste = getAjusteZona();
+  const superKeys = Object.keys(preciosSupers);
+  const resultados = []; // Array de { nombre, u, precios: { super: precio } }
+  
+  for (const item of unicos) {
+    const key = item.nombre.toLowerCase().trim();
+    let prodData = PRECIOS_RD[key];
+    
+    // Matching mejorado
+    if (!prodData || !prodData.porSuper) {
+      for (const [k, v] of Object.entries(PRECIOS_RD)) {
+        if (v.porSuper && (key.includes(k) || k.includes(key))) { prodData = v; break; }
+      }
+    }
+    if (!prodData || !prodData.porSuper) {
+      const palabras = key.split(/\s+/).filter(p => p.length > 3);
+      for (const palabra of palabras) {
+        for (const [k, v] of Object.entries(PRECIOS_RD)) {
+          if (v.porSuper && k.includes(palabra)) { prodData = v; break; }
+        }
+        if (prodData && prodData.porSuper) break;
+      }
+    }
+    
+    if (prodData && prodData.porSuper) {
+      const precios = {};
+      for (const s of superKeys) {
+        if (prodData.porSuper[s]) {
+          precios[s] = Math.round(prodData.porSuper[s] * ajuste * 100) / 100;
+        }
+      }
+      if (Object.keys(precios).length > 0) {
+        resultados.push({
+          nombre: item.nombre,
+          u: prodData.u || item.u,
+          precios
+        });
+      }
+    }
+  }
+  
+  return { resultados, superKeys, totalFiltrados: unicos.length };
+}
+
+function renderComparador() {
+  if (!showComparador) return '';
+  
+  const comp = compararSupermercados();
+  const { resultados, superKeys } = comp;
+  
+  if (resultados.length === 0) {
+    return `<div class="card fade-up" style="margin-top:16px;border:1px solid rgba(243,156,18,0.2)">
+      <h4 style="color:var(--orange);margin:0">🏪 Comparador de Supermercados</h4>
+      <p style="color:var(--text-dim);font-size:12px;margin:8px 0 0">No hay datos de comparación para los productos filtrados.</p>
+    </div>`;
+  }
+  
+  // Determinar qué supermercados tienen datos suficientes
+  const superConDatos = superKeys.filter(s => {
+    const count = resultados.filter(r => r.precios[s]).length;
+    return count >= resultados.length * 0.4;
+  });
+  
+  // Calcular totales por super (suma de precios unitarios)
+  const totales = {};
+  superConDatos.forEach(s => {
+    totales[s] = resultados.reduce((sum, r) => sum + (r.precios[s] || 0), 0);
+  });
+  
+  const sorted = Object.entries(totales).sort((a, b) => a[1] - b[1]);
+  if (sorted.length === 0) return '';
+  
+  const masBaratoKey = sorted[0][0];
+  const masCaroKey = sorted[sorted.length - 1][0];
+  const zonaNombre = (preciosZonas[zonaSeleccionada] && preciosZonas[zonaSeleccionada].nombre) || 'Santo Domingo';
+  const catLabel = invCat === 'Todos' ? 'todo el inventario' : invCat + (invSubCat ? ' → ' + invSubCat : '');
+  
+  return `<div class="card fade-up" style="margin-top:16px;border:1px solid rgba(243,156,18,0.2)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div>
+        <h4 style="color:var(--orange);margin:0">🏪 Comparador de Supermercados — ${catLabel}</h4>
+        <p style="color:var(--text-dim);font-size:11px;margin:4px 0 0">${resultados.length} productos comparados · Zona: ${zonaNombre}</p>
+      </div>
+      <select class="input" style="margin:0;width:220px;font-size:12px" onchange="setZona(this.value)">
+        ${Object.entries(preciosZonas).map(([k, v]) => `<option value="${k}" ${zonaSeleccionada === k ? 'selected' : ''}>${v.nombre}${v.ajuste > 1 ? ' (+' + Math.round((v.ajuste - 1) * 100) + '%)' : ''}</option>`).join('')}
+      </select>
+    </div>
+    
+    <!-- Tabla comparativa producto por producto -->
+    <div style="overflow-x:auto;margin-bottom:16px">
+      <table style="width:100%;font-size:12px;border-collapse:collapse">
+        <thead><tr style="background:rgba(0,0,0,0.15)">
+          <th style="text-align:left;padding:8px;min-width:140px">Producto</th>
+          <th style="text-align:center;padding:8px;min-width:50px">Unidad</th>
+          ${sorted.map(([s]) => {
+            const info = preciosSupers[s] || {};
+            const esMasBarato = s === masBaratoKey;
+            return `<th style="text-align:center;padding:8px;min-width:90px;${esMasBarato ? 'background:rgba(46,204,113,0.1)' : ''}">${info.logo || ''} ${info.nombre || s}</th>`;
+          }).join('')}
+        </tr></thead>
+        <tbody>${resultados.map(prod => {
+          const preciosArr = sorted.map(([s]) => prod.precios[s] || null).filter(p => p !== null);
+          const minPrecio = preciosArr.length > 0 ? Math.min(...preciosArr) : 0;
+          const maxPrecio = preciosArr.length > 0 ? Math.max(...preciosArr) : 0;
+          
+          return `<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+            <td style="padding:8px;color:var(--text-primary);font-weight:500">${prod.nombre}</td>
+            <td style="padding:8px;text-align:center;color:var(--text-dim);font-size:11px">${prod.u}</td>
+            ${sorted.map(([s]) => {
+              const p = prod.precios[s];
+              if (!p) return `<td style="padding:8px;text-align:center;color:var(--text-dim)">—</td>`;
+              const esMejor = p === minPrecio;
+              const esPeor = p === maxPrecio && maxPrecio !== minPrecio;
+              return `<td style="padding:8px;text-align:center;color:${esMejor ? 'var(--green)' : esPeor ? 'var(--red)' : 'var(--text-muted)'};font-weight:${esMejor ? '700' : '400'};${esMejor ? 'background:rgba(46,204,113,0.06)' : ''}">
+                RD$${p.toFixed(2)}${esMejor ? ' ✓' : ''}
+              </td>`;
+            }).join('')}
+          </tr>`;
+        }).join('')}
+        <tr style="border-top:2px solid rgba(255,255,255,0.15);font-weight:700">
+          <td style="padding:10px;color:var(--text-primary)">TOTAL (suma unitarios)</td>
+          <td></td>
+          ${sorted.map(([s, total]) => {
+            const esMejor = s === masBaratoKey;
+            const esPeor = s === masCaroKey;
+            return `<td style="padding:10px;text-align:center;color:${esMejor ? 'var(--green)' : esPeor ? 'var(--red)' : 'var(--orange)'};font-size:13px;${esMejor ? 'background:rgba(46,204,113,0.08)' : ''}">
+              RD$${total.toFixed(2)}${esMejor ? ' 💰' : ''}
+            </td>`;
+          }).join('')}
+        </tr></tbody>
+      </table>
+    </div>
+    
+    ${sorted.length >= 2 ? `<div style="padding:10px 16px;border-radius:8px;background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.2);text-align:center">
+      <span style="font-size:13px;color:var(--green);font-weight:700">💰 Para ${catLabel}: ${(preciosSupers[masBaratoKey]||{}).nombre} es el más barato (ahorras RD$${(totales[masCaroKey] - totales[masBaratoKey]).toFixed(2)} vs ${(preciosSupers[masCaroKey]||{}).nombre})</span>
+    </div>` : ''}
+    
+    <p style="color:var(--text-dim);font-size:10px;margin:12px 0 0;text-align:center">⚠️ Precios por unidad (${resultados.map(r=>r.u).filter((v,i,a)=>a.indexOf(v)===i).join(', ')}). Fuentes oficiales, pueden variar. Actualizado: ${preciosLastUpdate || 'N/A'}</p>
+  </div>`;
+}
+
+// Cargar precios al iniciar
+cargarPreciosExternos();
+
+// ═══════════════════════════════════════════════════════════
+// 🔔 RECORDATORIO DE ACTUALIZACIÓN DE PRECIOS (cada 15 días)
+// ═══════════════════════════════════════════════════════════
+function verificarRecordatorioPrecios() {
+  if (!preciosLastUpdate) return;
+  const lastDate = new Date(preciosLastUpdate);
+  const hoy = new Date();
+  const diasDesdeUpdate = Math.floor((hoy - lastDate) / (1000 * 60 * 60 * 24));
+  
+  if (diasDesdeUpdate >= 15) {
+    setTimeout(() => {
+      addNotif(`🔔 ¡Han pasado ${diasDesdeUpdate} días desde la última actualización de precios! (${lastDate.toLocaleDateString('es-DO')})`);
+      addNotif(`💡 Pídele a Claude: "Actualízame los precios del inventario" para obtener precios frescos de fuentes oficiales.`);
+    }, 3000);
+  } else if (diasDesdeUpdate >= 12) {
+    setTimeout(() => {
+      addNotif(`📅 Precios actualizados hace ${diasDesdeUpdate} días. Próxima actualización sugerida en ${15 - diasDesdeUpdate} día${15 - diasDesdeUpdate > 1 ? 's' : ''}.`);
+    }, 5000);
+  }
+}
+
+function obtenerInfoPrecios() {
+  const total = Object.keys(PRECIOS_RD).length;
+  if (!preciosLastUpdate) return `${total} productos · Sin fecha de actualización`;
+  const lastDate = new Date(preciosLastUpdate);
+  const dias = Math.floor((new Date() - lastDate) / (1000 * 60 * 60 * 24));
+  const estado = dias >= 15 ? '🔴 Desactualizado' : dias >= 10 ? '🟡 Por vencer' : '🟢 Vigente';
+  return `${total} productos · ${estado} · Actualizado: ${lastDate.toLocaleDateString('es-DO')} (hace ${dias} días)`;
+}
+
+// Precios personalizados guardados por el usuario
+let preciosCustom = JSON.parse(localStorage.getItem('ayb-precios-custom') || '{}');
+
+function guardarPreciosCustom() {
+  localStorage.setItem('ayb-precios-custom', JSON.stringify(preciosCustom));
+}
+
+let autoPrecios = { buscando: false, resultado: null, error: null };
+
+function buscarPrecioLocal(nombre) {
+  const key = nombre.toLowerCase().trim();
+  
+  // 1. Primero buscar en precios personalizados
+  if (preciosCustom[key]) return { ...preciosCustom[key], origen: 'custom' };
+  
+  // 2. Buscar match exacto en la base
+  if (PRECIOS_RD[key]) return { ...PRECIOS_RD[key], confianza: 'alta' };
+  
+  // 3. Buscar si alguna key de la base está contenida en el nombre
+  for (const [k, v] of Object.entries(PRECIOS_RD)) {
+    if (key.includes(k) || k.includes(key)) return { ...v, confianza: 'media' };
+  }
+  
+  // 4. Buscar por palabras individuales (fuzzy)
+  const palabras = key.split(/\s+/).filter(p => p.length > 3);
+  for (const palabra of palabras) {
+    for (const [k, v] of Object.entries(PRECIOS_RD)) {
+      if (k.includes(palabra)) return { ...v, confianza: 'baja' };
+    }
+  }
+  
+  return null;
+}
+
+function buscarPrecioIA(nombre, unidad, categoria) {
+  autoPrecios = { buscando: true, resultado: null, error: null };
+  renderPage();
+  
+  // Simular delay de búsqueda para UX
+  setTimeout(() => {
+    const found = buscarPrecioLocal(nombre);
+    if (found) {
+      autoPrecios = { 
+        buscando: false, 
+        resultado: { 
+          precio: found.precio, 
+          fuente: found.fuente || 'Base de precios local', 
+          fecha: found.fecha || 'ene 2026', 
+          confianza: found.confianza || 'alta',
+          origen: found.origen || 'base'
+        }, 
+        error: null 
+      };
+    } else {
+      autoPrecios = { 
+        buscando: false, 
+        resultado: null, 
+        error: `No se encontró precio para "${nombre}". Puedes ingresarlo manual y se guardará para el futuro.` 
+      };
+    }
+    renderPage();
+  }, 600);
+}
+
+function aplicarPrecioIA() {
+  if (autoPrecios.resultado) {
+    const precioInput = document.getElementById('inv-precio');
+    if (precioInput) {
+      precioInput.value = autoPrecios.resultado.precio.toFixed(2);
+      addNotif(`💰 Precio aplicado: RD$${autoPrecios.resultado.precio.toFixed(2)} (${autoPrecios.resultado.fuente})`);
+    }
+  }
+}
+
+async function actualizarTodosPrecios() {
+  if (!confirm('¿Actualizar precios de TODOS los productos con la base de precios RD?')) return;
+  
+  const items = inventory.map(inv);
+  let actualizados = 0;
+  let sinDatos = 0;
+  
+  for (const item of items) {
+    const found = buscarPrecioLocal(item.nombre);
+    if (found && found.precio > 0) {
+      const original = inventory.find(x => String(x.id) === String(item.id));
+      if (original) {
+        const oldPrecio = original.precio ?? original.precio;
+        if (FB_READY) {
+          await db.collection('inventario').doc(item.id).update({ 
+            precio: found.precio,
+            precioFuente: found.fuente || 'Base precios RD',
+            actualizado: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        } else {
+          original.precio = found.precio;
+        }
+        if (oldPrecio !== found.precio) {
+          addNotif(`✅ ${item.nombre}: RD$${(+oldPrecio).toFixed(2)} → RD$${found.precio.toFixed(2)}`);
+        }
+        actualizados++;
+      }
+    } else {
+      sinDatos++;
+    }
+  }
+  
+  addNotif(`🏁 Actualización completa: ${actualizados} productos actualizados, ${sinDatos} sin datos`);
+  renderPage();
+}
+
+// Guardar precios personalizados cuando se guarda un producto
+function guardarPrecioCustom(nombre, precio) {
+  if (nombre && precio > 0) {
+    preciosCustom[nombre.toLowerCase().trim()] = {
+      precio: precio,
+      fuente: 'Precio ingresado por usuario',
+      fecha: new Date().toISOString().slice(0,10),
+      confianza: 'alta'
+    };
+    guardarPreciosCustom();
+  }
+}
+
+function renderAutoPrecioWidget() {
+  const confianzaColors = { alta: 'var(--green)', media: 'var(--orange)', baja: 'var(--red)' };
+  const confianzaIcons = { alta: '🟢', media: '🟡', baja: '🔴' };
+  
+  let html = `<div style="margin-top:8px;padding:10px 14px;border-radius:8px;background:rgba(196,30,30,0.06);border:1px solid rgba(196,30,30,0.15)">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <span style="font-size:16px">🤖</span>
+      <strong style="color:var(--text-primary);font-size:12px">Auto-Precio RD$</strong>
+      <span style="font-size:10px;color:var(--text-dim)">(base: MERCADOM, ProConsumidor, supermercados)</span>
+    </div>`;
+  
+  if (autoPrecios.buscando) {
+    html += `<div style="display:flex;align-items:center;gap:8px;color:var(--orange);font-size:12px">
+      <span class="loading-spinner"></span> Buscando precio en base de datos RD...
+    </div>`;
+  } else if (autoPrecios.resultado) {
+    const r = autoPrecios.resultado;
+    html += `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
+      <div style="background:rgba(0,0,0,0.2);padding:6px 12px;border-radius:6px">
+        <span style="color:var(--orange);font-weight:700;font-size:16px">RD$${r.precio.toFixed(2)}</span>
+        <span style="color:var(--text-dim);font-size:11px;margin-left:4px">por ${r.u || 'unidad'}</span>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim)">
+        <div>${confianzaIcons[r.confianza]||'🟡'} <span style="color:${confianzaColors[r.confianza]||'var(--text-muted)'}">${r.confianza || 'media'}</span> · ${r.fuente}</div>
+        ${r.fecha ? `<div style="margin-top:2px">📅 ${r.fecha}</div>` : ''}
+      </div>
+      <button class="btn btn-sm btn-primary" onclick="aplicarPrecioIA()" style="margin-left:auto">✓ Usar este precio</button>
+    </div>`;
+  } else if (autoPrecios.error) {
+    html += `<div style="color:var(--orange);font-size:12px">⚠️ ${autoPrecios.error}</div>`;
+  } else {
+    html += `<div style="font-size:11px;color:var(--text-dim)">Escribe el nombre y haz clic en "🤖 Buscar precio" para obtener el precio de mercado. Si no existe, tu precio se guardará para futuras búsquedas.</div>`;
+  }
+  
+  html += `</div>`;
+  return html;
+}
+
 // ═══════════════════════════════════════════════════════════
 function buildSidebar() {
   const nav = document.getElementById('sidebar-nav');
@@ -1639,6 +2275,7 @@ function inv(item) {
     id: item.id,
     nombre: item.nombre,
     cat: item.categoria || item.cat || '',
+    sub: item.sub || '',
     cant: item.cantidad !== undefined ? item.cantidad : (item.cant || 0),
     u: item.unidad || item.u || 'und',
     min: item.minimo !== undefined ? item.minimo : (item.min || 0),
@@ -2305,7 +2942,11 @@ let invMoveId = null;
 function renderInventario() {
   const allNorm = inventory.map(inv);
   const lowStock = allNorm.filter(i=>i.cant<=i.min);
-  const filtered = allNorm.filter(i=>(invCat==='Todos'||i.cat===invCat) && i.nombre.toLowerCase().includes(invSearch.toLowerCase()));
+  const filtered = allNorm.filter(i=>{
+    const catMatch = invCat==='Todos' || i.cat===invCat;
+    const subMatch = !invSubCat || (i.sub && i.sub === invSubCat) || i.nombre.toLowerCase().includes(invSubCat.toLowerCase());
+    return catMatch && subMatch && i.nombre.toLowerCase().includes(invSearch.toLowerCase());
+  });
 
   let formHTML = '';
   if (invShowAdd || invEditId) {
@@ -2315,15 +2956,20 @@ function renderInventario() {
       <h4 style="color:var(--text-primary);margin:0 0 14px">${invEditId?'Editar':'Agregar'} Producto</h4>
       <div class="grid grid-3">
         <div style="grid-column:1/3"><input class="input" id="inv-nombre" placeholder="Nombre del producto" value="${item.nombre}"></div>
-        <select class="input" id="inv-cat">${CATEGORIES.map(c=>`<option ${item.cat===c?'selected':''}>${c}</option>`).join('')}</select>
+        <select class="input" id="inv-cat" onchange="document.getElementById('inv-sub-wrap').innerHTML=renderSubCatSelect(this.value,'${item.sub||''}')">${CATEGORIES.map(c=>`<option ${item.cat===c?'selected':''}>${c}</option>`).join('')}</select>
+        <span id="inv-sub-wrap">${SUBCATS[item.cat] ? `<select class="input" id="inv-sub"><option value="">— Corte/tipo —</option>${SUBCATS[item.cat].map(s=>`<option value="${s}" ${(item.sub||'')===s?'selected':''}>${s}</option>`).join('')}</select>` : '<span></span>'}</span>
         <input class="input" id="inv-cant" type="number" placeholder="Cantidad" value="${item.cant}">
         <select class="input" id="inv-u">${['lb','oz','g','kg','und','lt','gal','caja','paq','bot'].map(u=>`<option ${item.u===u?'selected':''}>${u}</option>`).join('')}</select>
         <input class="input" id="inv-min" type="number" placeholder="Stock mínimo" value="${item.min}">
-        <input class="input" id="inv-precio" type="number" step="0.01" placeholder="Precio RD$" value="${item.precio}">
+        <div style="display:flex;gap:6px;align-items:center">
+          <input class="input" id="inv-precio" type="number" step="0.01" placeholder="Precio RD$" value="${item.precio}" style="margin:0;flex:1">
+          <button class="btn btn-sm" style="background:linear-gradient(135deg,#c41e1e,#e85d04);color:#fff;white-space:nowrap;padding:8px 10px;font-size:11px" onclick="const n=document.getElementById('inv-nombre').value;const u=document.getElementById('inv-u').value;const c=document.getElementById('inv-cat').value;if(n)buscarPrecioIA(n,u,c);else alert('Escribe el nombre del producto primero');" title="Buscar precio con IA">🤖 Buscar precio</button>
+        </div>
       </div>
-      <div style="display:flex;gap:8px;margin-top:4px">
+      ${renderAutoPrecioWidget()}
+      <div style="display:flex;gap:8px;margin-top:10px">
         <button class="btn btn-primary" onclick="saveInvItem()">Guardar</button>
-        <button class="btn btn-secondary" onclick="invShowAdd=false;invEditId=null;renderPage()">Cancelar</button>
+        <button class="btn btn-secondary" onclick="invShowAdd=false;invEditId=null;autoPrecios={buscando:false,resultado:null,error:null};renderPage()">Cancelar</button>
       </div>
     </div>`;
   }
@@ -2357,11 +3003,19 @@ function renderInventario() {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input placeholder="Buscar producto..." value="${invSearch}" oninput="invSearch=this.value;renderPage()">
       </div>
-      <select class="input" style="margin:0;width:180px" onchange="invCat=this.value;renderPage()">
+      <select class="input" style="margin:0;width:180px" onchange="invCat=this.value;invSubCat='';renderPage()">
         <option ${invCat==='Todos'?'selected':''}>Todos</option>
         ${CATEGORIES.map(c=>`<option ${invCat===c?'selected':''}>${c}</option>`).join('')}
       </select>
-      <button class="btn btn-primary" onclick="invShowAdd=true;invEditId=null;renderPage()">+ Agregar</button>
+      ${SUBCATS[invCat] ? `<select class="input" style="margin:0;width:160px;font-size:12px" onchange="invSubCat=this.value;renderPage()">
+        <option value="">Todos los cortes</option>
+        ${SUBCATS[invCat].map(s=>`<option value="${s}" ${invSubCat===s?'selected':''}>${s}</option>`).join('')}
+      </select>` : ''}
+      <button class="btn btn-primary" onclick="invShowAdd=true;invEditId=null;autoPrecios={buscando:false,resultado:null,error:null};renderPage()">+ Agregar</button>
+      <button class="btn btn-sm" onclick="actualizarTodosPrecios()" style="background:linear-gradient(135deg,#c41e1e,#e85d04);color:#fff;font-size:11px;padding:8px 12px" title="Actualizar todos los precios con base RD">🤖 Actualizar precios</button>
+      <button class="btn btn-sm" onclick="showComparador=!showComparador;renderPage()" style="background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff;font-size:11px;padding:8px 12px">🏪 Comparar supermercados</button>
+      ${FB_READY ? `<button class="btn btn-sm" onclick="replaceFirebaseInventory()" style="background:linear-gradient(135deg,#9b59b6,#8e44ad);color:#fff;font-size:11px;padding:8px 12px" title="Reemplazar inventario de Firebase con los 158 productos">🔄 Cargar 158 productos a Firebase</button>` : ''}
+      ${tag('var(--text-dim)', obtenerInfoPrecios())}
       ${tag('var(--text-muted)', inventory.length+' productos')}
       ${FB_READY?tag('var(--green)','🔥 Sincronizado'):tag('var(--orange)','⚠️ Demo')}
     </div>
@@ -2372,7 +3026,7 @@ function renderInventario() {
         <tbody>${filtered.map(item=>{
           const low = item.cant <= item.min;
           return `<tr>
-            <td><span style="color:var(--text-primary);font-weight:500">${item.nombre}</span></td>
+            <td><span style="color:var(--text-primary);font-weight:500">${item.nombre}</span>${item.sub ? `<br><span style="font-size:10px;color:var(--text-dim)">${item.sub}</span>` : ''}</td>
             <td>${tag('var(--text-dim)',item.cat)}</td>
             <td><span style="color:${low?'var(--red)':'var(--green)'};font-weight:700">${item.cant}</span></td>
             <td style="color:var(--text-muted)">${item.min}</td>
@@ -2386,20 +3040,31 @@ function renderInventario() {
           </tr>`;
         }).join('')}</tbody>
       </table>
-    </div>`;
+    </div>
+    ${renderComparador()}`;
+}
+
+function renderSubCatSelect(cat, currentSub) {
+  if (!SUBCATS[cat]) return '';
+  return `<select class="input" id="inv-sub"><option value="">— Corte/tipo —</option>${SUBCATS[cat].map(s=>`<option value="${s}" ${currentSub===s?'selected':''}>${s}</option>`).join('')}</select>`;
 }
 
 async function saveInvItem() {
   const nombre = document.getElementById('inv-nombre').value;
   if (!nombre) return;
+  const subEl = document.getElementById('inv-sub');
   const data = {
     nombre,
     cat: document.getElementById('inv-cat').value,
+    sub: subEl ? subEl.value : '',
     cant: +document.getElementById('inv-cant').value,
     u: document.getElementById('inv-u').value,
     min: +document.getElementById('inv-min').value,
     precio: +document.getElementById('inv-precio').value,
   };
+  
+  // Guardar precio en base personalizada para futuras búsquedas
+  guardarPrecioCustom(data.nombre, data.precio);
   
   if (FB_READY) {
     // ═══ GUARDAR EN FIREBASE ═══

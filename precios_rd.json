@@ -1,0 +1,2988 @@
+{
+  "actualizado": "2026-02-05",
+  "fuentes": [
+    "MERCADOM ene/2026",
+    "ProConsumidor ene/2026",
+    "Nacional",
+    "Jumbo",
+    "Sirena",
+    "PriceSmart",
+    "Bravo",
+    "SupermercadosRD.com"
+  ],
+  "zonas": {
+    "santo_domingo": {
+      "nombre": "Santo Domingo / DN",
+      "ajuste": 1.0
+    },
+    "santiago": {
+      "nombre": "Santiago",
+      "ajuste": 1.02
+    },
+    "zona_norte": {
+      "nombre": "Zona Norte (Puerto Plata)",
+      "ajuste": 1.05
+    },
+    "zona_este": {
+      "nombre": "Zona Este (La Romana, SPM)",
+      "ajuste": 1.03
+    },
+    "zona_turistica": {
+      "nombre": "Zona Turística (Punta Cana, Samaná)",
+      "ajuste": 1.15
+    },
+    "zona_sur": {
+      "nombre": "Zona Sur (Baní, Azua, San Cristóbal)",
+      "ajuste": 1.03
+    },
+    "cibao": {
+      "nombre": "Cibao Central (La Vega, Moca)",
+      "ajuste": 1.04
+    }
+  },
+  "supermercados": {
+    "nacional": {
+      "nombre": "Nacional",
+      "logo": "🟢",
+      "tipo": "premium"
+    },
+    "jumbo": {
+      "nombre": "Jumbo",
+      "logo": "🔵",
+      "tipo": "premium"
+    },
+    "sirena": {
+      "nombre": "La Sirena",
+      "logo": "🟡",
+      "tipo": "economico"
+    },
+    "bravo": {
+      "nombre": "Bravo",
+      "logo": "🟠",
+      "tipo": "medio"
+    },
+    "pricesmart": {
+      "nombre": "PriceSmart",
+      "logo": "🔴",
+      "tipo": "mayorista"
+    },
+    "plaza_lama": {
+      "nombre": "Plaza Lama",
+      "logo": "🟣",
+      "tipo": "economico"
+    },
+    "mercadom": {
+      "nombre": "MERCADOM",
+      "logo": "🏪",
+      "tipo": "mayorista"
+    },
+    "colmado": {
+      "nombre": "Colmado",
+      "logo": "🏠",
+      "tipo": "local"
+    }
+  },
+  "productos": {
+    "res": {
+      "precio": 170,
+      "u": "lb",
+      "fuente": "MERCADOM 22/ene/2026",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 195,
+        "jumbo": 190,
+        "sirena": 175,
+        "bravo": 180,
+        "pricesmart": 165,
+        "plaza_lama": 178,
+        "mercadom": 170,
+        "colmado": 200
+      }
+    },
+    "bistec": {
+      "precio": 170,
+      "u": "lb",
+      "fuente": "MERCADOM 22/ene/2026",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 195,
+        "jumbo": 190,
+        "sirena": 175,
+        "bravo": 185,
+        "pricesmart": 168,
+        "mercadom": 170,
+        "colmado": 200
+      }
+    },
+    "carne de res": {
+      "precio": 170,
+      "u": "lb",
+      "fuente": "MERCADOM 22/ene/2026",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 195,
+        "jumbo": 190,
+        "sirena": 175,
+        "bravo": 180,
+        "pricesmart": 165,
+        "mercadom": 170,
+        "colmado": 200
+      }
+    },
+    "carne molida": {
+      "precio": 140,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 155,
+        "jumbo": 150,
+        "sirena": 138,
+        "bravo": 145,
+        "pricesmart": 130,
+        "mercadom": 140,
+        "colmado": 165
+      }
+    },
+    "cerdo": {
+      "precio": 120,
+      "u": "lb",
+      "fuente": "MERCADOM 22/ene/2026",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 140,
+        "jumbo": 135,
+        "sirena": 125,
+        "bravo": 130,
+        "pricesmart": 115,
+        "mercadom": 120,
+        "colmado": 150
+      }
+    },
+    "chuleta": {
+      "precio": 120,
+      "u": "lb",
+      "fuente": "MERCADOM 22/ene/2026",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 140,
+        "jumbo": 138,
+        "sirena": 125,
+        "bravo": 130,
+        "pricesmart": 118,
+        "mercadom": 120,
+        "colmado": 150
+      }
+    },
+    "chuleta ahumada": {
+      "precio": 110,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 126.5,
+        "jumbo": 121.0,
+        "sirena": 107.8,
+        "bravo": 115.5,
+        "pricesmart": 96.8,
+        "mercadom": 110.0,
+        "colmado": 132.0
+      }
+    },
+    "costilla": {
+      "precio": 130,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 149.5,
+        "jumbo": 143.0,
+        "sirena": 127.4,
+        "bravo": 136.5,
+        "pricesmart": 114.4,
+        "mercadom": 130.0,
+        "colmado": 156.0
+      }
+    },
+    "longaniza": {
+      "precio": 100,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 115.0,
+        "jumbo": 110.0,
+        "sirena": 98.0,
+        "bravo": 105.0,
+        "pricesmart": 88.0,
+        "mercadom": 100.0,
+        "colmado": 120.0
+      }
+    },
+    "pollo": {
+      "precio": 84,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 92,
+        "jumbo": 90,
+        "sirena": 82,
+        "bravo": 85,
+        "pricesmart": 78,
+        "mercadom": 84,
+        "colmado": 95
+      }
+    },
+    "pechuga": {
+      "precio": 152,
+      "u": "lb",
+      "fuente": "Expatistan SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 170,
+        "jumbo": 165,
+        "sirena": 150,
+        "bravo": 155,
+        "pricesmart": 140,
+        "mercadom": 152,
+        "colmado": 180
+      }
+    },
+    "pechuga de pollo": {
+      "precio": 152,
+      "u": "lb",
+      "fuente": "Expatistan SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 170,
+        "jumbo": 165,
+        "sirena": 150,
+        "bravo": 155,
+        "pricesmart": 140,
+        "mercadom": 152,
+        "colmado": 180
+      }
+    },
+    "muslo": {
+      "precio": 75,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 85,
+        "jumbo": 82,
+        "sirena": 74,
+        "bravo": 78,
+        "pricesmart": 70,
+        "mercadom": 75,
+        "colmado": 90
+      }
+    },
+    "alitas": {
+      "precio": 85,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 97.75,
+        "jumbo": 93.5,
+        "sirena": 83.3,
+        "bravo": 89.25,
+        "pricesmart": 74.8,
+        "mercadom": 85.0,
+        "colmado": 102.0
+      }
+    },
+    "pollo entero": {
+      "precio": 84,
+      "u": "lb",
+      "fuente": "Jumbo.com.do",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 96.6,
+        "jumbo": 92.4,
+        "sirena": 82.32,
+        "bravo": 88.2,
+        "pricesmart": 73.92,
+        "mercadom": 84.0,
+        "colmado": 100.8
+      }
+    },
+    "dorado": {
+      "precio": 250,
+      "u": "lb",
+      "fuente": "Pescaderías SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 280,
+        "jumbo": 275,
+        "sirena": 255,
+        "pricesmart": 240,
+        "mercadom": 250
+      }
+    },
+    "dorado filete": {
+      "precio": 250,
+      "u": "lb",
+      "fuente": "Pescaderías SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 287.5,
+        "jumbo": 275.0,
+        "sirena": 245.0,
+        "bravo": 262.5,
+        "pricesmart": 220.0,
+        "mercadom": 250.0,
+        "colmado": 300.0
+      }
+    },
+    "salmon": {
+      "precio": 450,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 517.5,
+        "jumbo": 495.0,
+        "sirena": 441.0,
+        "bravo": 472.5,
+        "pricesmart": 396.0,
+        "mercadom": 450.0,
+        "colmado": 540.0
+      }
+    },
+    "camarón": {
+      "precio": 350,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 402.5,
+        "jumbo": 385.0,
+        "sirena": 343.0,
+        "bravo": 367.5,
+        "pricesmart": 308.0,
+        "mercadom": 350.0,
+        "colmado": 420.0
+      }
+    },
+    "camarones": {
+      "precio": 350,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 395,
+        "jumbo": 380,
+        "sirena": 350,
+        "pricesmart": 320,
+        "mercadom": 350
+      }
+    },
+    "bacalao": {
+      "precio": 180,
+      "u": "lb",
+      "fuente": "Mercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 207.0,
+        "jumbo": 198.0,
+        "sirena": 176.4,
+        "bravo": 189.0,
+        "pricesmart": 158.4,
+        "mercadom": 180.0,
+        "colmado": 216.0
+      }
+    },
+    "atún": {
+      "precio": 90,
+      "u": "lata",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 103.5,
+        "jumbo": 99.0,
+        "sirena": 88.2,
+        "bravo": 94.5,
+        "pricesmart": 79.2,
+        "mercadom": 90.0,
+        "colmado": 108.0
+      }
+    },
+    "sardina": {
+      "precio": 65,
+      "u": "lata",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 74.75,
+        "jumbo": 71.5,
+        "sirena": 63.7,
+        "bravo": 68.25,
+        "pricesmart": 57.2,
+        "mercadom": 65.0,
+        "colmado": 78.0
+      }
+    },
+    "habichuelas rojas": {
+      "precio": 60,
+      "u": "lb",
+      "fuente": "MERCADOM 22/ene/2026",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 68,
+        "jumbo": 65,
+        "sirena": 58,
+        "bravo": 62,
+        "pricesmart": 52,
+        "plaza_lama": 60,
+        "mercadom": 60,
+        "colmado": 70
+      }
+    },
+    "habichuelas negras": {
+      "precio": 55,
+      "u": "lb",
+      "fuente": "ProConsumidor",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 62,
+        "jumbo": 60,
+        "sirena": 53,
+        "bravo": 57,
+        "pricesmart": 48,
+        "mercadom": 55,
+        "colmado": 65
+      }
+    },
+    "habichuelas pintas": {
+      "precio": 45,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 51.75,
+        "jumbo": 49.5,
+        "sirena": 44.1,
+        "bravo": 47.25,
+        "pricesmart": 39.6,
+        "mercadom": 45.0,
+        "colmado": 54.0
+      }
+    },
+    "habichuela": {
+      "precio": 60,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 69.0,
+        "jumbo": 66.0,
+        "sirena": 58.8,
+        "bravo": 63.0,
+        "pricesmart": 52.8,
+        "mercadom": 60.0,
+        "colmado": 72.0
+      }
+    },
+    "guandules secos": {
+      "precio": 65,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 75,
+        "jumbo": 72,
+        "sirena": 63,
+        "bravo": 68,
+        "pricesmart": 58,
+        "mercadom": 65,
+        "colmado": 78
+      }
+    },
+    "guandules verdes": {
+      "precio": 110,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 126.5,
+        "jumbo": 121.0,
+        "sirena": 107.8,
+        "bravo": 115.5,
+        "pricesmart": 96.8,
+        "mercadom": 110.0,
+        "colmado": 132.0
+      }
+    },
+    "guandules": {
+      "precio": 65,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 74.75,
+        "jumbo": 71.5,
+        "sirena": 63.7,
+        "bravo": 68.25,
+        "pricesmart": 57.2,
+        "mercadom": 65.0,
+        "colmado": 78.0
+      }
+    },
+    "lentejas": {
+      "precio": 45,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 51.75,
+        "jumbo": 49.5,
+        "sirena": 44.1,
+        "bravo": 47.25,
+        "pricesmart": 39.6,
+        "mercadom": 45.0,
+        "colmado": 54.0
+      }
+    },
+    "garbanzos": {
+      "precio": 55,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 63.25,
+        "jumbo": 60.5,
+        "sirena": 53.9,
+        "bravo": 57.75,
+        "pricesmart": 48.4,
+        "mercadom": 55.0,
+        "colmado": 66.0
+      }
+    },
+    "arroz": {
+      "precio": 45,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 50,
+        "jumbo": 48,
+        "sirena": 43,
+        "bravo": 46,
+        "pricesmart": 38,
+        "plaza_lama": 44,
+        "mercadom": 45,
+        "colmado": 52
+      }
+    },
+    "arroz largo grano": {
+      "precio": 45,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 51.75,
+        "jumbo": 49.5,
+        "sirena": 44.1,
+        "bravo": 47.25,
+        "pricesmart": 39.6,
+        "mercadom": 45.0,
+        "colmado": 54.0
+      }
+    },
+    "arroz selecto": {
+      "precio": 37,
+      "u": "lb",
+      "fuente": "ProConsumidor",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 42,
+        "jumbo": 40,
+        "sirena": 36,
+        "bravo": 38,
+        "pricesmart": 32,
+        "mercadom": 37,
+        "colmado": 45
+      }
+    },
+    "cebolla": {
+      "precio": 40,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 48,
+        "jumbo": 46,
+        "sirena": 40,
+        "bravo": 43,
+        "pricesmart": 35,
+        "mercadom": 40,
+        "colmado": 50
+      }
+    },
+    "cebolla roja": {
+      "precio": 40,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 46.0,
+        "jumbo": 44.0,
+        "sirena": 39.2,
+        "bravo": 42.0,
+        "pricesmart": 35.2,
+        "mercadom": 40.0,
+        "colmado": 48.0
+      }
+    },
+    "ajo": {
+      "precio": 160,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 185,
+        "jumbo": 180,
+        "sirena": 162,
+        "bravo": 170,
+        "pricesmart": 150,
+        "mercadom": 160,
+        "colmado": 195
+      }
+    },
+    "ajo importado": {
+      "precio": 160,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 184.0,
+        "jumbo": 176.0,
+        "sirena": 156.8,
+        "bravo": 168.0,
+        "pricesmart": 140.8,
+        "mercadom": 160.0,
+        "colmado": 192.0
+      }
+    },
+    "tomate": {
+      "precio": 45,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 55,
+        "jumbo": 52,
+        "sirena": 45,
+        "bravo": 48,
+        "mercadom": 45,
+        "colmado": 55
+      }
+    },
+    "tomates": {
+      "precio": 45,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 51.75,
+        "jumbo": 49.5,
+        "sirena": 44.1,
+        "bravo": 47.25,
+        "pricesmart": 39.6,
+        "mercadom": 45.0,
+        "colmado": 54.0
+      }
+    },
+    "lechuga": {
+      "precio": 13,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 18,
+        "jumbo": 16,
+        "sirena": 13,
+        "bravo": 15,
+        "mercadom": 13,
+        "colmado": 20
+      }
+    },
+    "lechuga repollada": {
+      "precio": 13,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 14.95,
+        "jumbo": 14.3,
+        "sirena": 12.74,
+        "bravo": 13.65,
+        "pricesmart": 11.44,
+        "mercadom": 13.0,
+        "colmado": 15.6
+      }
+    },
+    "plátano maduro": {
+      "precio": 25,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 30,
+        "jumbo": 28,
+        "sirena": 25,
+        "bravo": 27,
+        "mercadom": 25,
+        "colmado": 30
+      }
+    },
+    "plátanos maduros": {
+      "precio": 25,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 28.75,
+        "jumbo": 27.5,
+        "sirena": 24.5,
+        "bravo": 26.25,
+        "pricesmart": 22.0,
+        "mercadom": 25.0,
+        "colmado": 30.0
+      }
+    },
+    "plátano verde": {
+      "precio": 23,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 26.45,
+        "jumbo": 25.3,
+        "sirena": 22.54,
+        "bravo": 24.15,
+        "pricesmart": 20.24,
+        "mercadom": 23.0,
+        "colmado": 27.6
+      }
+    },
+    "plátanos verdes": {
+      "precio": 23,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 26.45,
+        "jumbo": 25.3,
+        "sirena": 22.54,
+        "bravo": 24.15,
+        "pricesmart": 20.24,
+        "mercadom": 23.0,
+        "colmado": 27.6
+      }
+    },
+    "plátano": {
+      "precio": 25,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 28.75,
+        "jumbo": 27.5,
+        "sirena": 24.5,
+        "bravo": 26.25,
+        "pricesmart": 22.0,
+        "mercadom": 25.0,
+        "colmado": 30.0
+      }
+    },
+    "guineo verde": {
+      "precio": 5,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 5.75,
+        "jumbo": 5.5,
+        "sirena": 4.9,
+        "bravo": 5.25,
+        "pricesmart": 4.4,
+        "mercadom": 5.0,
+        "colmado": 6.0
+      }
+    },
+    "guineo": {
+      "precio": 5,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 5.75,
+        "jumbo": 5.5,
+        "sirena": 4.9,
+        "bravo": 5.25,
+        "pricesmart": 4.4,
+        "mercadom": 5.0,
+        "colmado": 6.0
+      }
+    },
+    "papa": {
+      "precio": 35,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 42,
+        "jumbo": 40,
+        "sirena": 35,
+        "bravo": 38,
+        "pricesmart": 30,
+        "mercadom": 35,
+        "colmado": 42
+      }
+    },
+    "yuca": {
+      "precio": 35,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 40.25,
+        "jumbo": 38.5,
+        "sirena": 34.3,
+        "bravo": 36.75,
+        "pricesmart": 30.8,
+        "mercadom": 35.0,
+        "colmado": 42.0
+      }
+    },
+    "yautía": {
+      "precio": 45,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 51.75,
+        "jumbo": 49.5,
+        "sirena": 44.1,
+        "bravo": 47.25,
+        "pricesmart": 39.6,
+        "mercadom": 45.0,
+        "colmado": 54.0
+      }
+    },
+    "zanahoria": {
+      "precio": 25,
+      "u": "lb",
+      "fuente": "Mercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 28.75,
+        "jumbo": 27.5,
+        "sirena": 24.5,
+        "bravo": 26.25,
+        "pricesmart": 22.0,
+        "mercadom": 25.0,
+        "colmado": 30.0
+      }
+    },
+    "ají cubanela": {
+      "precio": 25,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 28.75,
+        "jumbo": 27.5,
+        "sirena": 24.5,
+        "bravo": 26.25,
+        "pricesmart": 22.0,
+        "mercadom": 25.0,
+        "colmado": 30.0
+      }
+    },
+    "ají gustoso": {
+      "precio": 75,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 86.25,
+        "jumbo": 82.5,
+        "sirena": 73.5,
+        "bravo": 78.75,
+        "pricesmart": 66.0,
+        "mercadom": 75.0,
+        "colmado": 90.0
+      }
+    },
+    "ají morrón": {
+      "precio": 40,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 46.0,
+        "jumbo": 44.0,
+        "sirena": 39.2,
+        "bravo": 42.0,
+        "pricesmart": 35.2,
+        "mercadom": 40.0,
+        "colmado": 48.0
+      }
+    },
+    "berenjena": {
+      "precio": 15,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 17.25,
+        "jumbo": 16.5,
+        "sirena": 14.7,
+        "bravo": 15.75,
+        "pricesmart": 13.2,
+        "mercadom": 15.0,
+        "colmado": 18.0
+      }
+    },
+    "brócoli": {
+      "precio": 50,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 57.5,
+        "jumbo": 55.0,
+        "sirena": 49.0,
+        "bravo": 52.5,
+        "pricesmart": 44.0,
+        "mercadom": 50.0,
+        "colmado": 60.0
+      }
+    },
+    "apio": {
+      "precio": 30,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 34.5,
+        "jumbo": 33.0,
+        "sirena": 29.4,
+        "bravo": 31.5,
+        "pricesmart": 26.4,
+        "mercadom": 30.0,
+        "colmado": 36.0
+      }
+    },
+    "repollo": {
+      "precio": 110,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 126.5,
+        "jumbo": 121.0,
+        "sirena": 107.8,
+        "bravo": 115.5,
+        "pricesmart": 96.8,
+        "mercadom": 110.0,
+        "colmado": 132.0
+      }
+    },
+    "pepino": {
+      "precio": 15,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 17.25,
+        "jumbo": 16.5,
+        "sirena": 14.7,
+        "bravo": 15.75,
+        "pricesmart": 13.2,
+        "mercadom": 15.0,
+        "colmado": 18.0
+      }
+    },
+    "tayota": {
+      "precio": 25,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 28.75,
+        "jumbo": 27.5,
+        "sirena": 24.5,
+        "bravo": 26.25,
+        "pricesmart": 22.0,
+        "mercadom": 25.0,
+        "colmado": 30.0
+      }
+    },
+    "batata": {
+      "precio": 33,
+      "u": "lb",
+      "fuente": "Primicias",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 37.95,
+        "jumbo": 36.3,
+        "sirena": 32.34,
+        "bravo": 34.65,
+        "pricesmart": 29.04,
+        "mercadom": 33.0,
+        "colmado": 39.6
+      }
+    },
+    "remolacha": {
+      "precio": 20,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 23.0,
+        "jumbo": 22.0,
+        "sirena": 19.6,
+        "bravo": 21.0,
+        "pricesmart": 17.6,
+        "mercadom": 20.0,
+        "colmado": 24.0
+      }
+    },
+    "espinaca": {
+      "precio": 60,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 69.0,
+        "jumbo": 66.0,
+        "sirena": 58.8,
+        "bravo": 63.0,
+        "pricesmart": 52.8,
+        "mercadom": 60.0,
+        "colmado": 72.0
+      }
+    },
+    "maíz": {
+      "precio": 60,
+      "u": "lata",
+      "fuente": "Inespre",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 69.0,
+        "jumbo": 66.0,
+        "sirena": 58.8,
+        "bravo": 63.0,
+        "pricesmart": 52.8,
+        "mercadom": 60.0,
+        "colmado": 72.0
+      }
+    },
+    "aguacate": {
+      "precio": 30,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 34.5,
+        "jumbo": 33.0,
+        "sirena": 29.4,
+        "bravo": 31.5,
+        "pricesmart": 26.4,
+        "mercadom": 30.0,
+        "colmado": 36.0
+      }
+    },
+    "naranja": {
+      "precio": 12,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 13.8,
+        "jumbo": 13.2,
+        "sirena": 11.76,
+        "bravo": 12.6,
+        "pricesmart": 10.56,
+        "mercadom": 12.0,
+        "colmado": 14.4
+      }
+    },
+    "limón": {
+      "precio": 60,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 69.0,
+        "jumbo": 66.0,
+        "sirena": 58.8,
+        "bravo": 63.0,
+        "pricesmart": 52.8,
+        "mercadom": 60.0,
+        "colmado": 72.0
+      }
+    },
+    "piña": {
+      "precio": 60,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 69.0,
+        "jumbo": 66.0,
+        "sirena": 58.8,
+        "bravo": 63.0,
+        "pricesmart": 52.8,
+        "mercadom": 60.0,
+        "colmado": 72.0
+      }
+    },
+    "chinola": {
+      "precio": 18,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 20.7,
+        "jumbo": 19.8,
+        "sirena": 17.64,
+        "bravo": 18.9,
+        "pricesmart": 15.84,
+        "mercadom": 18.0,
+        "colmado": 21.6
+      }
+    },
+    "mango": {
+      "precio": 15,
+      "u": "und",
+      "fuente": "Mercados SD",
+      "fecha": "2025",
+      "porSuper": {
+        "nacional": 17.25,
+        "jumbo": 16.5,
+        "sirena": 14.7,
+        "bravo": 15.75,
+        "pricesmart": 13.2,
+        "mercadom": 15.0,
+        "colmado": 18.0
+      }
+    },
+    "lechosa": {
+      "precio": 18,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 20.7,
+        "jumbo": 19.8,
+        "sirena": 17.64,
+        "bravo": 18.9,
+        "pricesmart": 15.84,
+        "mercadom": 18.0,
+        "colmado": 21.6
+      }
+    },
+    "coco seco": {
+      "precio": 50,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 57.5,
+        "jumbo": 55.0,
+        "sirena": 49.0,
+        "bravo": 52.5,
+        "pricesmart": 44.0,
+        "mercadom": 50.0,
+        "colmado": 60.0
+      }
+    },
+    "queso mozzarella": {
+      "precio": 200,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 230.0,
+        "jumbo": 220.0,
+        "sirena": 196.0,
+        "bravo": 210.0,
+        "pricesmart": 176.0,
+        "mercadom": 200.0,
+        "colmado": 240.0
+      }
+    },
+    "queso blanco": {
+      "precio": 142,
+      "u": "lb",
+      "fuente": "ProConsumidor",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 160,
+        "jumbo": 155,
+        "sirena": 140,
+        "bravo": 148,
+        "pricesmart": 130,
+        "mercadom": 142,
+        "colmado": 170
+      }
+    },
+    "queso": {
+      "precio": 142,
+      "u": "lb",
+      "fuente": "ProConsumidor",
+      "fecha": "2025-07",
+      "porSuper": {
+        "nacional": 163.3,
+        "jumbo": 156.2,
+        "sirena": 139.16,
+        "bravo": 149.1,
+        "pricesmart": 124.96,
+        "mercadom": 142.0,
+        "colmado": 170.4
+      }
+    },
+    "queso de freír": {
+      "precio": 120,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 138.0,
+        "jumbo": 132.0,
+        "sirena": 117.6,
+        "bravo": 126.0,
+        "pricesmart": 105.6,
+        "mercadom": 120.0,
+        "colmado": 144.0
+      }
+    },
+    "crema de leche": {
+      "precio": 185,
+      "u": "lt",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 212.75,
+        "jumbo": 203.5,
+        "sirena": 181.3,
+        "bravo": 194.25,
+        "pricesmart": 162.8,
+        "mercadom": 185.0,
+        "colmado": 222.0
+      }
+    },
+    "leche": {
+      "precio": 62,
+      "u": "lt",
+      "fuente": "ProConsumidor",
+      "fecha": "2025-07",
+      "porSuper": {
+        "nacional": 72,
+        "jumbo": 68,
+        "sirena": 60,
+        "bravo": 65,
+        "pricesmart": 55,
+        "colmado": 75
+      }
+    },
+    "leche en polvo": {
+      "precio": 85,
+      "u": "sobre",
+      "fuente": "ProConsumidor",
+      "fecha": "2025-07",
+      "porSuper": {
+        "nacional": 97.75,
+        "jumbo": 93.5,
+        "sirena": 83.3,
+        "bravo": 89.25,
+        "pricesmart": 74.8,
+        "mercadom": 85.0,
+        "colmado": 102.0
+      }
+    },
+    "mantequilla": {
+      "precio": 165,
+      "u": "lb",
+      "fuente": "Inespre",
+      "fecha": "2024-12",
+      "porSuper": {
+        "nacional": 189.75,
+        "jumbo": 181.5,
+        "sirena": 161.7,
+        "bravo": 173.25,
+        "pricesmart": 145.2,
+        "mercadom": 165.0,
+        "colmado": 198.0
+      }
+    },
+    "huevos": {
+      "precio": 6.83,
+      "u": "und",
+      "fuente": "MERCADOM (RD$205/30)",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 7.5,
+        "jumbo": 7.3,
+        "sirena": 6.8,
+        "bravo": 7.0,
+        "pricesmart": 6.2,
+        "mercadom": 6.83,
+        "colmado": 8.0
+      }
+    },
+    "huevo": {
+      "precio": 6.83,
+      "u": "und",
+      "fuente": "MERCADOM (RD$205/30)",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 7.85,
+        "jumbo": 7.51,
+        "sirena": 6.69,
+        "bravo": 7.17,
+        "pricesmart": 6.01,
+        "mercadom": 6.83,
+        "colmado": 8.2
+      }
+    },
+    "yogurt": {
+      "precio": 45,
+      "u": "und",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 51.75,
+        "jumbo": 49.5,
+        "sirena": 44.1,
+        "bravo": 47.25,
+        "pricesmart": 39.6,
+        "mercadom": 45.0,
+        "colmado": 54.0
+      }
+    },
+    "sal": {
+      "precio": 15,
+      "u": "lb",
+      "fuente": "Inespre/supermercados",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 18,
+        "jumbo": 17,
+        "sirena": 15,
+        "bravo": 16,
+        "pricesmart": 12,
+        "colmado": 20
+      }
+    },
+    "orégano": {
+      "precio": 50,
+      "u": "lb",
+      "fuente": "Inespre/mercados",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 57.5,
+        "jumbo": 55.0,
+        "sirena": 49.0,
+        "bravo": 52.5,
+        "pricesmart": 44.0,
+        "mercadom": 50.0,
+        "colmado": 60.0
+      }
+    },
+    "pimienta": {
+      "precio": 80,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 92.0,
+        "jumbo": 88.0,
+        "sirena": 78.4,
+        "bravo": 84.0,
+        "pricesmart": 70.4,
+        "mercadom": 80.0,
+        "colmado": 96.0
+      }
+    },
+    "cilantro": {
+      "precio": 50,
+      "u": "paq",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 57.5,
+        "jumbo": 55.0,
+        "sirena": 49.0,
+        "bravo": 52.5,
+        "pricesmart": 44.0,
+        "mercadom": 50.0,
+        "colmado": 60.0
+      }
+    },
+    "sazón": {
+      "precio": 50,
+      "u": "paq",
+      "fuente": "Inespre",
+      "fecha": "2025",
+      "porSuper": {
+        "nacional": 57.5,
+        "jumbo": 55.0,
+        "sirena": 49.0,
+        "bravo": 52.5,
+        "pricesmart": 44.0,
+        "mercadom": 50.0,
+        "colmado": 60.0
+      }
+    },
+    "vinagre": {
+      "precio": 18,
+      "u": "bot",
+      "fuente": "Inespre",
+      "fecha": "2025",
+      "porSuper": {
+        "nacional": 20.7,
+        "jumbo": 19.8,
+        "sirena": 17.64,
+        "bravo": 18.9,
+        "pricesmart": 15.84,
+        "mercadom": 18.0,
+        "colmado": 21.6
+      }
+    },
+    "canela": {
+      "precio": 120,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 138.0,
+        "jumbo": 132.0,
+        "sirena": 117.6,
+        "bravo": 126.0,
+        "pricesmart": 105.6,
+        "mercadom": 120.0,
+        "colmado": 144.0
+      }
+    },
+    "aceite vegetal": {
+      "precio": 615,
+      "u": "gal",
+      "fuente": "MERCADOM 22/ene/2026",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 680,
+        "jumbo": 665,
+        "sirena": 610,
+        "bravo": 640,
+        "pricesmart": 580,
+        "plaza_lama": 620,
+        "mercadom": 615,
+        "colmado": 700
+      }
+    },
+    "aceite crisol": {
+      "precio": 615,
+      "u": "gal",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 707.25,
+        "jumbo": 676.5,
+        "sirena": 602.7,
+        "bravo": 645.75,
+        "pricesmart": 541.2,
+        "mercadom": 615.0,
+        "colmado": 738.0
+      }
+    },
+    "aceite de oliva": {
+      "precio": 450,
+      "u": "lt",
+      "fuente": "Supermercados SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 517.5,
+        "jumbo": 495.0,
+        "sirena": 441.0,
+        "bravo": 472.5,
+        "pricesmart": 396.0,
+        "mercadom": 450.0,
+        "colmado": 540.0
+      }
+    },
+    "aceite": {
+      "precio": 615,
+      "u": "gal",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 707.25,
+        "jumbo": 676.5,
+        "sirena": 602.7,
+        "bravo": 645.75,
+        "pricesmart": 541.2,
+        "mercadom": 615.0,
+        "colmado": 738.0
+      }
+    },
+    "harina de trigo": {
+      "precio": 28,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 32,
+        "jumbo": 30,
+        "sirena": 27,
+        "bravo": 29,
+        "pricesmart": 24,
+        "colmado": 35
+      }
+    },
+    "harina de maíz": {
+      "precio": 20,
+      "u": "lb",
+      "fuente": "Inespre",
+      "fecha": "2025",
+      "porSuper": {
+        "nacional": 23.0,
+        "jumbo": 22.0,
+        "sirena": 19.6,
+        "bravo": 21.0,
+        "pricesmart": 17.6,
+        "mercadom": 20.0,
+        "colmado": 24.0
+      }
+    },
+    "harina": {
+      "precio": 28,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 32.2,
+        "jumbo": 30.8,
+        "sirena": 27.44,
+        "bravo": 29.4,
+        "pricesmart": 24.64,
+        "mercadom": 28.0,
+        "colmado": 33.6
+      }
+    },
+    "pasta": {
+      "precio": 35,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 42,
+        "jumbo": 40,
+        "sirena": 34,
+        "bravo": 38,
+        "pricesmart": 30,
+        "colmado": 45
+      }
+    },
+    "pasta espaguetis": {
+      "precio": 35,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 40.25,
+        "jumbo": 38.5,
+        "sirena": 34.3,
+        "bravo": 36.75,
+        "pricesmart": 30.8,
+        "mercadom": 35.0,
+        "colmado": 42.0
+      }
+    },
+    "espaguetis": {
+      "precio": 35,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 40.25,
+        "jumbo": 38.5,
+        "sirena": 34.3,
+        "bravo": 36.75,
+        "pricesmart": 30.8,
+        "mercadom": 35.0,
+        "colmado": 42.0
+      }
+    },
+    "pan": {
+      "precio": 10,
+      "u": "und",
+      "fuente": "Panaderías SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 11.5,
+        "jumbo": 11.0,
+        "sirena": 9.8,
+        "bravo": 10.5,
+        "pricesmart": 8.8,
+        "mercadom": 10.0,
+        "colmado": 12.0
+      }
+    },
+    "pan de sándwich": {
+      "precio": 120,
+      "u": "paq",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 138.0,
+        "jumbo": 132.0,
+        "sirena": 117.6,
+        "bravo": 126.0,
+        "pricesmart": 105.6,
+        "mercadom": 120.0,
+        "colmado": 144.0
+      }
+    },
+    "salsa de tomate": {
+      "precio": 120,
+      "u": "lt",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 140,
+        "jumbo": 135,
+        "sirena": 118,
+        "bravo": 125,
+        "pricesmart": 105
+      }
+    },
+    "pasta de tomate": {
+      "precio": 45,
+      "u": "lata",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 51.75,
+        "jumbo": 49.5,
+        "sirena": 44.1,
+        "bravo": 47.25,
+        "pricesmart": 39.6,
+        "mercadom": 45.0,
+        "colmado": 54.0
+      }
+    },
+    "guandules enlatados": {
+      "precio": 69,
+      "u": "lata",
+      "fuente": "Inespre",
+      "fecha": "2024-12",
+      "porSuper": {
+        "nacional": 79.35,
+        "jumbo": 75.9,
+        "sirena": 67.62,
+        "bravo": 72.45,
+        "pricesmart": 60.72,
+        "mercadom": 69.0,
+        "colmado": 82.8
+      }
+    },
+    "salami": {
+      "precio": 75,
+      "u": "lb",
+      "fuente": "Inespre",
+      "fecha": "2024-12",
+      "porSuper": {
+        "nacional": 88,
+        "jumbo": 85,
+        "sirena": 74,
+        "bravo": 78,
+        "pricesmart": 68,
+        "mercadom": 75,
+        "colmado": 90
+      }
+    },
+    "jamón": {
+      "precio": 120,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 138.0,
+        "jumbo": 132.0,
+        "sirena": 117.6,
+        "bravo": 126.0,
+        "pricesmart": 105.6,
+        "mercadom": 120.0,
+        "colmado": 144.0
+      }
+    },
+    "jamoneta": {
+      "precio": 100,
+      "u": "lb",
+      "fuente": "Inespre",
+      "fecha": "2024-12",
+      "porSuper": {
+        "nacional": 115.0,
+        "jumbo": 110.0,
+        "sirena": 98.0,
+        "bravo": 105.0,
+        "pricesmart": 88.0,
+        "mercadom": 100.0,
+        "colmado": 120.0
+      }
+    },
+    "salchicha": {
+      "precio": 70,
+      "u": "lb",
+      "fuente": "Inespre",
+      "fecha": "2024-12",
+      "porSuper": {
+        "nacional": 80.5,
+        "jumbo": 77.0,
+        "sirena": 68.6,
+        "bravo": 73.5,
+        "pricesmart": 61.6,
+        "mercadom": 70.0,
+        "colmado": 84.0
+      }
+    },
+    "azúcar": {
+      "precio": 34,
+      "u": "lb",
+      "fuente": "ProConsumidor",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 40,
+        "jumbo": 38,
+        "sirena": 33,
+        "bravo": 36,
+        "pricesmart": 28,
+        "mercadom": 34,
+        "colmado": 42
+      }
+    },
+    "azúcar crema": {
+      "precio": 34,
+      "u": "lb",
+      "fuente": "ProConsumidor",
+      "fecha": "2025-07",
+      "porSuper": {
+        "nacional": 39.1,
+        "jumbo": 37.4,
+        "sirena": 33.32,
+        "bravo": 35.7,
+        "pricesmart": 29.92,
+        "mercadom": 34.0,
+        "colmado": 40.8
+      }
+    },
+    "azúcar blanca": {
+      "precio": 43,
+      "u": "lb",
+      "fuente": "ProConsumidor",
+      "fecha": "2025-07",
+      "porSuper": {
+        "nacional": 49.45,
+        "jumbo": 47.3,
+        "sirena": 42.14,
+        "bravo": 45.15,
+        "pricesmart": 37.84,
+        "mercadom": 43.0,
+        "colmado": 51.6
+      }
+    },
+    "café": {
+      "precio": 80,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 92.0,
+        "jumbo": 88.0,
+        "sirena": 78.4,
+        "bravo": 84.0,
+        "pricesmart": 70.4,
+        "mercadom": 80.0,
+        "colmado": 96.0
+      }
+    },
+    "chocolate": {
+      "precio": 70,
+      "u": "caja",
+      "fuente": "Inespre",
+      "fecha": "2025",
+      "porSuper": {
+        "nacional": 80.5,
+        "jumbo": 77.0,
+        "sirena": 68.6,
+        "bravo": 73.5,
+        "pricesmart": 61.6,
+        "mercadom": 70.0,
+        "colmado": 84.0
+      }
+    },
+    "avena": {
+      "precio": 90,
+      "u": "paq",
+      "fuente": "ProConsumidor",
+      "fecha": "2025-07",
+      "porSuper": {
+        "nacional": 103.5,
+        "jumbo": 99.0,
+        "sirena": 88.2,
+        "bravo": 94.5,
+        "pricesmart": 79.2,
+        "mercadom": 90.0,
+        "colmado": 108.0
+      }
+    },
+    "churrasco": {
+      "precio": 195,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 224.25,
+        "jumbo": 214.5,
+        "sirena": 191.1,
+        "bravo": 204.75,
+        "pricesmart": 171.6,
+        "mercadom": 195.0,
+        "colmado": 234.0
+      }
+    },
+    "punta trasera": {
+      "precio": 180,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 207.0,
+        "jumbo": 198.0,
+        "sirena": 176.4,
+        "bravo": 189.0,
+        "pricesmart": 158.4,
+        "mercadom": 180.0,
+        "colmado": 216.0
+      }
+    },
+    "osobuco": {
+      "precio": 120,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 138.0,
+        "jumbo": 132.0,
+        "sirena": 117.6,
+        "bravo": 126.0,
+        "pricesmart": 105.6,
+        "mercadom": 120.0,
+        "colmado": 144.0
+      }
+    },
+    "rabo de res": {
+      "precio": 160,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 184.0,
+        "jumbo": 176.0,
+        "sirena": 156.8,
+        "bravo": 168.0,
+        "pricesmart": 140.8,
+        "mercadom": 160.0,
+        "colmado": 192.0
+      }
+    },
+    "falda de res": {
+      "precio": 145,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 166.75,
+        "jumbo": 159.5,
+        "sirena": 142.1,
+        "bravo": 152.25,
+        "pricesmart": 127.6,
+        "mercadom": 145.0,
+        "colmado": 174.0
+      }
+    },
+    "costilla de res": {
+      "precio": 130,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 149.5,
+        "jumbo": 143.0,
+        "sirena": 127.4,
+        "bravo": 136.5,
+        "pricesmart": 114.4,
+        "mercadom": 130.0,
+        "colmado": 156.0
+      }
+    },
+    "bistec de res": {
+      "precio": 170,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 195.5,
+        "jumbo": 187.0,
+        "sirena": 166.6,
+        "bravo": 178.5,
+        "pricesmart": 149.6,
+        "mercadom": 170.0,
+        "colmado": 204.0
+      }
+    },
+    "costilla de cerdo": {
+      "precio": 125,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 143.75,
+        "jumbo": 137.5,
+        "sirena": 122.5,
+        "bravo": 131.25,
+        "pricesmart": 110.0,
+        "mercadom": 125.0,
+        "colmado": 150.0
+      }
+    },
+    "pierna de cerdo": {
+      "precio": 115,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 132.25,
+        "jumbo": 126.5,
+        "sirena": 112.7,
+        "bravo": 120.75,
+        "pricesmart": 101.2,
+        "mercadom": 115.0,
+        "colmado": 138.0
+      }
+    },
+    "lomo de cerdo": {
+      "precio": 135,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 155.25,
+        "jumbo": 148.5,
+        "sirena": 132.3,
+        "bravo": 141.75,
+        "pricesmart": 118.8,
+        "mercadom": 135.0,
+        "colmado": 162.0
+      }
+    },
+    "pernil": {
+      "precio": 110,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 126.5,
+        "jumbo": 121.0,
+        "sirena": 107.8,
+        "bravo": 115.5,
+        "pricesmart": 96.8,
+        "mercadom": 110.0,
+        "colmado": 132.0
+      }
+    },
+    "chicharrón": {
+      "precio": 150,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2026-01",
+      "porSuper": {
+        "nacional": 172.5,
+        "jumbo": 165.0,
+        "sirena": 147.0,
+        "bravo": 157.5,
+        "pricesmart": 132.0,
+        "mercadom": 150.0,
+        "colmado": 180.0
+      }
+    },
+    "chuleta de cerdo": {
+      "precio": 120,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 138.0,
+        "jumbo": 132.0,
+        "sirena": 117.6,
+        "bravo": 126.0,
+        "pricesmart": 105.6,
+        "mercadom": 120.0,
+        "colmado": 144.0
+      }
+    },
+    "muslo ancho": {
+      "precio": 85,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 97.75,
+        "jumbo": 93.5,
+        "sirena": 83.3,
+        "bravo": 89.25,
+        "pricesmart": 74.8,
+        "mercadom": 85.0,
+        "colmado": 102.0
+      }
+    },
+    "cuarto trasero": {
+      "precio": 68,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 78.2,
+        "jumbo": 74.8,
+        "sirena": 66.64,
+        "bravo": 71.4,
+        "pricesmart": 59.84,
+        "mercadom": 68.0,
+        "colmado": 81.6
+      }
+    },
+    "muslo de pollo": {
+      "precio": 75,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 86.25,
+        "jumbo": 82.5,
+        "sirena": 73.5,
+        "bravo": 78.75,
+        "pricesmart": 66.0,
+        "mercadom": 75.0,
+        "colmado": 90.0
+      }
+    },
+    "alitas de pollo": {
+      "precio": 85,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 97.75,
+        "jumbo": 93.5,
+        "sirena": 83.3,
+        "bravo": 89.25,
+        "pricesmart": 74.8,
+        "mercadom": 85.0,
+        "colmado": 102.0
+      }
+    },
+    "chillo": {
+      "precio": 220,
+      "u": "lb",
+      "fuente": "Pescaderías SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 253.0,
+        "jumbo": 242.0,
+        "sirena": 215.6,
+        "bravo": 231.0,
+        "pricesmart": 193.6,
+        "mercadom": 220.0,
+        "colmado": 264.0
+      }
+    },
+    "mero": {
+      "precio": 280,
+      "u": "lb",
+      "fuente": "Pescaderías SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 322.0,
+        "jumbo": 308.0,
+        "sirena": 274.4,
+        "bravo": 294.0,
+        "pricesmart": 246.4,
+        "mercadom": 280.0,
+        "colmado": 336.0
+      }
+    },
+    "tilapia": {
+      "precio": 120,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 138.0,
+        "jumbo": 132.0,
+        "sirena": 117.6,
+        "bravo": 126.0,
+        "pricesmart": 105.6,
+        "mercadom": 120.0,
+        "colmado": 144.0
+      }
+    },
+    "langosta": {
+      "precio": 600,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 690.0,
+        "jumbo": 660.0,
+        "sirena": 588.0,
+        "bravo": 630.0,
+        "pricesmart": 528.0,
+        "mercadom": 600.0,
+        "colmado": 720.0
+      }
+    },
+    "pulpo": {
+      "precio": 320,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 368.0,
+        "jumbo": 352.0,
+        "sirena": 313.6,
+        "bravo": 336.0,
+        "pricesmart": 281.6,
+        "mercadom": 320.0,
+        "colmado": 384.0
+      }
+    },
+    "lambí": {
+      "precio": 280,
+      "u": "lb",
+      "fuente": "Mercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 322.0,
+        "jumbo": 308.0,
+        "sirena": 274.4,
+        "bravo": 294.0,
+        "pricesmart": 246.4,
+        "mercadom": 280.0,
+        "colmado": 336.0
+      }
+    },
+    "tocineta": {
+      "precio": 180,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 207.0,
+        "jumbo": 198.0,
+        "sirena": 176.4,
+        "bravo": 189.0,
+        "pricesmart": 158.4,
+        "mercadom": 180.0,
+        "colmado": 216.0
+      }
+    },
+    "queso cheddar": {
+      "precio": 220,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 253.0,
+        "jumbo": 242.0,
+        "sirena": 215.6,
+        "bravo": 231.0,
+        "pricesmart": 193.6,
+        "mercadom": 220.0,
+        "colmado": 264.0
+      }
+    },
+    "leche evaporada": {
+      "precio": 65,
+      "u": "lata",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 74.75,
+        "jumbo": 71.5,
+        "sirena": 63.7,
+        "bravo": 68.25,
+        "pricesmart": 57.2,
+        "mercadom": 65.0,
+        "colmado": 78.0
+      }
+    },
+    "leche condensada": {
+      "precio": 75,
+      "u": "lata",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 86.25,
+        "jumbo": 82.5,
+        "sirena": 73.5,
+        "bravo": 78.75,
+        "pricesmart": 66.0,
+        "mercadom": 75.0,
+        "colmado": 90.0
+      }
+    },
+    "queso crema": {
+      "precio": 180,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 207.0,
+        "jumbo": 198.0,
+        "sirena": 176.4,
+        "bravo": 189.0,
+        "pricesmart": 158.4,
+        "mercadom": 180.0,
+        "colmado": 216.0
+      }
+    },
+    "nata": {
+      "precio": 150,
+      "u": "lt",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 172.5,
+        "jumbo": 165.0,
+        "sirena": 147.0,
+        "bravo": 157.5,
+        "pricesmart": 132.0,
+        "mercadom": 150.0,
+        "colmado": 180.0
+      }
+    },
+    "comino": {
+      "precio": 90,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 103.5,
+        "jumbo": 99.0,
+        "sirena": 88.2,
+        "bravo": 94.5,
+        "pricesmart": 79.2,
+        "mercadom": 90.0,
+        "colmado": 108.0
+      }
+    },
+    "achiote": {
+      "precio": 45,
+      "u": "bot",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 51.75,
+        "jumbo": 49.5,
+        "sirena": 44.1,
+        "bravo": 47.25,
+        "pricesmart": 39.6,
+        "mercadom": 45.0,
+        "colmado": 54.0
+      }
+    },
+    "cubito de pollo": {
+      "precio": 25,
+      "u": "paq",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 28.75,
+        "jumbo": 27.5,
+        "sirena": 24.5,
+        "bravo": 26.25,
+        "pricesmart": 22.0,
+        "mercadom": 25.0,
+        "colmado": 30.0
+      }
+    },
+    "salsa soya": {
+      "precio": 85,
+      "u": "bot",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 97.75,
+        "jumbo": 93.5,
+        "sirena": 83.3,
+        "bravo": 89.25,
+        "pricesmart": 74.8,
+        "mercadom": 85.0,
+        "colmado": 102.0
+      }
+    },
+    "salsa inglesa": {
+      "precio": 95,
+      "u": "bot",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 109.25,
+        "jumbo": 104.5,
+        "sirena": 93.1,
+        "bravo": 99.75,
+        "pricesmart": 83.6,
+        "mercadom": 95.0,
+        "colmado": 114.0
+      }
+    },
+    "mostaza": {
+      "precio": 65,
+      "u": "bot",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 74.75,
+        "jumbo": 71.5,
+        "sirena": 63.7,
+        "bravo": 68.25,
+        "pricesmart": 57.2,
+        "mercadom": 65.0,
+        "colmado": 78.0
+      }
+    },
+    "ketchup": {
+      "precio": 75,
+      "u": "bot",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 86.25,
+        "jumbo": 82.5,
+        "sirena": 73.5,
+        "bravo": 78.75,
+        "pricesmart": 66.0,
+        "mercadom": 75.0,
+        "colmado": 90.0
+      }
+    },
+    "mayonesa": {
+      "precio": 95,
+      "u": "bot",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 109.25,
+        "jumbo": 104.5,
+        "sirena": 93.1,
+        "bravo": 99.75,
+        "pricesmart": 83.6,
+        "mercadom": 95.0,
+        "colmado": 114.0
+      }
+    },
+    "sazón completo": {
+      "precio": 50,
+      "u": "paq",
+      "fuente": "Inespre",
+      "fecha": "2025",
+      "porSuper": {
+        "nacional": 57.5,
+        "jumbo": 55.0,
+        "sirena": 49.0,
+        "bravo": 52.5,
+        "pricesmart": 44.0,
+        "mercadom": 50.0,
+        "colmado": 60.0
+      }
+    },
+    "perejil": {
+      "precio": 25,
+      "u": "paq",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 28.75,
+        "jumbo": 27.5,
+        "sirena": 24.5,
+        "bravo": 26.25,
+        "pricesmart": 22.0,
+        "mercadom": 25.0,
+        "colmado": 30.0
+      }
+    },
+    "aceite de maíz": {
+      "precio": 650,
+      "u": "gal",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 747.5,
+        "jumbo": 715.0,
+        "sirena": 637.0,
+        "bravo": 682.5,
+        "pricesmart": 572.0,
+        "mercadom": 650.0,
+        "colmado": 780.0
+      }
+    },
+    "manteca": {
+      "precio": 55,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 63.25,
+        "jumbo": 60.5,
+        "sirena": 53.9,
+        "bravo": 57.75,
+        "pricesmart": 48.4,
+        "mercadom": 55.0,
+        "colmado": 66.0
+      }
+    },
+    "pasta coditos": {
+      "precio": 35,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 40.25,
+        "jumbo": 38.5,
+        "sirena": 34.3,
+        "bravo": 36.75,
+        "pricesmart": 30.8,
+        "mercadom": 35.0,
+        "colmado": 42.0
+      }
+    },
+    "pasta tornillo": {
+      "precio": 38,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 43.7,
+        "jumbo": 41.8,
+        "sirena": 37.24,
+        "bravo": 39.9,
+        "pricesmart": 33.44,
+        "mercadom": 38.0,
+        "colmado": 45.6
+      }
+    },
+    "pan de hamburguesa": {
+      "precio": 85,
+      "u": "paq",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 97.75,
+        "jumbo": 93.5,
+        "sirena": 83.3,
+        "bravo": 89.25,
+        "pricesmart": 74.8,
+        "mercadom": 85.0,
+        "colmado": 102.0
+      }
+    },
+    "pan de hot dog": {
+      "precio": 75,
+      "u": "paq",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 86.25,
+        "jumbo": 82.5,
+        "sirena": 73.5,
+        "bravo": 78.75,
+        "pricesmart": 66.0,
+        "mercadom": 75.0,
+        "colmado": 90.0
+      }
+    },
+    "pan de agua": {
+      "precio": 10,
+      "u": "und",
+      "fuente": "Panaderías SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 11.5,
+        "jumbo": 11.0,
+        "sirena": 9.8,
+        "bravo": 10.5,
+        "pricesmart": 8.8,
+        "mercadom": 10.0,
+        "colmado": 12.0
+      }
+    },
+    "maicena": {
+      "precio": 45,
+      "u": "lb",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 51.75,
+        "jumbo": 49.5,
+        "sirena": 44.1,
+        "bravo": 47.25,
+        "pricesmart": 39.6,
+        "mercadom": 45.0,
+        "colmado": 54.0
+      }
+    },
+    "aceitunas": {
+      "precio": 110,
+      "u": "bot",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 126.5,
+        "jumbo": 121.0,
+        "sirena": 107.8,
+        "bravo": 115.5,
+        "pricesmart": 96.8,
+        "mercadom": 110.0,
+        "colmado": 132.0
+      }
+    },
+    "alcaparras": {
+      "precio": 85,
+      "u": "bot",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 97.75,
+        "jumbo": 93.5,
+        "sirena": 83.3,
+        "bravo": 89.25,
+        "pricesmart": 74.8,
+        "mercadom": 85.0,
+        "colmado": 102.0
+      }
+    },
+    "champiñones": {
+      "precio": 75,
+      "u": "lata",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 86.25,
+        "jumbo": 82.5,
+        "sirena": 73.5,
+        "bravo": 78.75,
+        "pricesmart": 66.0,
+        "mercadom": 75.0,
+        "colmado": 90.0
+      }
+    },
+    "maíz enlatado": {
+      "precio": 60,
+      "u": "lata",
+      "fuente": "Inespre",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 69.0,
+        "jumbo": 66.0,
+        "sirena": 58.8,
+        "bravo": 63.0,
+        "pricesmart": 52.8,
+        "mercadom": 60.0,
+        "colmado": 72.0
+      }
+    },
+    "atún en lata": {
+      "precio": 90,
+      "u": "lata",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 103.5,
+        "jumbo": 99.0,
+        "sirena": 88.2,
+        "bravo": 94.5,
+        "pricesmart": 79.2,
+        "mercadom": 90.0,
+        "colmado": 108.0
+      }
+    },
+    "sardina en lata": {
+      "precio": 65,
+      "u": "lata",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 74.75,
+        "jumbo": 71.5,
+        "sirena": 63.7,
+        "bravo": 68.25,
+        "pricesmart": 57.2,
+        "mercadom": 65.0,
+        "colmado": 78.0
+      }
+    },
+    "vainitas": {
+      "precio": 45,
+      "u": "lb",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 51.75,
+        "jumbo": 49.5,
+        "sirena": 44.1,
+        "bravo": 47.25,
+        "pricesmart": 39.6,
+        "mercadom": 45.0,
+        "colmado": 54.0
+      }
+    },
+    "maíz dulce": {
+      "precio": 15,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 17.25,
+        "jumbo": 16.5,
+        "sirena": 14.7,
+        "bravo": 15.75,
+        "pricesmart": 13.2,
+        "mercadom": 15.0,
+        "colmado": 18.0
+      }
+    },
+    "guineo maduro": {
+      "precio": 5,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 5.75,
+        "jumbo": 5.5,
+        "sirena": 4.9,
+        "bravo": 5.25,
+        "pricesmart": 4.4,
+        "mercadom": 5.0,
+        "colmado": 6.0
+      }
+    },
+    "naranja agria": {
+      "precio": 12,
+      "u": "und",
+      "fuente": "MERCADOM",
+      "fecha": "2026-01-22",
+      "porSuper": {
+        "nacional": 13.8,
+        "jumbo": 13.2,
+        "sirena": 11.76,
+        "bravo": 12.6,
+        "pricesmart": 10.56,
+        "mercadom": 12.0,
+        "colmado": 14.4
+      }
+    },
+    "agua": {
+      "precio": 45,
+      "u": "gal",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 51.75,
+        "jumbo": 49.5,
+        "sirena": 44.1,
+        "bravo": 47.25,
+        "pricesmart": 39.6,
+        "mercadom": 45.0,
+        "colmado": 54.0
+      }
+    },
+    "jugo de naranja": {
+      "precio": 85,
+      "u": "lt",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 97.75,
+        "jumbo": 93.5,
+        "sirena": 83.3,
+        "bravo": 89.25,
+        "pricesmart": 74.8,
+        "mercadom": 85.0,
+        "colmado": 102.0
+      }
+    },
+    "refresco 2 litros": {
+      "precio": 80,
+      "u": "und",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 92.0,
+        "jumbo": 88.0,
+        "sirena": 78.4,
+        "bravo": 84.0,
+        "pricesmart": 70.4,
+        "mercadom": 80.0,
+        "colmado": 96.0
+      }
+    },
+    "cerveza": {
+      "precio": 75,
+      "u": "und",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 86.25,
+        "jumbo": 82.5,
+        "sirena": 73.5,
+        "bravo": 78.75,
+        "pricesmart": 66.0,
+        "mercadom": 75.0,
+        "colmado": 90.0
+      }
+    },
+    "ron": {
+      "precio": 450,
+      "u": "bot",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 517.5,
+        "jumbo": 495.0,
+        "sirena": 441.0,
+        "bravo": 472.5,
+        "pricesmart": 396.0,
+        "mercadom": 450.0,
+        "colmado": 540.0
+      }
+    },
+    "vino tinto": {
+      "precio": 350,
+      "u": "bot",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 402.5,
+        "jumbo": 385.0,
+        "sirena": 343.0,
+        "bravo": 367.5,
+        "pricesmart": 308.0,
+        "mercadom": 350.0,
+        "colmado": 420.0
+      }
+    },
+    "platos desechables": {
+      "precio": 3.5,
+      "u": "und",
+      "fuente": "Distribuidoras SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 4.02,
+        "jumbo": 3.85,
+        "sirena": 3.43,
+        "bravo": 3.68,
+        "pricesmart": 3.08,
+        "mercadom": 3.5,
+        "colmado": 4.2
+      }
+    },
+    "vasos desechables": {
+      "precio": 2.5,
+      "u": "und",
+      "fuente": "Distribuidoras SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 2.88,
+        "jumbo": 2.75,
+        "sirena": 2.45,
+        "bravo": 2.62,
+        "pricesmart": 2.2,
+        "mercadom": 2.5,
+        "colmado": 3.0
+      }
+    },
+    "cubiertos desechables": {
+      "precio": 2.0,
+      "u": "und",
+      "fuente": "Distribuidoras SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 2.3,
+        "jumbo": 2.2,
+        "sirena": 1.96,
+        "bravo": 2.1,
+        "pricesmart": 1.76,
+        "mercadom": 2.0,
+        "colmado": 2.4
+      }
+    },
+    "servilletas": {
+      "precio": 1.0,
+      "u": "und",
+      "fuente": "Distribuidoras SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 1.15,
+        "jumbo": 1.1,
+        "sirena": 0.98,
+        "bravo": 1.05,
+        "pricesmart": 0.88,
+        "mercadom": 1.0,
+        "colmado": 1.2
+      }
+    },
+    "papel aluminio": {
+      "precio": 120,
+      "u": "rollo",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 138.0,
+        "jumbo": 132.0,
+        "sirena": 117.6,
+        "bravo": 126.0,
+        "pricesmart": 105.6,
+        "mercadom": 120.0,
+        "colmado": 144.0
+      }
+    },
+    "papel plástico": {
+      "precio": 95,
+      "u": "rollo",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 109.25,
+        "jumbo": 104.5,
+        "sirena": 93.1,
+        "bravo": 99.75,
+        "pricesmart": 83.6,
+        "mercadom": 95.0,
+        "colmado": 114.0
+      }
+    },
+    "fundas térmicas": {
+      "precio": 8,
+      "u": "und",
+      "fuente": "Distribuidoras SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 9.2,
+        "jumbo": 8.8,
+        "sirena": 7.84,
+        "bravo": 8.4,
+        "pricesmart": 7.04,
+        "mercadom": 8.0,
+        "colmado": 9.6
+      }
+    },
+    "bandejas aluminio": {
+      "precio": 25,
+      "u": "und",
+      "fuente": "Distribuidoras SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 28.75,
+        "jumbo": 27.5,
+        "sirena": 24.5,
+        "bravo": 26.25,
+        "pricesmart": 22.0,
+        "mercadom": 25.0,
+        "colmado": 30.0
+      }
+    },
+    "cloro": {
+      "precio": 85,
+      "u": "gal",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 97.75,
+        "jumbo": 93.5,
+        "sirena": 83.3,
+        "bravo": 89.25,
+        "pricesmart": 74.8,
+        "mercadom": 85.0,
+        "colmado": 102.0
+      }
+    },
+    "jabón lavaplatos": {
+      "precio": 75,
+      "u": "bot",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 86.25,
+        "jumbo": 82.5,
+        "sirena": 73.5,
+        "bravo": 78.75,
+        "pricesmart": 66.0,
+        "mercadom": 75.0,
+        "colmado": 90.0
+      }
+    },
+    "desinfectante": {
+      "precio": 120,
+      "u": "gal",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 138.0,
+        "jumbo": 132.0,
+        "sirena": 117.6,
+        "bravo": 126.0,
+        "pricesmart": 105.6,
+        "mercadom": 120.0,
+        "colmado": 144.0
+      }
+    },
+    "brillo verde": {
+      "precio": 12,
+      "u": "und",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 13.8,
+        "jumbo": 13.2,
+        "sirena": 11.76,
+        "bravo": 12.6,
+        "pricesmart": 10.56,
+        "mercadom": 12.0,
+        "colmado": 14.4
+      }
+    },
+    "bolsas de basura": {
+      "precio": 5,
+      "u": "und",
+      "fuente": "Supermercados SD",
+      "fecha": "2025-12",
+      "porSuper": {
+        "nacional": 5.75,
+        "jumbo": 5.5,
+        "sirena": 4.9,
+        "bravo": 5.25,
+        "pricesmart": 4.4,
+        "mercadom": 5.0,
+        "colmado": 6.0
+      }
+    }
+  }
+}
