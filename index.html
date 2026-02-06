@@ -989,7 +989,7 @@ const CATEGORIES = ["Res","Cerdo","Aves","Pescados","Mariscos","Granos","Arroz",
 
 // Subcategorías de cortes para filtro detallado
 const SUBCATS = {
-  "Res": ["Bistec","Carne molida","Costilla","Falda","Churrasco","Punta trasera","Pecho","Osobuco","Rabo"],
+  "Res": ["Bistec","Carne molida","Costilla","Falda","Churrasco","Punta trasera","Lomo fino","Osobuco","Rabo","Res para guisar"],
   "Cerdo": ["Chuleta","Chuleta ahumada","Costilla","Pierna","Lomo","Pernil","Chicharrón"],
   "Aves": ["Pechuga","Muslo","Muslo ancho","Alitas","Pollo entero","Cuarto trasero","Menudencia"],
   "Pescados": ["Dorado","Chillo","Mero","Salmón","Bacalao","Tilapia","Atún fresco"],
@@ -1000,29 +1000,36 @@ let invSubCat = '';
 
 let inventory = [
   // ═══ RES ═══
-  {id:1,nombre:"Bistec de res",cat:"Res",sub:"Bistec",cant:100,u:"lb",min:30,precio:170.00},
-  {id:2,nombre:"Carne molida",cat:"Res",sub:"Carne molida",cant:80,u:"lb",min:25,precio:140.00},
-  {id:3,nombre:"Costilla de res",cat:"Res",sub:"Costilla",cant:50,u:"lb",min:15,precio:130.00},
-  {id:4,nombre:"Falda de res",cat:"Res",sub:"Falda",cant:40,u:"lb",min:10,precio:145.00},
-  {id:5,nombre:"Churrasco",cat:"Res",sub:"Churrasco",cant:60,u:"lb",min:20,precio:195.00},
-  {id:6,nombre:"Punta trasera",cat:"Res",sub:"Punta trasera",cant:40,u:"lb",min:10,precio:180.00},
-  {id:7,nombre:"Osobuco",cat:"Res",sub:"Osobuco",cant:30,u:"lb",min:10,precio:120.00},
-  {id:8,nombre:"Rabo de res",cat:"Res",sub:"Rabo",cant:25,u:"lb",min:8,precio:160.00},
-  // ═══ CERDO ═══
-  {id:9,nombre:"Chuleta de cerdo",cat:"Cerdo",sub:"Chuleta",cant:80,u:"lb",min:25,precio:120.00},
-  {id:10,nombre:"Chuleta ahumada",cat:"Cerdo",sub:"Chuleta ahumada",cant:40,u:"lb",min:12,precio:110.00},
-  {id:11,nombre:"Costilla de cerdo",cat:"Cerdo",sub:"Costilla",cant:50,u:"lb",min:15,precio:125.00},
-  {id:12,nombre:"Pierna de cerdo",cat:"Cerdo",sub:"Pierna",cant:40,u:"lb",min:10,precio:115.00},
-  {id:13,nombre:"Lomo de cerdo",cat:"Cerdo",sub:"Lomo",cant:30,u:"lb",min:10,precio:135.00},
-  {id:14,nombre:"Pernil",cat:"Cerdo",sub:"Pernil",cant:60,u:"lb",min:20,precio:110.00},
-  {id:15,nombre:"Chicharrón",cat:"Cerdo",sub:"Chicharrón",cant:20,u:"lb",min:8,precio:150.00},
-  // ═══ AVES ═══
-  {id:16,nombre:"Pechuga de pollo",cat:"Aves",sub:"Pechuga",cant:150,u:"lb",min:40,precio:152.00},
-  {id:17,nombre:"Muslo de pollo",cat:"Aves",sub:"Muslo",cant:80,u:"lb",min:25,precio:75.00},
-  {id:18,nombre:"Muslo ancho",cat:"Aves",sub:"Muslo ancho",cant:60,u:"lb",min:20,precio:85.00},
-  {id:19,nombre:"Alitas de pollo",cat:"Aves",sub:"Alitas",cant:50,u:"lb",min:15,precio:85.00},
-  {id:20,nombre:"Pollo entero",cat:"Aves",sub:"Pollo entero",cant:40,u:"lb",min:15,precio:84.00},
-  {id:21,nombre:"Cuarto trasero",cat:"Aves",sub:"Cuarto trasero",cant:60,u:"lb",min:20,precio:68.00},
+  // PRIMERA CALIDAD (cortes tiernos, premium)
+  {id:1,nombre:"Bistec de res (primera)",cat:"Res",sub:"Bistec",cant:100,u:"lb",min:30,precio:210.00,calidad:"primera"},
+  {id:2,nombre:"Churrasco",cat:"Res",sub:"Churrasco",cant:60,u:"lb",min:20,precio:250.00,calidad:"primera"},
+  {id:3,nombre:"Lomo fino",cat:"Res",sub:"Lomo fino",cant:25,u:"lb",min:8,precio:350.00,calidad:"primera"},
+  {id:4,nombre:"Punta trasera",cat:"Res",sub:"Punta trasera",cant:40,u:"lb",min:10,precio:230.00,calidad:"primera"},
+  // SEGUNDA CALIDAD (semi-tiernos)
+  {id:5,nombre:"Bistec de res (segunda)",cat:"Res",sub:"Bistec",cant:80,u:"lb",min:25,precio:185.00,calidad:"segunda"},
+  {id:6,nombre:"Falda de res",cat:"Res",sub:"Falda",cant:40,u:"lb",min:10,precio:175.00,calidad:"segunda"},
+  {id:7,nombre:"Carne molida (primera)",cat:"Res",sub:"Carne molida",cant:60,u:"lb",min:20,precio:175.00,calidad:"segunda"},
+  {id:8,nombre:"Carne molida (segunda)",cat:"Res",sub:"Carne molida",cant:40,u:"lb",min:15,precio:155.00,calidad:"segunda"},
+  // TERCERA CALIDAD (guiso, hueso, duro)
+  {id:9,nombre:"Res No.7 (tercera)",cat:"Res",sub:"Res para guisar",cant:50,u:"lb",min:15,precio:170.00,calidad:"tercera"},
+  {id:10,nombre:"Costilla de res",cat:"Res",sub:"Costilla",cant:50,u:"lb",min:15,precio:160.00,calidad:"tercera"},
+  {id:11,nombre:"Osobuco",cat:"Res",sub:"Osobuco",cant:30,u:"lb",min:10,precio:145.00,calidad:"tercera"},
+  {id:12,nombre:"Rabo de res",cat:"Res",sub:"Rabo",cant:25,u:"lb",min:8,precio:180.00,calidad:"tercera"},
+  // ═══ CERDO ═══ (MERCADOM ene/2026)
+  {id:13,nombre:"Chuleta de cerdo",cat:"Cerdo",sub:"Chuleta",cant:80,u:"lb",min:25,precio:120.00},
+  {id:14,nombre:"Chuleta ahumada",cat:"Cerdo",sub:"Chuleta ahumada",cant:40,u:"lb",min:12,precio:110.00},
+  {id:15,nombre:"Costilla de cerdo",cat:"Cerdo",sub:"Costilla",cant:50,u:"lb",min:15,precio:135.00},
+  {id:16,nombre:"Pierna de cerdo",cat:"Cerdo",sub:"Pierna",cant:40,u:"lb",min:10,precio:115.00},
+  {id:17,nombre:"Lomo de cerdo",cat:"Cerdo",sub:"Lomo",cant:30,u:"lb",min:10,precio:145.00},
+  {id:18,nombre:"Pernil",cat:"Cerdo",sub:"Pernil",cant:60,u:"lb",min:20,precio:115.00},
+  {id:19,nombre:"Chicharrón",cat:"Cerdo",sub:"Chicharrón",cant:20,u:"lb",min:8,precio:165.00},
+  // ═══ AVES ═══ (feb 2026: pollo escaso, 90-100 en mercados)
+  {id:20,nombre:"Pechuga de pollo",cat:"Aves",sub:"Pechuga",cant:150,u:"lb",min:40,precio:155.00},
+  {id:21,nombre:"Muslo de pollo",cat:"Aves",sub:"Muslo",cant:80,u:"lb",min:25,precio:85.00},
+  {id:22,nombre:"Muslo ancho",cat:"Aves",sub:"Muslo ancho",cant:60,u:"lb",min:20,precio:95.00},
+  {id:23,nombre:"Alitas de pollo",cat:"Aves",sub:"Alitas",cant:50,u:"lb",min:15,precio:95.00},
+  {id:24,nombre:"Pollo entero",cat:"Aves",sub:"Pollo entero",cant:40,u:"lb",min:15,precio:90.00},
+  {id:25,nombre:"Cuarto trasero",cat:"Aves",sub:"Cuarto trasero",cant:60,u:"lb",min:20,precio:72.00},
   // ═══ PESCADOS ═══
   {id:22,nombre:"Dorado filete",cat:"Pescados",sub:"Dorado",cant:50,u:"lb",min:15,precio:250.00},
   {id:23,nombre:"Chillo",cat:"Pescados",sub:"Chillo",cant:30,u:"lb",min:10,precio:220.00},
@@ -1269,6 +1276,7 @@ async function replaceFirebaseInventory() {
         nombre: item.nombre,
         categoria: item.cat,
         sub: item.sub || '',
+        calidad: item.calidad || '',
         cantidad: item.cant,
         unidad: item.u,
         minimo: item.min,
@@ -2252,6 +2260,7 @@ function inv(item) {
     nombre: item.nombre,
     cat: item.categoria || item.cat || '',
     sub: item.sub || '',
+    calidad: item.calidad || '',
     cant: item.cantidad !== undefined ? item.cantidad : (item.cant || 0),
     u: item.unidad || item.u || 'und',
     min: item.minimo !== undefined ? item.minimo : (item.min || 0),
@@ -3002,7 +3011,7 @@ function renderInventario() {
         <tbody>${filtered.map(item=>{
           const low = item.cant <= item.min;
           return `<tr>
-            <td><span style="color:var(--text-primary);font-weight:500">${item.nombre}</span>${item.sub ? `<br><span style="font-size:10px;color:var(--text-dim)">${item.sub}</span>` : ''}</td>
+            <td><span style="color:var(--text-primary);font-weight:500">${item.nombre}</span>${item.sub ? `<br><span style="font-size:10px;color:var(--text-dim)">${item.sub}</span>` : ''}${item.calidad ? `<span style="font-size:9px;margin-left:6px;padding:1px 5px;border-radius:8px;background:${item.calidad==='primera'?'rgba(46,204,113,0.2);color:#2ecc71':item.calidad==='segunda'?'rgba(243,156,18,0.2);color:#f39c12':'rgba(231,76,60,0.15);color:#e74c3c'}">${item.calidad}</span>` : ''}</td>
             <td>${tag('var(--text-dim)',item.cat)}</td>
             <td><span style="color:${low?'var(--red)':'var(--green)'};font-weight:700">${item.cant}</span></td>
             <td style="color:var(--text-muted)">${item.min}</td>
