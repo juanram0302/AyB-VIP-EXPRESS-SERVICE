@@ -184,7 +184,7 @@
         "jumbo": 125,
         "sirena": 108,
         "bravo": 118,
-        "pricesmart": 98,
+        "pricesmart": 165,
         "mercadom": 110,
         "colmado": 135
       }
@@ -259,7 +259,7 @@
         "jumbo": 168,
         "sirena": 152,
         "bravo": 162,
-        "pricesmart": 140,
+        "pricesmart": 195,
         "mercadom": 155,
         "colmado": 190
       }
@@ -304,7 +304,7 @@
         "jumbo": 94,
         "sirena": 85,
         "bravo": 90,
-        "pricesmart": 78,
+        "pricesmart": 95,
         "mercadom": 85,
         "colmado": 110
       }
@@ -1854,7 +1854,7 @@
         "jumbo": 280,
         "sirena": 250,
         "bravo": 265,
-        "pricesmart": 230,
+        "pricesmart": 1140,
         "mercadom": 250,
         "colmado": 300
       },
@@ -1870,7 +1870,7 @@
         "jumbo": 258,
         "sirena": 230,
         "bravo": 245,
-        "pricesmart": 210,
+        "pricesmart": 580,
         "mercadom": 230,
         "colmado": 280
       },
@@ -1886,7 +1886,7 @@
         "jumbo": 162,
         "sirena": 145,
         "bravo": 155,
-        "pricesmart": 130,
+        "pricesmart": 320,
         "mercadom": 145,
         "colmado": 175
       },
@@ -1902,7 +1902,7 @@
         "jumbo": 200,
         "sirena": 180,
         "bravo": 190,
-        "pricesmart": 165,
+        "pricesmart": 350,
         "mercadom": 180,
         "colmado": 220
       },
@@ -1918,7 +1918,7 @@
         "jumbo": 195,
         "sirena": 175,
         "bravo": 185,
-        "pricesmart": 160,
+        "pricesmart": 350,
         "mercadom": 175,
         "colmado": 210
       },
@@ -1934,7 +1934,7 @@
         "jumbo": 178,
         "sirena": 160,
         "bravo": 170,
-        "pricesmart": 145,
+        "pricesmart": 380,
         "mercadom": 160,
         "colmado": 195
       },
@@ -1965,7 +1965,7 @@
         "jumbo": 150,
         "sirena": 133,
         "bravo": 143,
-        "pricesmart": 120,
+        "pricesmart": 245,
         "mercadom": 135,
         "colmado": 165
       }
@@ -1980,7 +1980,7 @@
         "jumbo": 128,
         "sirena": 113,
         "bravo": 122,
-        "pricesmart": 103,
+        "pricesmart": 155,
         "mercadom": 115,
         "colmado": 140
       }
@@ -1995,7 +1995,7 @@
         "jumbo": 162,
         "sirena": 143,
         "bravo": 153,
-        "pricesmart": 130,
+        "pricesmart": 225,
         "mercadom": 145,
         "colmado": 178
       }
@@ -2010,7 +2010,7 @@
         "jumbo": 128,
         "sirena": 113,
         "bravo": 122,
-        "pricesmart": 103,
+        "pricesmart": 155,
         "mercadom": 115,
         "colmado": 140
       }
@@ -2025,7 +2025,7 @@
         "jumbo": 183,
         "sirena": 163,
         "bravo": 175,
-        "pricesmart": 148,
+        "pricesmart": 195,
         "mercadom": 165,
         "colmado": 200
       }
@@ -2040,7 +2040,7 @@
         "jumbo": 138,
         "sirena": 118,
         "bravo": 128,
-        "pricesmart": 108,
+        "pricesmart": 185,
         "mercadom": 120,
         "colmado": 148
       }
@@ -2055,7 +2055,7 @@
         "jumbo": 106,
         "sirena": 93,
         "bravo": 100,
-        "pricesmart": 85,
+        "pricesmart": 125,
         "mercadom": 95,
         "colmado": 118
       }
@@ -2070,7 +2070,7 @@
         "jumbo": 80,
         "sirena": 70,
         "bravo": 76,
-        "pricesmart": 65,
+        "pricesmart": 85,
         "mercadom": 72,
         "colmado": 90
       }
@@ -2085,7 +2085,7 @@
         "jumbo": 95,
         "sirena": 83,
         "bravo": 90,
-        "pricesmart": 76,
+        "pricesmart": 115,
         "mercadom": 85,
         "colmado": 105
       }
@@ -2100,7 +2100,7 @@
         "jumbo": 106,
         "sirena": 93,
         "bravo": 100,
-        "pricesmart": 85,
+        "pricesmart": 135,
         "mercadom": 95,
         "colmado": 118
       }
@@ -3001,7 +3001,7 @@
         "jumbo": 235,
         "sirena": 210,
         "bravo": 220,
-        "pricesmart": 195,
+        "pricesmart": 520,
         "mercadom": 210,
         "colmado": 250
       }
@@ -3017,7 +3017,7 @@
         "jumbo": 395,
         "sirena": 350,
         "bravo": 370,
-        "pricesmart": 320,
+        "pricesmart": 890,
         "mercadom": 350,
         "colmado": 430
       }
@@ -3033,7 +3033,7 @@
         "jumbo": 205,
         "sirena": 185,
         "bravo": 195,
-        "pricesmart": 168,
+        "pricesmart": 420,
         "mercadom": 185,
         "colmado": 220
       }
@@ -3049,7 +3049,7 @@
         "jumbo": 190,
         "sirena": 170,
         "bravo": 182,
-        "pricesmart": 155,
+        "pricesmart": 295,
         "mercadom": 175,
         "colmado": 210
       }
@@ -3065,7 +3065,7 @@
         "jumbo": 172,
         "sirena": 155,
         "bravo": 165,
-        "pricesmart": 140,
+        "pricesmart": 245,
         "mercadom": 155,
         "colmado": 185
       }
@@ -3081,7 +3081,7 @@
         "jumbo": 190,
         "sirena": 170,
         "bravo": 180,
-        "pricesmart": 155,
+        "pricesmart": 280,
         "mercadom": 170,
         "colmado": 205
       }
@@ -3096,7 +3096,7 @@
         "jumbo": 135,
         "sirena": 118,
         "bravo": 128,
-        "pricesmart": 108,
+        "pricesmart": 175,
         "mercadom": 120,
         "colmado": 148
       }
