@@ -2951,6 +2951,15 @@ function doGenerate() {
   const arrozOtros     = cats.arroz.filter(a => !pideGranos(a));
   const P_ARROZ_BLANCO = 0.41;   // 41% de los días de arroz × 70% de días con arroz ≈ 2/7
 
+  // ── Desayuno: siempre lleva un víver (mangú, puré o vianda), nunca arroz ──
+  // Se detecta por el víver y NO por la cocción: "Huevo hervido" es hervido
+  // pero no es un víver, y colarlo dejaría desayunos sin su carbohidrato.
+  const viverDesR = /\bmangú|\bmangu|\bpuré|\bpure|\bbollito|\byuca|\byautía|\byautia|\bplátano|\bplatano|\bguineo|\bbatata|\bpapa/i;
+  const desTodos  = [...new Set([...DB.desayunos, ...(customMenus.desayunos || [])])]
+    .filter(d => !hit(d, arrozR));   // el arroz no es desayuno dominicano
+  const desViveres = desTodos.filter(d =>  viverDesR.test(d));
+  const desOtros   = desTodos.filter(d => !viverDesR.test(d));
+
 
   // Sugerencias del día: horneados en capas (pastelón, lasaña, canelones).
   // Son opciones para el chef por stock y variedad — NO sustituyen el
@@ -2958,7 +2967,7 @@ function doGenerate() {
   const sugerenciasPool = cats.fuerte.filter(f => /\bpastelón|\bpastelon|\blasaña|\blasana|\bcanelones/i.test(f));
 
   genResult = [];
-  const usedCarbos = [], usedBlancos = [], usedProteinas = [], usedEnsaladas = [], usedVegetales = [], usedSugerencias = [];
+  const usedCarbos = [], usedBlancos = [], usedProteinas = [], usedEnsaladas = [], usedVegetales = [], usedSugerencias = [], usedViverDes = [];
 
   // Elige `n` platos distintos de `pool`:
   //  · `delDia` garantiza que NADA se repita dentro del mismo día.
@@ -3017,8 +3026,14 @@ function doGenerate() {
     //    coincidan entre sí, ni con el carbohidrato si ese día tocó un pastelón.
     const sug = pick(sugerenciasPool, usedSugerencias, delDia, 2);
 
+    // 6. DESAYUNO: 4 platos, y el primero es SIEMPRE un víver — mangú, puré o
+    //    vianda. Un desayuno dominicano sin su carbohidrato no está completo.
+    const viverDia = pick(desViveres, usedViverDes, delDia, 1);
+    const restoDes = getRandom(desOtros.filter(d => !delDia.has(d)), 4 - viverDia.length);
+    restoDes.forEach(d => delDia.add(d));
+
     const day = {
-      des: getRandom([...DB.desayunos, ...(customMenus.desayunos || [])], 4),
+      des: [...viverDia, ...restoDes],
       com: [carbo, ...prots, ensalada, vegetal].filter(Boolean),
       sug: sug,
       cen: getRandom([...DB.cenas, ...(customMenus.cenas || [])], 3),

@@ -38,16 +38,18 @@ const ESCENAS = {
       genPersonas = 50; genDays = 5; genVegan = false;
       doGenerate();`,
   },
-  alternas: {
-    archivo: 'alternas.html',
-    salida: 'opciones-alternas.png',
+  // Una escena por pestaña del modal: la lógica es la misma, pero verlas
+  // renderizadas es lo único que prueba que las tres pintan bien.
+  ...Object.fromEntries(['almuerzo', 'desayuno', 'cena'].map(t => [`alternas-${t}`, {
+    archivo: `alt-${t}.html`,
+    salida: t === 'almuerzo' ? 'opciones-alternas.png' : `alternas-${t}.png`,
     alto: 1100,
     guion: `navigate('generador');
       genPersonas = 50; genDays = 5; genVegan = false;
       doGenerate();
-      altTab = 'almuerzo';
+      altTab = '${t}';
       abrirAlternas();`,
-  },
+  }])),
   chafing: {
     archivo: 'chafing.html',
     salida: 'chafing-dishes.png',
