@@ -38,6 +38,16 @@ const ESCENAS = {
       genPersonas = 50; genDays = 5; genVegan = false;
       doGenerate();`,
   },
+  alternas: {
+    archivo: 'alternas.html',
+    salida: 'opciones-alternas.png',
+    alto: 1100,
+    guion: `navigate('generador');
+      genPersonas = 50; genDays = 5; genVegan = false;
+      doGenerate();
+      altTab = 'almuerzo';
+      abrirAlternas();`,
+  },
   chafing: {
     archivo: 'chafing.html',
     salida: 'chafing-dishes.png',
@@ -75,6 +85,12 @@ function prepararCopia(nombres) {
   const despues = (html.match(/firebasejs/g) || []).length;
   if (despues !== 0) throw new Error(`Quedaron ${despues} scripts de Firebase: abortando para no tocar producción.`);
   console.log(`  Firebase: ${antes} scripts → 0 (modo demo, sin escrituras)`);
+
+  // Las clases de entrada usan `animation-fill-mode: both`, así que el elemento
+  // vive en opacity 0 hasta que la animación corre. Bajo tiempo virtual eso es
+  // impredecible y salen capturas en blanco. Para la foto no hacen falta.
+  html = html.replace('</head>',
+    '<style>.fade-up,.fade-in,.scale-in,.slide-right{animation:none !important;opacity:1 !important}</style></head>');
 
   copyFileSync(join(RAIZ, 'precios_rd.json'), join(TMP, 'precios_rd.json'));
 

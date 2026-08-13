@@ -2781,7 +2781,7 @@ function renderGenerador() {
   let resultHTML = '';
   if (genResult) {
     const dayNames = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
-    resultHTML = `<div class="alert-box alert-info fade-up"><span>📋</span><span style="font-size:13px;font-weight:600;color:#ff8888">Menú generado para ${genPersonas} personas · ${genDays} días ${genVegan?'· Incluye vegano 🌿':''}</span></div>` +
+    resultHTML = `<div class="alert-box alert-info fade-up" style="justify-content:space-between;flex-wrap:wrap;gap:10px"><span style="display:flex;align-items:center;gap:8px"><span>📋</span><span style="font-size:13px;font-weight:600;color:#ff8888">Menú generado para ${genPersonas} personas · ${genDays} días ${genVegan?'· Incluye vegano 🌿':''}</span></span><button class="btn btn-sm btn-secondary" onclick="abrirAlternas()">🍲 Opciones alternas</button></div>` +
     genResult.map((day,di)=>`
       <div class="card fade-up" style="margin-bottom:16px;animation-delay:${di*0.08}s">
         <h3 style="color:var(--accent);font-size:16px;margin:0 0 16px;padding-bottom:10px;border-bottom:1px solid var(--border)">📅 ${dayNames[di%7]}</h3>
@@ -2795,11 +2795,6 @@ function renderGenerador() {
           <span style="color:var(--purple);font-size:11px;font-weight:700;letter-spacing:0.5px">💡 SUGERENCIAS</span>
           ${day.sug.map(s=>`<span style="font-size:11px;color:var(--text-secondary);background:var(--bg-card2);padding:4px 10px;border-radius:20px">${s}</span>`).join('')}
           <span style="color:var(--text-dim);font-size:10px">opcional · decide el chef</span>
-        </div>` : ''}
-        ${day.opc && day.opc.length ? `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px">
-          <span style="color:var(--blue);font-size:11px;font-weight:700;letter-spacing:0.5px">🍲 OPCIONALES</span>
-          ${day.opc.map(o=>`<span style="font-size:11px;color:var(--text-secondary);background:var(--bg-card2);padding:4px 10px;border-radius:20px">${o}</span>`).join('')}
-          <span style="color:var(--text-dim);font-size:10px">aparte del menú · el asopao va en cena</span>
         </div>` : ''}
         <div style="display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--bg-card2)">
           <span style="color:var(--text-muted);font-size:11px">🍿 ${day.snk.join(', ')}</span>
@@ -2823,7 +2818,74 @@ function renderGenerador() {
       </div>
       <button class="btn btn-primary" style="margin-top:16px" onclick="doGenerate()">🔀 GENERAR MENÚ ALEATORIO</button>
     </div>
-    ${resultHTML}`;
+    ${resultHTML}
+    ${renderModalAlternas()}`;
+}
+
+// ═══════════════════ OPCIONES ALTERNAS (modal) ═══════════════════
+// Menús alternos completos: no entran nunca en el menú del día (doGenerate los
+// filtra con `ollaR`), se ofrecen aquí como opción aparte.
+const OPCIONES_ESPECIALES = [
+  { n:'Sancocho', nota:'' },
+  { n:'Asopao',   nota:'cena' },
+];
+
+const ALT_COMIDAS = [
+  { id:'desayuno', l:'🌅 Desayuno', c:'var(--orange)', campo:'des', db:'desayunos' },
+  { id:'almuerzo', l:'🍽️ Almuerzo', c:'var(--red)',    campo:'com', db:'comidas'   },
+  { id:'cena',     l:'🌙 Cena',     c:'var(--blue)',   campo:'cen', db:'cenas'     },
+];
+
+let altOpen = false, altTab = 'almuerzo', altLista = null;
+
+// Sortea alternativas que NO estén ya en el menú generado: si el chef pide
+// opciones, mostrarle lo que ya tiene delante no le sirve de nada.
+function sortearAlternas() {
+  altLista = {};
+  for (const c of ALT_COMIDAS) {
+    const fuente = [...new Set([...DB[c.db], ...(customMenus[c.db] || [])])];
+    const enMenu = new Set((genResult || []).flatMap(d => d[c.campo] || []));
+    const libres = fuente.filter(p => !enMenu.has(p));
+    altLista[c.id] = getRandom(libres.length >= 6 ? libres : fuente, 6);
+  }
+}
+
+function abrirAlternas()      { sortearAlternas(); altOpen = true; renderPage(); }
+function cerrarAlternas()     { altOpen = false; renderPage(); }
+function setAltTab(t)         { altTab = t; renderPage(); }
+function otraRondaAlternas()  { sortearAlternas(); renderPage(); }
+
+function renderModalAlternas() {
+  if (!altOpen) return '';
+  if (!altLista) sortearAlternas();
+  const act = ALT_COMIDAS.find(t => t.id === altTab) || ALT_COMIDAS[1];
+  return `
+    <div onclick="cerrarAlternas()" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px">
+      <div onclick="event.stopPropagation()" class="card fade-up" style="max-width:580px;width:100%;max-height:85vh;overflow-y:auto;margin:0">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+          <h3 style="color:var(--text-primary);margin:0;font-size:16px">🍲 Opciones alternas</h3>
+          <button class="btn btn-sm btn-ghost" onclick="cerrarAlternas()">✕</button>
+        </div>
+        <p style="color:var(--text-dim);font-size:11px;margin:4px 0 14px">Platos que NO están en el menú generado. Son alternativas para el chef; no reemplazan nada automáticamente.</p>
+
+        <div style="display:flex;gap:6px;margin-bottom:14px">
+          ${ALT_COMIDAS.map(t => `<button class="btn btn-sm" style="flex:1;justify-content:center;background:${altTab===t.id?t.c:'var(--border)'};color:${altTab===t.id?'#fff':'var(--text-muted)'};${altTab===t.id?'font-weight:700':''}" onclick="setAltTab('${t.id}')">${t.l}</button>`).join('')}
+        </div>
+
+        <div class="grid grid-auto-sm" style="gap:8px">
+          ${(altLista[altTab] || []).map(p => `<div style="font-size:12px;color:var(--text-secondary);background:var(--bg-card2);padding:9px 12px;border-radius:8px;border-left:3px solid ${act.c}">${p}</div>`).join('')}
+        </div>
+        <button class="btn btn-secondary btn-sm" style="margin-top:12px" onclick="otraRondaAlternas()">🔄 Otras opciones</button>
+
+        <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--bg-card2)">
+          <div style="color:var(--purple);font-size:11px;font-weight:700;letter-spacing:0.5px;margin-bottom:4px">⭐ ESPECIALES</div>
+          <p style="color:var(--text-dim);font-size:11px;margin:0 0 10px">Menús alternos completos, se sirven en lugar del menú del día.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            ${OPCIONES_ESPECIALES.map(o => `<span style="font-size:12px;color:var(--text-secondary);background:var(--bg-card2);padding:7px 14px;border-radius:20px;border:1px solid rgba(155,89,182,0.35)">${o.n}${o.nota?` <span style="color:var(--text-dim);font-size:10px">· ${o.nota}</span>`:''}</span>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>`;
 }
 
 function doGenerate() {
@@ -2889,8 +2951,6 @@ function doGenerate() {
   const arrozOtros     = cats.arroz.filter(a => !pideGranos(a));
   const P_ARROZ_BLANCO = 0.41;   // 41% de los días de arroz × 70% de días con arroz ≈ 2/7
 
-  // Platos de olla que se ofrecen aparte del menú. El asopao es de cena.
-  const OPCIONALES_OLLA = ['Sancocho', 'Asopao'];
 
   // Sugerencias del día: horneados en capas (pastelón, lasaña, canelones).
   // Son opciones para el chef por stock y variedad — NO sustituyen el
@@ -2961,7 +3021,6 @@ function doGenerate() {
       des: getRandom([...DB.desayunos, ...(customMenus.desayunos || [])], 4),
       com: [carbo, ...prots, ensalada, vegetal].filter(Boolean),
       sug: sug,
-      opc: [...OPCIONALES_OLLA],
       cen: getRandom([...DB.cenas, ...(customMenus.cenas || [])], 3),
       snk: getRandom([...DB.snacks, ...(customMenus.snacks || [])], 2),
       beb: getRandom(DB.bebidas, 3),
