@@ -50,6 +50,14 @@ const ESCENAS = {
       altTab = '${t}';
       abrirAlternas();`,
   }])),
+  manual: {
+    archivo: 'manual.html',
+    salida: 'armado-manual.png',
+    alto: 1500,
+    guion: `navigate('generador');
+      genPersonas = 50; genDays = 3; genVegan = false;
+      manualPrellenar();`,
+  },
   chafing: {
     archivo: 'chafing.html',
     salida: 'chafing-dishes.png',

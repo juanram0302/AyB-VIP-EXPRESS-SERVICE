@@ -2806,18 +2806,29 @@ function renderGenerador() {
 
   return `
     <div class="card fade-up" style="margin-bottom:20px">
-      <h3 style="color:var(--text-primary);margin:0 0 16px;font-size:16px">⚡ Configurar Generación</h3>
+      <h3 style="color:var(--text-primary);margin:0 0 12px;font-size:16px">⚡ Configurar Generación</h3>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        ${[{id:'auto',l:'🔀 Aleatorio'},{id:'manual',l:'✍️ Manual'}].map(m=>`<button class="btn btn-sm" style="flex:1;justify-content:center;background:${genModo===m.id?'var(--accent)':'var(--border)'};color:${genModo===m.id?'#fff':'var(--text-muted)'};${genModo===m.id?'font-weight:700':''}" onclick="setGenModo('${m.id}')">${m.l}</button>`).join('')}
+      </div>
       <div class="grid grid-3" style="align-items:end">
         <div><label style="color:var(--text-muted);font-size:12px;display:block;margin-bottom:6px">Personas</label>
           <input class="input" type="number" value="${genPersonas}" onchange="genPersonas=+this.value" style="margin:0"></div>
         <div><label style="color:var(--text-muted);font-size:12px;display:block;margin-bottom:6px">Días (1-7)</label>
-          <input class="input" type="number" value="${genDays}" min="1" max="7" onchange="genDays=Math.min(7,+this.value)" style="margin:0"></div>
+          <input class="input" type="number" value="${genDays}" min="1" max="7" onchange="genDays=Math.max(1,Math.min(7,+this.value));if(genModo==='manual')renderPage()" style="margin:0"></div>
         <div><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:14px 0">
           <input type="checkbox" ${genVegan?'checked':''} onchange="genVegan=this.checked" style="accent-color:var(--green)">
           <span style="color:var(--green);font-size:13px">Incluir Vegano</span></label></div>
       </div>
-      <button class="btn btn-primary" style="margin-top:16px" onclick="doGenerate()">🔀 GENERAR MENÚ ALEATORIO</button>
+      ${genModo === 'auto'
+        ? `<button class="btn btn-primary" style="margin-top:16px" onclick="doGenerate()">🔀 GENERAR MENÚ ALEATORIO</button>`
+        : `<div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+             <button class="btn btn-primary" style="flex:1;min-width:180px;justify-content:center" onclick="manualAplicar()">✓ USAR ESTE MENÚ</button>
+             <button class="btn btn-secondary" onclick="manualPrellenar()">🔀 Prellenar</button>
+             <button class="btn btn-secondary" onclick="manualInit();renderPage()">Vaciar</button>
+           </div>
+           <p style="color:var(--text-dim);font-size:11px;margin:10px 0 0">Modo libre: aquí no se aplican las reglas de víver, granos ni 2 proteínas. Tú mandas.</p>`}
     </div>
+    ${genModo === 'manual' ? renderManual() : ''}
     ${resultHTML}
     ${renderModalAlternas()}`;
 }
@@ -2886,6 +2897,92 @@ function renderModalAlternas() {
         </div>
       </div>
     </div>`;
+}
+
+// ═══════════════════ ARMADO MANUAL ═══════════════════
+// Modo libre: el chef arma las tres comidas a mano, sin validación. Las reglas
+// del generador (víver, granos, 2 proteínas) NO se aplican aquí a propósito.
+let genModo = 'auto';     // 'auto' | 'manual'
+let manualMenu = null;    // [{des:[4], com:[5], cen:[3]}]
+
+const MANUAL_COLS = [
+  { k:'des', l:'🌅 Desayuno', c:'var(--orange)', n:4, db:'desayunos' },
+  { k:'com', l:'🍽️ Comida',   c:'var(--red)',    n:5, db:'comidas'   },
+  { k:'cen', l:'🌙 Cena',     c:'var(--blue)',   n:3, db:'cenas'     },
+];
+
+const manualDiaVacio = () => Object.fromEntries(MANUAL_COLS.map(c => [c.k, Array(c.n).fill('')]));
+
+function manualInit() { manualMenu = Array.from({ length: genDays }, manualDiaVacio); }
+
+// Ajusta el largo si cambió el número de días, conservando lo ya elegido.
+function manualSync() {
+  if (!manualMenu) return manualInit();
+  while (manualMenu.length < genDays) manualMenu.push(manualDiaVacio());
+  manualMenu.length = genDays;
+}
+
+// Sin renderPage: el <select> ya muestra el cambio, y volver a pintar 60
+// selectores en cada elección perdería el scroll y se sentiría lento.
+function manualSet(d, comida, i, valor) { manualMenu[d][comida][i] = valor; }
+
+function setGenModo(m) { genModo = m; if (m === 'manual') manualSync(); renderPage(); }
+
+// Arranca desde un menú generado: 60 selectores en blanco no son un buen punto
+// de partida, y así el chef solo ajusta lo que quiere cambiar.
+function manualPrellenar() {
+  doGenerate();
+  manualMenu = genResult.map(x => Object.fromEntries(
+    MANUAL_COLS.map(c => [c.k, [...x[c.k], ...Array(c.n).fill('')].slice(0, c.n)])
+  ));
+  genResult = null;
+  genModo = 'manual';
+  renderPage();
+}
+
+function manualAplicar() {
+  manualSync();
+  genResult = manualMenu.map(d => ({
+    des: d.des.filter(Boolean),
+    com: d.com.filter(Boolean),
+    cen: d.cen.filter(Boolean),
+    sug: [],
+    snk: getRandom([...DB.snacks, ...(customMenus.snacks || [])], 2),
+    beb: getRandom(DB.bebidas, 3),
+    ...(genVegan ? { veg: [...getRandom(DB.vegano.desayunos,2), ...getRandom(DB.vegano.comidas,3), ...getRandom(DB.vegano.cenas,1)] } : {}),
+  }));
+  addNotif('✓ Menú manual aplicado');
+  renderPage();
+}
+
+function renderManual() {
+  manualSync();
+  const attr = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+  const dayNames = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+  return manualMenu.map((dia, d) => `
+    <div class="card fade-up" style="margin-bottom:16px;animation-delay:${d*0.05}s">
+      <h3 style="color:var(--accent);font-size:16px;margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid var(--border)">📅 ${dayNames[d%7]}</h3>
+      <div class="grid grid-3">
+        ${MANUAL_COLS.map(c => {
+          // El generador puede poner un puré o mangú de cena, y esos platos viven
+          // en DB.desayunos: sin esto el selector no podría representarlos.
+          const extra = c.k === 'cen' ? DB.desayunos.filter(x => /\bmangú|\bmangu|\bpuré|\bpure|\bbollito/i.test(x)) : [];
+          // Y lo ya elegido entra al pool sí o sí: si el prellenado trae un plato
+          // de otra lista, el selector tiene que poder mostrarlo en vez de vaciarlo.
+          const enUso = manualMenu.flatMap(x => x[c.k]).filter(Boolean);
+          const pool = [...new Set([...DB[c.db], ...(customMenus[c.db] || []), ...extra, ...enUso])]
+            .sort((a,b) => a.localeCompare(b,'es'));
+          return `<div>
+            <div style="color:${c.c};font-size:12px;font-weight:700;margin-bottom:8px;letter-spacing:0.5px">${c.l}</div>
+            ${dia[c.k].map((val, i) => `
+              <select class="input" style="margin:0 0 6px;font-size:12px;padding:8px 10px" onchange="manualSet(${d},'${c.k}',${i},this.value)">
+                <option value="">— vacío —</option>
+                ${pool.map(p => `<option value="${attr(p)}"${p === val ? ' selected' : ''}>${p}</option>`).join('')}
+              </select>`).join('')}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
 }
 
 function doGenerate() {
