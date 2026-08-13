@@ -1,0 +1,3 @@
+# Configuración local de Claude Code (por máquina, no se comparte).
+# settings.json y .claude/skills/ SÍ se versionan si algún día se agregan.
+.claude/settings.local.json
