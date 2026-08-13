@@ -14,11 +14,12 @@
  *     no necesitar credenciales. Ese script solo existe en la copia temporal.
  *  3. Sirve la copia y la fotografía con Chrome headless.
  *
- * Requisitos: Node 18+, Python 3 (servidor estático) y Google Chrome.
+ * Requisitos: Node 18+ y Google Chrome. Nada más.
  */
-import { readFileSync, writeFileSync, copyFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
-import { spawn, spawnSync } from 'node:child_process';
-import { join, dirname } from 'node:path';
+import { readFileSync, writeFileSync, copyFileSync, mkdirSync, rmSync, existsSync, statSync } from 'node:fs';
+import { spawn } from 'node:child_process';
+import { createServer } from 'node:http';
+import { join, dirname, extname, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 
@@ -97,15 +98,42 @@ window.addEventListener('load', function () {
   }
 }
 
-async function esperarServidor(intentos = 25) {
-  for (let i = 0; i < intentos; i++) {
-    try {
-      const r = await fetch(`http://127.0.0.1:${PUERTO}/`);
-      if (r.ok || r.status === 404) return true;
-    } catch { /* todavía no levanta */ }
-    await new Promise(r => setTimeout(r, 200));
-  }
-  return false;
+const TIPOS = { '.html': 'text/html; charset=utf-8', '.json': 'application/json; charset=utf-8' };
+
+/** Servidor estático mínimo, atado a 127.0.0.1 y limitado al directorio temporal. */
+function servidorEstatico(raiz, puerto) {
+  const server = createServer((req, res) => {
+    const rel = normalize(decodeURIComponent(req.url.split('?')[0])).replace(/^[/\\]+/, '');
+    const abs = join(raiz, rel);
+    // startsWith corta cualquier intento de salir de `raiz` con ../
+    if (!abs.startsWith(raiz) || !existsSync(abs) || !statSync(abs).isFile()) {
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      res.end('no encontrado');
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': TIPOS[extname(abs)] || 'application/octet-stream' });
+    res.end(readFileSync(abs));
+  });
+  return new Promise((ok, fallo) => {
+    server.once('error', fallo);
+    server.listen(puerto, '127.0.0.1', () => ok(server));
+  });
+}
+
+/**
+ * Lanza un proceso y espera SIN bloquear el event loop. Tiene que ser async:
+ * el servidor de arriba vive en este mismo proceso, así que un spawnSync lo
+ * dejaría sordo y Chrome nunca podría cargar la página.
+ */
+function correr(cmd, args, timeoutMs = 120000) {
+  return new Promise(ok => {
+    const p = spawn(cmd, args, { stdio: ['ignore', 'ignore', 'pipe'] });
+    let err = '';
+    p.stderr.on('data', d => { err += d; });
+    const t = setTimeout(() => p.kill(), timeoutMs);
+    p.on('error', e => { clearTimeout(t); ok({ code: -1, err: e.message }); });
+    p.on('close', code => { clearTimeout(t); ok({ code, err }); });
+  });
 }
 
 const pedidas = process.argv.slice(2).filter(a => ESCENAS[a]);
@@ -115,25 +143,24 @@ console.log('Preparando copia sin Firebase…');
 prepararCopia(nombres);
 mkdirSync(DOCS, { recursive: true });
 
-const server = spawn('python', ['-m', 'http.server', String(PUERTO), '--bind', '127.0.0.1'],
-  { cwd: TMP, stdio: 'ignore' });
+const server = await servidorEstatico(TMP, PUERTO);
 
 try {
-  if (!await esperarServidor()) throw new Error(`El servidor estático no respondió en el puerto ${PUERTO}.`);
   console.log(`Servidor en http://127.0.0.1:${PUERTO}\n`);
 
   for (const n of nombres) {
     const e = ESCENAS[n];
     const destino = join(DOCS, e.salida);
-    const r = spawnSync(chromePath(), [
+    const r = await correr(chromePath(), [
       '--headless=new', '--disable-gpu', '--hide-scrollbars',
       '--no-first-run', '--no-default-browser-check',
+      '--disable-extensions', '--disable-background-networking',
       `--user-data-dir=${join(TMP, 'perfil')}`,
       `--window-size=1500,${e.alto}`,
       '--virtual-time-budget=8000',
       `--screenshot=${destino}`,
       `http://127.0.0.1:${PUERTO}/${e.archivo}`,
-    ], { encoding: 'utf8', timeout: 120000 });
+    ]);
 
     if (!existsSync(destino)) {
       console.error(`✗ ${n}: no se generó la captura\n${r.stderr || ''}`);
@@ -144,7 +171,7 @@ try {
     }
   }
 } finally {
-  server.kill();
+  server.close();
   // En Windows, Chrome deja el perfil bloqueado un instante tras salir; si no
   // se puede borrar no es un fallo: el temporal se limpia en la próxima corrida.
   try {
