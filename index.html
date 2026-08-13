@@ -2954,11 +2954,25 @@ function doGenerate() {
   // ── Desayuno: siempre lleva un víver (mangú, puré o vianda), nunca arroz ──
   // Se detecta por el víver y NO por la cocción: "Huevo hervido" es hervido
   // pero no es un víver, y colarlo dejaría desayunos sin su carbohidrato.
-  const viverDesR = /\bmangú|\bmangu|\bpuré|\bpure|\bbollito|\byuca|\byautía|\byautia|\bplátano|\bplatano|\bguineo|\bbatata|\bpapa/i;
+  // Ojo: `viverR` ya existe arriba como los regex de clasificación del almuerzo.
+  const viverNomR = /\bmangú|\bmangu|\bpuré|\bpure|\bbollito|\byuca|\byautía|\byautia|\bplátano|\bplatano|\bguineo|\bbatata|\bpapa|\btoston/i;
+  // Falsos positivos: "Hamburguesas con papas" trae papas pero es una
+  // hamburguesa, igual que "Huevo hervido" era hervido sin ser víver.
+  const noViverR = /\bhamburgues|\bhot dog|\bsandwich|\bwrap|\bpizza|\btaco|\bquesadilla|\bhuevo/i;
+  const esViver  = c => viverNomR.test(c) && !noViverR.test(c);
+
   const desTodos  = [...new Set([...DB.desayunos, ...(customMenus.desayunos || [])])]
     .filter(d => !hit(d, arrozR));   // el arroz no es desayuno dominicano
-  const desViveres = desTodos.filter(d =>  viverDesR.test(d));
-  const desOtros   = desTodos.filter(d => !viverDesR.test(d));
+  const desViveres = desTodos.filter(esViver);
+  const desOtros   = desTodos.filter(d => !esViver(d));
+
+  // ── Cena: también lleva su víver, entero o en puré/mangú ──
+  // DB.cenas solo trae 2 víveres (guineos, yuca): no alcanzan para la semana.
+  // Se le suman los purés y mangús, que el cliente admite de cena. Pool = 9.
+  const cenTodas   = [...new Set([...DB.cenas, ...(customMenus.cenas || [])])]
+    .filter(c => !hit(c, arrozR));
+  const cenViveres = [...new Set([...cenTodas.filter(esViver), ...desViveres])];
+  const cenOtras   = cenTodas.filter(c => !esViver(c));
 
 
   // Sugerencias del día: horneados en capas (pastelón, lasaña, canelones).
@@ -2967,7 +2981,7 @@ function doGenerate() {
   const sugerenciasPool = cats.fuerte.filter(f => /\bpastelón|\bpastelon|\blasaña|\blasana|\bcanelones/i.test(f));
 
   genResult = [];
-  const usedCarbos = [], usedBlancos = [], usedProteinas = [], usedEnsaladas = [], usedVegetales = [], usedSugerencias = [], usedViverDes = [];
+  const usedCarbos = [], usedBlancos = [], usedProteinas = [], usedEnsaladas = [], usedVegetales = [], usedSugerencias = [], usedViverDes = [], usedViverCena = [];
 
   // Elige `n` platos distintos de `pool`:
   //  · `delDia` garantiza que NADA se repita dentro del mismo día.
@@ -3032,11 +3046,17 @@ function doGenerate() {
     const restoDes = getRandom(desOtros.filter(d => !delDia.has(d)), 4 - viverDia.length);
     restoDes.forEach(d => delDia.add(d));
 
+    // 7. CENA: 3 platos, y uno también es víver. Si la cena trae carne (chuleta,
+    //    pollo, croquetas…), el víver es justamente lo que la completa.
+    const viverCena = pick(cenViveres, usedViverCena, delDia, 1);
+    const restoCen  = getRandom(cenOtras.filter(c => !delDia.has(c)), 3 - viverCena.length);
+    restoCen.forEach(c => delDia.add(c));
+
     const day = {
       des: [...viverDia, ...restoDes],
       com: [carbo, ...prots, ensalada, vegetal].filter(Boolean),
       sug: sug,
-      cen: getRandom([...DB.cenas, ...(customMenus.cenas || [])], 3),
+      cen: [...viverCena, ...restoCen],
       snk: getRandom([...DB.snacks, ...(customMenus.snacks || [])], 2),
       beb: getRandom(DB.bebidas, 3),
     };
