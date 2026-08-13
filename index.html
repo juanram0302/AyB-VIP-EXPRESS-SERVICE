@@ -1556,6 +1556,7 @@ const NAV = [
   {id:'generador',label:'Generador Menú',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16,3 21,3 21,8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21,16 21,21 16,21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>'},
   {id:'recetas',label:'Recetas',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 13.87A4 4 0 014 10a4 4 0 018 0 4 4 0 018 0 4 4 0 01-2 3.87V16a2 2 0 01-2 2H8a2 2 0 01-2-2v-2.13z"/><line x1="6" y1="20" x2="18" y2="20"/></svg>'},
   {id:'calculadora',label:'Calculadora',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/></svg>'},
+  {id:'chafing',label:'Chafing Dishes',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18h18"/><path d="M21 15a9 9 0 00-18 0"/><line x1="12" y1="3" x2="12" y2="6"/></svg>'},
   {id:'convertidor',label:'Convertidor',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7,23 3,19 7,15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>'},
   {id:'presupuesto',label:'Presupuesto',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>'},
   {id:'porciones_fb',label:'Porciones A&B',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>'},
@@ -2625,6 +2626,7 @@ function renderPage() {
     case 'generador': c.innerHTML = renderGenerador(); break;
     case 'recetas': c.innerHTML = renderRecetas(); break;
     case 'calculadora': c.innerHTML = renderCalculadora(); break;
+    case 'chafing': c.innerHTML = renderChafing(); break;
     case 'convertidor': c.innerHTML = renderConvertidor(); break;
     case 'presupuesto': c.innerHTML = renderPresupuesto(); break;
     case 'porciones_fb': c.innerHTML = renderPorcionesFB(); break;
@@ -3090,6 +3092,234 @@ function toggleCalcDish(dish) {
   const i = calcSelected.indexOf(dish);
   if (i >= 0) calcSelected.splice(i,1); else calcSelected.push(dish);
   renderPage();
+}
+
+// ═══════════════════ CHAFING DISHES ═══════════════════
+// Cálculo 100% local: aritmética pura, sin IA, sin red, instantáneo.
+// Métrica estándar: Chafing Dish Full-Size de 4" de profundidad.
+const CHAFING_CATS = {
+  pure:       {label:'Purés y masas',             porcion:0.33, unidad:'lb',       cap:15,  capLabel:'15 lb'},
+  guisada:    {label:'Carne guisada (con salsa)', porcion:2,    unidad:'piezas',   cap:96,  capLabel:'96 pzs (18 lb)'},
+  seca:       {label:'Carne horneada/frita',      porcion:2,    unidad:'piezas',   cap:64,  capLabel:'64 pzs (12 lb)'},
+  albondigas: {label:'Albóndigas',                porcion:3,    unidad:'piezas',   cap:120, capLabel:'120 albóndigas'},
+  yuca:       {label:'Yuca cocida (trozos)',      porcion:0.40, unidad:'lb',       cap:12,  capLabel:'12 lb'},
+  pverde:     {label:'Plátano verde entero',      porcion:1,    unidad:'unidades', cap:26,  capLabel:'26 unidades'},
+  pmaduro:    {label:'Plátano maduro entero',     porcion:1,    unidad:'unidades', cap:26,  capLabel:'26 unidades'},
+  guineo:     {label:'Guineo verde entero',       porcion:2,    unidad:'unidades', cap:48,  capLabel:'48 unidades'},
+};
+
+// Platos propios del módulo: no existen en DB.comidas y NO se agregan allí,
+// para no alterar el generador de menús ni las recetas.
+const CHAFING_EXTRA = ['Albóndigas de res','Albóndigas de pollo','Albóndigas de pescado','Plátano verde hervido'];
+
+const CHAF_CARNE = ['pechuga','lomo','bistec','costilla','pollo','cerdo','osobuco','dorado','chuleta',
+                    'albóndiga','mariscada','bacalao','pechurina','alitas','ropa vieja','carne','muslo',
+                    'bajita','filete','pavo','chivo'];
+
+// Devuelve {cat} | {cat,opcional} | {ambigua:true} | null (no reconocido).
+// "Entero"/"en trozos" = HERVIDO. Lo frito (yuca frita) es otro rendimiento y no aplica.
+function chafingCat(dish) {
+  const t = dish.toLowerCase();
+  if (/\btostones|\bplatanito/.test(t))                     return {cat:'pverde', opcional:true};
+  if (/\balbóndiga/.test(t))                                return {cat:'albondigas'};
+  if (/\bmangú|\bpuré/.test(t))                             return {cat:'pure'};
+  if (/\byuca (hervida|cocida|sancochada)/.test(t))         return {cat:'yuca'};
+  if (/plátano verde (hervido|sancochado|entero)/.test(t))  return {cat:'pverde'};
+  if (/plátano maduro/.test(t) && !/pastelón/.test(t))      return {cat:'pmaduro'};
+  if (/guineos? verdes?/.test(t))                           return {cat:'guineo'};
+  if (CHAF_CARNE.some(k => new RegExp('\\b'+k,'i').test(t))) {
+    if (/guisad|ropa vieja/.test(t))                             return {cat:'guisada'};
+    if (/horno|frit|plancha|bbq|asad|parrilla|empaniz/.test(t))  return {cat:'seca'};
+    return {ambigua:true};  // es carne, pero no dice si va guisada o seca
+  }
+  return null;
+}
+
+function chafMargen(p) { return p <= 50 ? 1.15 : p <= 150 ? 1.10 : 1.07; }
+
+// Punto flotante: 200*1.10 = 220.00000000000003, y Math.ceil lo subiría a 221.
+// Se normaliza a 6 decimales antes de aplicar techo o redondeo.
+function ceilSafe(v) { return Math.ceil(Number(v.toFixed(6))); }
+function round1(v)   { return Number(v.toFixed(1)); }
+
+// Orden exacto: neto -> con margen -> chafings (el chafing sale del valor CON margen).
+function calcChafing(personas, platos, prep) {
+  prep = prep || {};
+  const n = Math.floor(Number(personas));
+  if (!isFinite(n) || n <= 0) return {error:'Indica un número de invitados mayor que 0.'};
+  if (!platos || !platos.length) return {error:'Selecciona al menos un plato del menú.'};
+
+  const mult = chafMargen(n);
+  const items = [], opcionales = [], pendientes = [], noReconocidos = [];
+
+  for (const dish of platos) {
+    const info = chafingCat(dish);
+    if (!info) { noReconocidos.push(dish); continue; }
+
+    let catKey = info.cat;
+    if (info.ambigua) {
+      const elegido = prep[dish];
+      if (elegido !== 'guisada' && elegido !== 'seca') { pendientes.push(dish); continue; }
+      catKey = elegido;
+    }
+
+    const c = CHAFING_CATS[catKey];
+    const esPeso = c.unidad === 'lb';
+    const neto = c.porcion * n;
+    const conMargen = esPeso ? round1(neto * mult) : ceilSafe(neto * mult);
+    const chafings = Math.max(1, ceilSafe(conMargen / c.cap));
+
+    const row = {dish, cat:catKey, catLabel:c.label, unidad:c.unidad, capLabel:c.capLabel,
+                 neto: esPeso ? round1(neto) : ceilSafe(neto),
+                 conMargen, chafings, opcional: !!info.opcional};
+    (info.opcional ? opcionales : items).push(row);
+  }
+
+  // Los opcionales (tostones) se sirven al momento y NO suman rechauds.
+  const totalChafing = items.reduce((s,r) => s + r.chafings, 0);
+  return {personas:n, mult, items, opcionales, pendientes, noReconocidos, totalChafing};
+}
+
+let chafPersonas = 100;
+let chafSelected = [];
+let chafPrep = {};
+let chafResult = null;
+let chafShowOtros = false;
+
+function chafDishes() { return [...new Set([...DB.comidas, ...(customMenus.comidas || []), ...CHAFING_EXTRA])]; }
+
+function toggleChafDish(dish) {
+  const i = chafSelected.indexOf(dish);
+  if (i >= 0) chafSelected.splice(i,1); else chafSelected.push(dish);
+  chafResult = null;  // el resultado queda obsoleto al cambiar la selección
+  renderPage();
+}
+function setChafPrep(dish, prep) { chafPrep[dish] = prep; if (chafResult) doChafingCalc(); else renderPage(); }
+function setChafPersonas(v) { chafPersonas = Math.floor(+v) || 0; chafResult = null; renderPage(); }
+function doChafingCalc() { chafResult = calcChafing(chafPersonas, chafSelected, chafPrep); renderPage(); }
+function chafLimpiar() { chafSelected = []; chafPrep = {}; chafResult = null; renderPage(); }
+
+async function chafRegistrar() {
+  if (!chafResult || chafResult.error) return;
+  const r = chafResult;
+  const platos = r.items.map(i => i.dish).join(', ');
+  await logActivity('chafing', `Calculó chafing para ${r.personas} invitados: ${r.totalChafing} chafing dishes`, platos);
+  addNotif('📋 Cálculo registrado en actividad');
+}
+
+function renderChafing() {
+  const dishes = chafDishes();
+  const calculables = dishes.filter(d => chafingCat(d));
+  const otros = dishes.filter(d => !chafingCat(d));
+  const mult = chafMargen(chafPersonas > 0 ? chafPersonas : 1);
+  const r = chafResult;
+
+  const chip = (d) => {
+    const info = chafingCat(d);
+    const on = chafSelected.includes(d);
+    const color = !info ? 'var(--text-dim)' : info.ambigua ? 'var(--orange)' : info.opcional ? 'var(--purple)' : 'var(--green)';
+    return `<button class="btn btn-sm" title="${info ? (info.ambigua ? 'Carne: hay que especificar preparación' : CHAFING_CATS[info.cat].label + (info.opcional ? ' · opcional' : '')) : 'Sin rendimiento en chafing'}"
+      style="background:${on?'var(--accent)':'var(--border)'};color:${on?'#fff':color}" onclick="toggleChafDish('${esc(d)}')">${d}${info&&info.opcional?' ✻':''}</button>`;
+  };
+
+  // ── Bloque de resultados ──
+  let out = '';
+  if (r && r.error) {
+    out = `<div class="alert-box alert-danger fade-up"><span>⚠️</span><span style="font-size:13px;font-weight:600;color:#ff8888">${r.error}</span></div>`;
+  } else if (r) {
+    const fila = (i, opc) => `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;background:var(--bg-card2);border-radius:10px;border:1px solid ${opc?'rgba(155,89,182,0.25)':'var(--border)'}">
+        <div style="min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--text-primary)">${i.dish}${opc?' <span style="color:var(--purple);font-size:10px">✻ OPCIONAL</span>':''}</div>
+          <div style="font-size:10px;color:var(--text-dim)">${i.catLabel} · ${i.capLabel}/chafing</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:3px">Neto ${i.neto} ${i.unidad} → con margen <strong style="color:var(--text-primary)">${i.conMargen} ${i.unidad}</strong></div>
+        </div>
+        <div style="text-align:center;flex-shrink:0">
+          <div style="color:${opc?'var(--purple)':'#ff8888'};font-size:22px;font-weight:800;line-height:1">${opc?'—':i.chafings}</div>
+          <div style="font-size:9px;color:var(--text-dim)">${opc?'sin chafing':'chafing'}</div>
+        </div>
+      </div>`;
+
+    out = `
+    <div class="card fade-up" style="animation-delay:0.1s">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:4px">
+        <h3 style="color:var(--orange);margin:0">🔥 Chafing Dishes para ${r.personas} invitados</h3>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm btn-secondary" onclick="window.print()">🖨️ Imprimir</button>
+          ${FB_READY?`<button class="btn btn-sm btn-secondary" onclick="chafRegistrar()">📋 Registrar en actividad</button>`:''}
+        </div>
+      </div>
+      <p style="color:var(--text-dim);font-size:11px;margin:0 0 16px">Margen aplicado +${Math.round((r.mult-1)*100)}% · Chafing Full-Size 4" · el chafing se calcula sobre la cantidad CON margen</p>
+
+      ${r.items.length?`<div class="grid grid-auto">${r.items.map(i=>fila(i,false)).join('')}</div>`:''}
+
+      ${r.items.length?`<div style="margin-top:16px;padding:16px;background:var(--bg-deep);border-radius:12px;border:1px solid rgba(196,30,30,0.2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <div><div style="color:var(--text-muted);font-size:11px;font-weight:700;letter-spacing:0.5px">TOTAL A RENTAR</div>
+        <div style="color:var(--text-dim);font-size:10px">${r.items.length} plato${r.items.length>1?'s':''} en chafing${r.opcionales.length?' · opcionales no incluidos':''}</div></div>
+        <div style="text-align:right"><span style="color:#ff8888;font-size:34px;font-weight:800;line-height:1">${r.totalChafing}</span>
+        <span style="color:var(--text-muted);font-size:13px;margin-left:6px">chafing dishes</span></div>
+      </div>`:''}
+
+      ${r.opcionales.length?`<h4 style="color:var(--purple);margin:20px 0 8px;font-size:13px">✻ Opcionales — se sirven al momento</h4>
+        <p style="color:var(--text-dim);font-size:11px;margin:0 0 10px">Se endurecen en baño de María. La cantidad es para la compra; el chef decide si van. No suman al total.</p>
+        <div class="grid grid-auto">${r.opcionales.map(i=>fila(i,true)).join('')}</div>`:''}
+
+      ${r.pendientes.length?`<div class="alert-box alert-info" style="margin-top:20px;display:block">
+        <div style="font-size:13px;font-weight:700;color:#ff8888;margin-bottom:10px">⚠️ Falta especificar la preparación (${r.pendientes.length})</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">Rinden distinto: guisada 96 pzs/chafing · seca 64 pzs/chafing. No se calculan hasta que elijas.</div>
+        ${r.pendientes.map(d=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bg-card2)">
+          <span style="font-size:12px;color:var(--text-primary)">${d}</span>
+          <span style="display:flex;gap:6px;flex-shrink:0">
+            <button class="btn btn-sm btn-secondary" onclick="setChafPrep('${esc(d)}','guisada')">🍲 Guisada</button>
+            <button class="btn btn-sm btn-secondary" onclick="setChafPrep('${esc(d)}','seca')">🔥 Seca</button>
+          </span></div>`).join('')}
+      </div>`:''}
+
+      ${r.noReconocidos.length?`<h4 style="color:var(--text-muted);margin:20px 0 8px;font-size:13px">No reconocidos (${r.noReconocidos.length})</h4>
+        <p style="color:var(--text-dim);font-size:11px;margin:0 0 8px">Sin rendimiento definido en la tabla de chafing. No se calculan.</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${r.noReconocidos.map(d=>`<span style="font-size:11px;color:var(--text-dim);background:var(--bg-card2);padding:4px 10px;border-radius:20px">${d}</span>`).join('')}</div>`:''}
+
+      ${!r.items.length&&!r.opcionales.length&&!r.pendientes.length?`<p style="color:var(--text-muted);font-size:13px;margin:0">Ninguno de los platos seleccionados tiene rendimiento en chafing.</p>`:''}
+    </div>`;
+  }
+
+  return `
+    <div class="card fade-up" style="margin-bottom:20px">
+      <h3 style="color:var(--text-primary);margin:0 0 16px;font-size:16px">🔥 Calculadora de Chafing Dishes</h3>
+      <div class="grid grid-2">
+        <div><label style="color:var(--text-muted);font-size:12px;display:block;margin-bottom:6px">Número de Invitados</label>
+          <input class="input" type="number" min="1" value="${chafPersonas}" onchange="setChafPersonas(this.value)" style="margin:0;font-size:20px;font-weight:700;text-align:center"></div>
+        <div><label style="color:var(--text-muted);font-size:12px;display:block;margin-bottom:6px">Margen automático</label>
+          <div style="padding:12px;background:var(--bg-deep);border-radius:8px;text-align:center">
+            <span style="color:var(--green);font-size:20px;font-weight:800">+${Math.round((mult-1)*100)}%</span>
+            <span style="color:var(--text-dim);font-size:11px;margin-left:8px">${chafPersonas<=50?'1–50 pers.':chafPersonas<=150?'51–150 pers.':'151+ pers.'}</span>
+          </div></div>
+      </div>
+      <div style="margin-top:10px;padding:8px 12px;background:var(--bg-deep);border-radius:8px;font-size:11px;color:var(--text-muted)">
+        📏 Métrica: <strong style="color:var(--text-primary)">Chafing Full-Size 4"</strong> · Cálculo local instantáneo
+      </div>
+    </div>
+
+    <div class="card fade-up" style="margin-bottom:20px;animation-delay:0.05s">
+      <h4 style="color:var(--text-primary);margin:0 0 4px;font-size:14px">Seleccionar Platos <span style="color:var(--text-dim);font-weight:400">(${chafSelected.length} seleccionado${chafSelected.length===1?'':'s'})</span></h4>
+      <p style="color:var(--text-dim);font-size:11px;margin:0 0 12px">
+        <span style="color:var(--green)">■</span> con rendimiento ·
+        <span style="color:var(--orange)">■</span> falta especificar preparación ·
+        <span style="color:var(--purple)">■</span> ✻ opcional
+      </p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${calculables.map(chip).join('')}</div>
+
+      <button class="btn btn-sm btn-ghost" style="margin-top:12px" onclick="chafShowOtros=!chafShowOtros;renderPage()">
+        ${chafShowOtros?'▾':'▸'} Otros platos del menú (${otros.length}) — sin rendimiento en chafing
+      </button>
+      ${chafShowOtros?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${otros.map(chip).join('')}</div>`:''}
+
+      <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+        <button class="btn btn-primary" style="flex:1;min-width:200px;justify-content:center" onclick="doChafingCalc()">🔥 CALCULAR CHAFING DISHES</button>
+        <button class="btn btn-secondary" onclick="chafLimpiar()">Limpiar</button>
+      </div>
+    </div>
+    ${out}`;
 }
 
 // ═══════════════════ CONVERTIDOR ═══════════════════

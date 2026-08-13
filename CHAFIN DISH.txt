@@ -1,0 +1,98 @@
+# Módulo de Habilidades de Catering: Calculador de Chafing Dishes y Alimentos
+
+Este módulo define las capacidades, algoritmos, constantes y formatos de salida para el motor de cálculo de alimentos y recipientes chafing de la aplicación.
+
+## 1. Constantes del Sistema (Metadatos de Capacidad)
+
+Todos los cálculos toman como recipiente base un **Chafing Dish Full-Size de 4 pulgadas de profundidad** (Capacidad volumétrica real de trabajo: ~11.5 Litros / 3 Galones líquidos).
+
+### 1.1 Densidades y Porciones Base
+
+| ID_Elemento | Categoría | Nombre | Unidad de Medida | Capacidad Máxima (Chafing) | Porción Base (Persona) | Rendimiento (Personas/Chafing) |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `P_MANGU` | Pure/Masa | Mangú de Plátano | lbs / kg | 15.0 lbs / 6.80 kg | 0.33 lbs / 0.15 kg | 45 |
+| `P_PAPA` | Pure/Masa | Puré de Papa | lbs / kg | 15.0 lbs / 6.80 kg | 0.33 lbs / 0.15 kg | 45 |
+| `P_YUCA` | Pure/Masa | Puré de Yuca | lbs / kg | 15.0 lbs / 6.80 kg | 0.33 lbs / 0.15 kg | 45 |
+| `C_GUIS` | Carnes | Carnes Guisadas | unidades (piezas) | 96 piezas | 2 piezas | 48 |
+| `C_SECA` | Carnes | Carnes Horneadas/Fritas | unidades (piezas) | 64 piezas | 2 piezas | 32 |
+| `C_ALBO` | Carnes | Albóndigas con Salsa | unidades (piezas) | 120 piezas | 3 piezas | 40 |
+| `V_YUCA` | Víveres | Yuca Cocida en Trozos | lbs / kg | 12.0 lbs / 5.44 kg | 0.40 lbs / 0.18 kg | 30 |
+| `V_PLAT_V` | Víveres | Plátanos Verdes Enteros | unidades | 26 piezas | 1 pieza | 26 |
+| `V_PLAT_M` | Víveres | Plátanos Maduros Enteros | unidades | 26 piezas | 1 pieza | 26 |
+| `V_GUIN_V` | Víveres | Guineos Verdes Enteros | unidades | 48 piezas | 2 piezas | 24 |
+
+---
+
+## 2. Reglas de Negocio y Algoritmos
+
+### 2.1 Algoritmo de Margen de Error (Sobreproducción Coeficiente $M$)
+Para mitigar el riesgo de escasez por variabilidad en el servicio, aplica un multiplicador según el volumen de usuarios:
+
+*   Si $\text{Invitados} \le 50 \implies M = 1.15$ (+15%)
+*   Si $\text{Invitados} > 50$ y $\text{Invitados} \le 150 \implies M = 1.10$ (+10%)
+*   Si $\text{Invitados} > 150 \implies M = 1.07$ (+7%)
+
+### 2.2 Ecuaciones de Cálculo
+
+1. **Cantidad Neta Requerida ($Q_{\text{neta}}$):**
+   $$Q_{\text{neta}} = \text{Invitados} \times \text{Porción Base}$$
+
+2. **Cantidad Total con Margen ($Q_{\text{total}}$):**
+   $$Q_{\text{total}} = Q_{\text{neta}} \times M$$
+
+3. **Cálculo de Chafing Dishes ($CD$):**
+   El resultado de recipientes físicos requeridos debe redondearse estrictamente hacia el número entero superior más cercano (Techo matemático).
+   $$CD = \left\lceil \frac{Q_{\text{total}}}{\text{Capacidad Máxima}} \right\rceil$$
+
+---
+
+## 3. Contrato de Interfaz de Datos (API Payload JSON)
+
+Para asegurar la compatibilidad con frameworks de desarrollo web/móvil (React, Flutter, Vue), el motor debe procesar la solicitud y estructurar la salida bajo el siguiente esquema JSON estándar:
+
+### 3.1 Input Requerido (Request)
+```json
+{
+  "total_personas": 120,
+  "items_menu": ["P_MANGU", "C_GUIS", "V_PLAT_M"]
+}
+```
+
+### 3.2 Output Esperado (Response)
+```json
+{
+  "evento": {
+    "invitados_recibidos": 120,
+    "margen_seguridad_aplicado": 0.10
+  },
+  "resultados_calculo": [
+    {
+      "id_elemento": "P_MANGU",
+      "nombre_comida": "Mangú de Plátano",
+      "tipo_metrica": "peso",
+      "unidad": "lbs",
+      "cantidad_neta": 39.6,
+      "cantidad_con_margen": 43.56,
+      "chafing_dishes_requeridos": 3
+    },
+    {
+      "id_elemento": "C_GUIS",
+      "nombre_comida": "Carnes Guisadas",
+      "tipo_metrica": "conteo_piezas",
+      "unidad": "piezas",
+      "cantidad_neta": 240,
+      "cantidad_con_margen": 264,
+      "chafing_dishes_requeridos": 3
+    },
+    {
+      "id_elemento": "V_PLAT_M",
+      "nombre_comida": "Plátanos Maduros Enteros",
+      "tipo_metrica": "conteo_piezas",
+      "unidad": "unidades",
+      "cantidad_neta": 120,
+      "cantidad_con_margen": 132,
+      "chafing_dishes_requeridos": 6
+    }
+  ]
+}
+```
