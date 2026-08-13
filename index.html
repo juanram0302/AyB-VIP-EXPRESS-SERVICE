@@ -2796,6 +2796,11 @@ function renderGenerador() {
           ${day.sug.map(s=>`<span style="font-size:11px;color:var(--text-secondary);background:var(--bg-card2);padding:4px 10px;border-radius:20px">${s}</span>`).join('')}
           <span style="color:var(--text-dim);font-size:10px">opcional · decide el chef</span>
         </div>` : ''}
+        ${day.opc && day.opc.length ? `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px">
+          <span style="color:var(--blue);font-size:11px;font-weight:700;letter-spacing:0.5px">🍲 OPCIONALES</span>
+          ${day.opc.map(o=>`<span style="font-size:11px;color:var(--text-secondary);background:var(--bg-card2);padding:4px 10px;border-radius:20px">${o}</span>`).join('')}
+          <span style="color:var(--text-dim);font-size:10px">aparte del menú · el asopao va en cena</span>
+        </div>` : ''}
         <div style="display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--bg-card2)">
           <span style="color:var(--text-muted);font-size:11px">🍿 ${day.snk.join(', ')}</span>
           <span style="color:var(--text-muted);font-size:11px">🥤 ${day.beb.join(', ')}</span>
@@ -2825,11 +2830,15 @@ function doGenerate() {
   // ═══ Clasificar platos de comida para menú dominicano ═══
   // Estructura: 1 Carbohidrato + 2 Proteínas DISTINTAS + 1 Ensalada + 1 Vegetal/Legumbre
   // (la bandera dominicana: arroz + habichuela + carne + ensalada)
-  const allComidas = [...new Set([...DB.comidas, ...(customMenus.comidas || [])])];
+  // Sancocho y asopao son platos de olla: se ofrecen APARTE (ver OPCIONALES_OLLA),
+  // nunca dentro del menú del día. Se excluyen aquí para que no puedan ocupar
+  // ningún slot, ni siquiera si alguien los agrega desde el menú personalizado.
+  const ollaR = /\bsancocho|\basopao/i;
+  const allComidas = [...new Set([...DB.comidas, ...(customMenus.comidas || [])])].filter(c => !ollaR.test(c));
 
-  // El arroz/moro es el carbohidrato por defecto. Los víveres y las pastas/pastelones
+  // El arroz es el carbohidrato por defecto. Los víveres y las pastas/pastelones
   // SUSTITUYEN al arroz (nunca lo acompañan), por eso compiten por el mismo slot.
-  const arrozK    = ['arroz','moro','chofán','chofan','locrio','asopao'];
+  const arrozK    = ['arroz','moro','chofán','chofan','locrio'];
   const viverK    = ['papa','yuca','plátano','platano','platanito','maduro','batata','yautía','yautia','guineo','mangú','mangu','arepita','domplines','yanikequito','puré','pure','casabe','tostones'];
   const fuerteK   = ['lasaña','lasana','pastelón','pastelon','canelones','pasta','espagueti','macarrones','picadera'];
   const proteinaK = ['pechuga','lomo','bistec','costilla','pollo','cerdo','osobuco','dorado','chuleta','albóndiga','mariscada','bacalao','pechurina','alitas','ropa vieja','carne guisada','filete de cerdo','filete de dorado','muslo','bajita'];
@@ -2861,16 +2870,27 @@ function doGenerate() {
     .map(f => f.map(k => new RegExp('\\b' + k, 'i')));
   const familias = t => legumFam.filter(f => f.some(r => r.test(t)));
 
-  // ── Regla de granos ──
-  // El arroz blanco SIEMPRE pide granos aparte (arroz + habichuela = la bandera).
-  // El moro/locrio ya los trae integrados: ponerle habichuela encima es granos
-  // sobre granos, y eso no existe en una mesa dominicana real.
+  // ── Regla de granos (lista blanca: solo estos dos piden granos aparte) ──
+  //  · Arroz blanco puro → habichuela guisada, guandules guisados, lentejas.
+  //  · Locrio de carne   → lleva carne, no granos dentro, así que sí los admite.
+  // Todo lo demás va con vegetal/víver: el moro ya trae las habichuelas cocidas
+  // adentro, y los arroces compuestos (primavera, con vegetales, con maíz, con
+  // coco, chofán) ya están completos. Granos sobre granos no existe en la mesa.
   const granoR = /\bhabichuela|\bgandul|\bguandul|\blenteja|\bgarbanzo/i;
-  // Capta también "Arroz blanco con lentejas": dice blanco pero ya trae el grano.
-  // El chofán es un arroz frito completo, tampoco admite granos encima.
-  const yaTraeGranos = c => /\bmoro|\blocrio|\basopao|\bchofán|\bchofan/i.test(c) || granoR.test(c);
+  // Exacto a propósito: "Arroz blanco con lentejas" NO entra (ya trae el grano).
+  const pideGranos = c => /^arroz blanco$/i.test(c.trim()) || (/\blocrio/i.test(c) && !granoR.test(c));
   const vegGranos   = cats.vegetal.filter(v =>  granoR.test(v));
   const vegNoGranos = cats.vegetal.filter(v => !granoR.test(v));
+
+  // El arroz blanco es la base del menú dominicano y el único que trae granos,
+  // pero es 1 plato entre 15 arroces: sorteado parejo saldría 1 día de cada 22.
+  // Se le da peso propio para que la habichuela salga ~2 días por semana.
+  const arrocesBlancos = cats.arroz.filter(a => pideGranos(a));
+  const arrozOtros     = cats.arroz.filter(a => !pideGranos(a));
+  const P_ARROZ_BLANCO = 0.41;   // 41% de los días de arroz × 70% de días con arroz ≈ 2/7
+
+  // Platos de olla que se ofrecen aparte del menú. El asopao es de cena.
+  const OPCIONALES_OLLA = ['Sancocho', 'Asopao'];
 
   // Sugerencias del día: horneados en capas (pastelón, lasaña, canelones).
   // Son opciones para el chef por stock y variedad — NO sustituyen el
@@ -2878,7 +2898,7 @@ function doGenerate() {
   const sugerenciasPool = cats.fuerte.filter(f => /\bpastelón|\bpastelon|\blasaña|\blasana|\bcanelones/i.test(f));
 
   genResult = [];
-  const usedCarbos = [], usedProteinas = [], usedEnsaladas = [], usedVegetales = [], usedSugerencias = [];
+  const usedCarbos = [], usedBlancos = [], usedProteinas = [], usedEnsaladas = [], usedVegetales = [], usedSugerencias = [];
 
   // Elige `n` platos distintos de `pool`:
   //  · `delDia` garantiza que NADA se repita dentro del mismo día.
@@ -2906,9 +2926,14 @@ function doGenerate() {
 
     // 1. CARBOHIDRATO: exactamente 1. ~70% arroz/moro; el resto un víver o
     //    pasta/pastelón EN LUGAR del arroz, nunca además.
-    const usarArroz = cats.arroz.length && (Math.random() < 0.7 || !sustitutos.length);
-    const carboPool = usarArroz ? cats.arroz : (sustitutos.length ? sustitutos : cats.arroz);
-    const carbo = pick(carboPool, usedCarbos, delDia, 1)[0];
+    //    El arroz blanco lleva memoria aparte (`usedBlancos`): al haber uno solo,
+    //    meterlo en `usedCarbos` borraría la memoria del resto de los arroces.
+    const usarArroz  = cats.arroz.length && (Math.random() < 0.7 || !sustitutos.length);
+    const usarBlanco = usarArroz && arrocesBlancos.length && Math.random() < P_ARROZ_BLANCO;
+    const carboPool = usarBlanco ? arrocesBlancos
+                    : usarArroz  ? (arrozOtros.length ? arrozOtros : cats.arroz)
+                    : (sustitutos.length ? sustitutos : cats.arroz);
+    const carbo = pick(carboPool, usarBlanco ? usedBlancos : usedCarbos, delDia, 1)[0];
 
     // 2. PROTEÍNAS: 2 SIEMPRE distintas (`delDia` lo garantiza por construcción)
     const prots = pick(cats.proteina, usedProteinas, delDia, 2);
@@ -2916,10 +2941,9 @@ function doGenerate() {
     // 3. ENSALADA: 1
     const ensalada = pick(cats.ensalada, usedEnsaladas, delDia, 1)[0];
 
-    // 4. GUARNICIÓN: 1. Arroz blanco → granos. Moro/locrio, víver o pasta →
-    //    vegetal/víver, nunca granos encima.
-    const esArrozBlanco = !!carbo && cats.arroz.includes(carbo) && !yaTraeGranos(carbo);
-    let vegPool = esArrozBlanco ? vegGranos : vegNoGranos;
+    // 4. GUARNICIÓN: 1. Solo arroz blanco y locrio de carne reciben granos;
+    //    el resto (moro, arroz compuesto, víver, pasta) va con vegetal/víver.
+    let vegPool = (carbo && pideGranos(carbo)) ? vegGranos : vegNoGranos;
     if (!vegPool.length) vegPool = cats.vegetal;  // pool vacío: no dejamos el slot huérfano
     // Red de seguridad para el fallback: nunca la misma legumbre que ya trae el carbo.
     const famCarbo = carbo ? familias(carbo) : [];
@@ -2937,6 +2961,7 @@ function doGenerate() {
       des: getRandom([...DB.desayunos, ...(customMenus.desayunos || [])], 4),
       com: [carbo, ...prots, ensalada, vegetal].filter(Boolean),
       sug: sug,
+      opc: [...OPCIONALES_OLLA],
       cen: getRandom([...DB.cenas, ...(customMenus.cenas || [])], 3),
       snk: getRandom([...DB.snacks, ...(customMenus.snacks || [])], 2),
       beb: getRandom(DB.bebidas, 3),
