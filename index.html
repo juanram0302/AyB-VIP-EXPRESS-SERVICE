@@ -3272,9 +3272,16 @@ function renderChafing() {
   const chip = (d) => {
     const info = chafingCat(d);
     const on = chafSelected.includes(d);
-    const color = !info ? 'var(--text-dim)' : info.ambigua ? 'var(--orange)' : info.opcional ? 'var(--purple)' : 'var(--green)';
+    // Cada categoría conserva SU color al seleccionarse. Si todos los chips activos
+    // se pintaran del rojo de acento, un opcional o una carne pendiente dejarían de
+    // distinguirse justo cuando más importa: cuando están dentro del cálculo.
+    const cat = !info ? 'dim' : info.ambigua ? 'ambigua' : info.opcional ? 'opcional' : 'ok';
+    const fg   = {ok:'var(--green)', ambigua:'var(--orange)', opcional:'var(--purple)', dim:'var(--text-dim)'}[cat];
+    const bgOn = {ok:'var(--accent)', ambigua:'var(--orange)', opcional:'var(--purple)', dim:'var(--text-muted)'}[cat];
+    // Blanco sobre naranja (#f39c12) no contrasta: ahí el texto va oscuro.
+    const fgOn = cat === 'ambigua' ? '#2b1a05' : '#fff';
     return `<button class="btn btn-sm" title="${info ? (info.ambigua ? 'Carne: hay que especificar preparación' : CHAFING_CATS[info.cat].label + (info.opcional ? ' · opcional' : '')) : 'Sin rendimiento en chafing'}"
-      style="background:${on?'var(--accent)':'var(--border)'};color:${on?'#fff':color}" onclick="toggleChafDish('${esc(d)}')">${d}${info&&info.opcional?' ✻':''}</button>`;
+      style="background:${on?bgOn:'var(--border)'};color:${on?fgOn:fg}${on?';font-weight:700':''}" onclick="toggleChafDish('${esc(d)}')">${d}${info&&info.opcional?' ✻':''}</button>`;
   };
 
   // ── Bloque de resultados ──
