@@ -2791,6 +2791,11 @@ function renderGenerador() {
             ${s.items.map(it=>`<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--bg-card2)">• ${it}</div>`).join('')}</div>
           `).join('')}
         </div>
+        ${day.sug && day.sug.length ? `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--bg-card2)">
+          <span style="color:var(--purple);font-size:11px;font-weight:700;letter-spacing:0.5px">💡 SUGERENCIAS</span>
+          ${day.sug.map(s=>`<span style="font-size:11px;color:var(--text-secondary);background:var(--bg-card2);padding:4px 10px;border-radius:20px">${s}</span>`).join('')}
+          <span style="color:var(--text-dim);font-size:10px">opcional · decide el chef</span>
+        </div>` : ''}
         <div style="display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--bg-card2)">
           <span style="color:var(--text-muted);font-size:11px">🍿 ${day.snk.join(', ')}</span>
           <span style="color:var(--text-muted);font-size:11px">🥤 ${day.beb.join(', ')}</span>
@@ -2856,8 +2861,24 @@ function doGenerate() {
     .map(f => f.map(k => new RegExp('\\b' + k, 'i')));
   const familias = t => legumFam.filter(f => f.some(r => r.test(t)));
 
+  // ── Regla de granos ──
+  // El arroz blanco SIEMPRE pide granos aparte (arroz + habichuela = la bandera).
+  // El moro/locrio ya los trae integrados: ponerle habichuela encima es granos
+  // sobre granos, y eso no existe en una mesa dominicana real.
+  const granoR = /\bhabichuela|\bgandul|\bguandul|\blenteja|\bgarbanzo/i;
+  // Capta también "Arroz blanco con lentejas": dice blanco pero ya trae el grano.
+  // El chofán es un arroz frito completo, tampoco admite granos encima.
+  const yaTraeGranos = c => /\bmoro|\blocrio|\basopao|\bchofán|\bchofan/i.test(c) || granoR.test(c);
+  const vegGranos   = cats.vegetal.filter(v =>  granoR.test(v));
+  const vegNoGranos = cats.vegetal.filter(v => !granoR.test(v));
+
+  // Sugerencias del día: horneados en capas (pastelón, lasaña, canelones).
+  // Son opciones para el chef por stock y variedad — NO sustituyen el
+  // carbohidrato ni las proteínas del menú principal.
+  const sugerenciasPool = cats.fuerte.filter(f => /\bpastelón|\bpastelon|\blasaña|\blasana|\bcanelones/i.test(f));
+
   genResult = [];
-  const usedCarbos = [], usedProteinas = [], usedEnsaladas = [], usedVegetales = [];
+  const usedCarbos = [], usedProteinas = [], usedEnsaladas = [], usedVegetales = [], usedSugerencias = [];
 
   // Elige `n` platos distintos de `pool`:
   //  · `delDia` garantiza que NADA se repita dentro del mismo día.
@@ -2895,18 +2916,27 @@ function doGenerate() {
     // 3. ENSALADA: 1
     const ensalada = pick(cats.ensalada, usedEnsaladas, delDia, 1)[0];
 
-    // 4. VEGETAL/LEGUMBRE: 1. Si el carbo ya trae una legumbre, no la repetimos aquí.
+    // 4. GUARNICIÓN: 1. Arroz blanco → granos. Moro/locrio, víver o pasta →
+    //    vegetal/víver, nunca granos encima.
+    const esArrozBlanco = !!carbo && cats.arroz.includes(carbo) && !yaTraeGranos(carbo);
+    let vegPool = esArrozBlanco ? vegGranos : vegNoGranos;
+    if (!vegPool.length) vegPool = cats.vegetal;  // pool vacío: no dejamos el slot huérfano
+    // Red de seguridad para el fallback: nunca la misma legumbre que ya trae el carbo.
     const famCarbo = carbo ? familias(carbo) : [];
-    let vegPool = cats.vegetal;
     if (famCarbo.length) {
       const filt = vegPool.filter(v => !familias(v).some(f => famCarbo.includes(f)));
       if (filt.length) vegPool = filt;
     }
     const vegetal = pick(vegPool, usedVegetales, delDia, 1)[0];
 
+    // 5. SUGERENCIAS: 2 horneados distintos, aparte del menú. `delDia` evita que
+    //    coincidan entre sí, ni con el carbohidrato si ese día tocó un pastelón.
+    const sug = pick(sugerenciasPool, usedSugerencias, delDia, 2);
+
     const day = {
       des: getRandom([...DB.desayunos, ...(customMenus.desayunos || [])], 4),
       com: [carbo, ...prots, ensalada, vegetal].filter(Boolean),
+      sug: sug,
       cen: getRandom([...DB.cenas, ...(customMenus.cenas || [])], 3),
       snk: getRandom([...DB.snacks, ...(customMenus.snacks || [])], 2),
       beb: getRandom(DB.bebidas, 3),
